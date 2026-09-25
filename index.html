@@ -1198,6 +1198,11 @@
 
                 const netBudget = Math.round(Number(d.budget) || 0) + inflow - outflow;
                 const changeTimesStr = activeChangeDates.length > 0 ? activeChangeDates.join('; ') : '無異動';
+                let changeCount = 0;
+if (d.changes && Array.isArray(d.changes)) {
+    // 確保只計算已生效的異動筆數，並強制轉為整數
+    changeCount = Math.round(Number(d.changes.filter(c => c.isChanged === '是').length) || 0);
+}
 
                 exportData.push({
                     '年度': d.year,
