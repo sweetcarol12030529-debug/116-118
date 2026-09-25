@@ -39,15 +39,6 @@
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .table-fixed-layout {
-            table-layout: fixed;
-            width: 100%;
-        }
-        .table-fixed-layout th, .table-fixed-layout td {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            word-wrap: break-word;
-        }
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -74,97 +65,87 @@
             </div>
             <div>
                 <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-                    🦄 深耕計畫經費系統表 <span class="text-xs px-2.5 py-1 bg-pink-500/80 rounded-full font-bold uppercase tracking-widest text-white shadow-sm">Google 試算表連線版</span>
+                    🦄 深耕計畫經費系統表 <span class="text-xs px-2.5 py-1 bg-pink-500/80 rounded-full font-bold uppercase tracking-widest text-white shadow-sm">完整保留支用說明版</span>
                 </h1>
                 <p class="text-xs sm:text-sm text-purple-200 mt-1 font-medium">
-                    🚀 支援從指定 Google 試算表直接載入資料、平均欄寬與正確整數異動筆數同步！✨
+                    🚀 智慧卡片與表格完整呈現「支用說明與編列基準」，資訊絕不遺漏！✨
                 </p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2 items-center justify-center">
             <button onclick="loadFromGoogleSheet()" id="reloadSheetBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl shadow transition duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-arrows-rotate"></i> ☁️ 從 Google 試算表重新載入
+                <i class="fa-solid fa-arrows-rotate"></i> ☁️ 重新載入
             </button>
 
             <label for="importFile" class="cursor-pointer bg-white/15 hover:bg-white/25 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl transition duration-200 flex items-center gap-2 border border-white/20 shadow">
-                <i class="fa-solid fa-file-excel text-emerald-300"></i> 📊 匯入 Excel 檔
+                <i class="fa-solid fa-file-excel text-emerald-300"></i> 📊 匯入
             </label>
             <input type="file" id="importFile" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFileImport(event)">
 
             <button onclick="openChangeModal()" class="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition duration-200 flex items-center gap-2 transform hover:scale-105">
-                <i class="fa-solid fa-shuffle"></i> 🔀 經費變更申請
+                <i class="fa-solid fa-shuffle"></i> 🔀 變更
             </button>
 
             <button onclick="openAddModal()" class="bg-white/15 hover:bg-white/25 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl transition duration-200 flex items-center gap-2 border border-white/20 shadow">
-                <i class="fa-solid fa-plus-circle text-amber-300"></i> ➕ 新增項目
+                <i class="fa-solid fa-plus-circle text-amber-300"></i> ➕ 新增
             </button>
             
             <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl shadow transition duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-download"></i> 📥 匯出報表
+                <i class="fa-solid fa-download"></i> 📥 匯出
             </button>
 
             <button onclick="syncToCloud()" id="syncBtn" class="bg-amber-500 hover:bg-amber-400 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步雲端
+                <i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步
             </button>
         </div>
     </header>
 
     <main class="max-w-7xl w-full mx-auto flex-grow space-y-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="glass-card p-5 rounded-3xl shadow-xl border-l-8 border-purple-600 transform hover:-translate-y-1 transition">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-slate-500 uppercase">💼 原始總經費 (篩選)</p>
-                        <h3 id="kpiTotalBudget" class="text-2xl font-black text-purple-900 mt-1">NT$ 0</h3>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl shadow-inner">
-                        <span>💰</span>
-                    </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="glass-card p-3 sm:p-4 rounded-3xl shadow-xl border-l-8 border-purple-600 transform hover:-translate-y-1 transition">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">💼 原始總經費</p>
+                    <h3 id="kpiTotalBudget" class="text-base sm:text-lg font-black text-purple-900 mt-1">NT$ 0</h3>
                 </div>
-                <span class="text-[11px] text-purple-600 font-semibold mt-2 inline-block">🎯 依目前篩選條件加總</span>
             </div>
 
-            <div class="glass-card p-5 rounded-3xl shadow-xl border-l-8 border-emerald-500 transform hover:-translate-y-1 transition">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-slate-500 uppercase">📈 變更流入總額</p>
-                        <h3 id="kpiInflow" class="text-2xl font-black text-emerald-600 mt-1">NT$ 0</h3>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shadow-inner">
-                        <span>🚀</span>
-                    </div>
+            <div class="glass-card p-3 sm:p-4 rounded-3xl shadow-xl border-l-8 border-emerald-500 transform hover:-translate-y-1 transition">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">📈 變更流入</p>
+                    <h3 id="kpiInflow" class="text-base sm:text-lg font-black text-emerald-600 mt-1">NT$ 0</h3>
                 </div>
-                <span class="text-[11px] text-emerald-600 font-semibold mt-2 inline-block">✨ 異動流入金額累計</span>
             </div>
 
-            <div class="glass-card p-5 rounded-3xl shadow-xl border-l-8 border-rose-500 transform hover:-translate-y-1 transition">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-slate-500 uppercase">📉 變更流出總額</p>
-                        <h3 id="kpiOutflow" class="text-2xl font-black text-rose-600 mt-1">NT$ 0</h3>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-xl shadow-inner">
-                        <span>🔥</span>
-                    </div>
+            <div class="glass-card p-3 sm:p-4 rounded-3xl shadow-xl border-l-8 border-rose-500 transform hover:-translate-y-1 transition">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">📉 變更流出</p>
+                    <h3 id="kpiOutflow" class="text-base sm:text-lg font-black text-rose-600 mt-1">NT$ 0</h3>
                 </div>
-                <span class="text-[11px] text-rose-600 font-semibold mt-2 inline-block">⚡ 異動流出金額累計</span>
             </div>
 
-            <div class="glass-card p-5 rounded-3xl shadow-xl border-l-8 border-blue-600 transform hover:-translate-y-1 transition">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-slate-500 uppercase">💎 調整後淨經費</p>
-                        <h3 id="kpiNetBudget" class="text-2xl font-black text-blue-900 mt-1">NT$ 0</h3>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl shadow-inner">
-                        <span>🌟</span>
-                    </div>
+            <div class="glass-card p-3 sm:p-4 rounded-3xl shadow-xl border-l-8 border-blue-600 transform hover:-translate-y-1 transition">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">💎 調整後淨經費</p>
+                    <h3 id="kpiNetBudget" class="text-base sm:text-lg font-black text-blue-900 mt-1">NT$ 0</h3>
                 </div>
-                <span class="text-[11px] text-blue-600 font-semibold mt-2 inline-block">🔮 原始 + 流入 - 流出淨額</span>
+            </div>
+
+            <div class="glass-card p-3 sm:p-4 rounded-3xl shadow-xl border-l-8 border-teal-500 transform hover:-translate-y-1 transition">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">🧾 已核銷總額</p>
+                    <h3 id="kpiDisbursed" class="text-base sm:text-lg font-black text-teal-700 mt-1">NT$ 0</h3>
+                </div>
+            </div>
+
+            <div class="glass-card p-3 sm:p-4 rounded-3xl shadow-xl border-l-8 border-indigo-500 transform hover:-translate-y-1 transition">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">📊 平均執行率</p>
+                    <h3 id="kpiAvgRate" class="text-base sm:text-lg font-black text-indigo-700 mt-1">0.0%</h3>
+                </div>
             </div>
         </div>
 
-        <div class="glass-card p-5 rounded-3xl shadow-xl space-y-4">
+        <div class="glass-card p-4 sm:p-5 rounded-3xl shadow-xl space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-purple-100">
                 <h2 class="text-sm font-black text-purple-900 flex items-center gap-2">
                     <i class="fa-solid fa-filter text-purple-600"></i> 🔍 多維度智慧篩選器
@@ -174,7 +155,7 @@
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <i class="fa-solid fa-search"></i>
                         </span>
-                        <input type="text" id="searchInput" oninput="applyFilters()" placeholder="搜尋關鍵字..." class="w-full pl-9 pr-4 py-1.5 bg-purple-50/80 border border-purple-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="text" id="searchInput" oninput="applyFilters()" placeholder="搜尋關鍵字或支用說明..." class="w-full pl-9 pr-4 py-1.5 bg-purple-50/80 border border-purple-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
                     <button onclick="resetFilters()" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1">
                         <i class="fa-solid fa-rotate-right"></i> 重設
@@ -220,33 +201,37 @@
             <div class="p-4 sm:p-5 bg-gradient-to-r from-purple-900 to-indigo-900 text-white flex justify-between items-center flex-wrap gap-3">
                 <div>
                     <h2 class="text-base font-black flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-pink-400"></i> 📊 深耕計畫經費系統與異動執行總表
+                        <i class="fa-solid fa-list-check text-pink-400"></i> 📊 深耕計畫經費系統與執行總表
                     </h2>
-                    <p class="text-xs text-purple-200 mt-0.5">💡 支援平均欄寬顯示、支用說明/編列基準對應與正確整數異動筆數！✨</p>
+                    <p class="text-xs text-purple-200 mt-0.5">💡 清楚呈現支用說明與編列基準，經費明細滴水不漏！✨</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <span id="recordCountBadge" class="text-xs bg-white/20 text-purple-100 px-3 py-1 rounded-full font-bold">0 筆項目</span>
                     <button onclick="openHistoryModal()" class="text-xs bg-pink-600 hover:bg-pink-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-clock-rotate-left"></i> 🕒 檢視所有異動紀錄
+                        <i class="fa-solid fa-clock-rotate-left"></i> 🕒 檢視異動
                     </button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs table-fixed-layout min-w-[1300px]">
+            <!-- Mobile & Tablet Card View -->
+            <div id="cardContainer" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 block lg:hidden">
+                <!-- Cards injected dynamically -->
+            </div>
+
+            <!-- Desktop Table View (Includes Expense Standard Column) -->
+            <div class="overflow-x-auto hidden lg:block">
+                <table class="w-full text-left border-collapse text-xs min-w-[1200px]">
                     <thead>
                         <tr class="bg-purple-100/80 text-purple-900 font-extrabold uppercase tracking-wider text-[11px] border-b border-purple-200">
-                            <th class="py-3 px-3 w-[7%]">📅 年度</th>
-                            <th class="py-3 px-3 w-[9%]">🌌 範疇</th>
-                            <th class="py-3 px-3 w-[10%]">📂 子計畫</th>
-                            <th class="py-3 px-3 w-[9%]">🏷️ 項目名稱</th>
-                            <th class="py-3 px-3 w-[9%]">📝 細項名稱</th>
-                            <th class="py-3 px-3 w-[7%]">🚪 門別</th>
-                            <th class="py-3 px-3 w-[16%]">📖 支用說明與編列基準</th>
-                            <th class="py-3 px-3 w-[8%] text-right">💰 原始經費</th>
-                            <th class="py-3 px-3 w-[8%] text-center">🔄 異動筆數</th>
-                            <th class="py-3 px-3 w-[9%] text-right">💎 調整後淨額</th>
-                            <th class="py-3 px-3 w-[16%] text-center">⚙️ 操作與異動</th>
+                            <th class="py-3 px-3">📅 年度/計畫/細項</th>
+                            <th class="py-3 px-2 text-center">🚪 門別</th>
+                            <th class="py-3 px-3">📖 支用說明與編列基準</th>
+                            <th class="py-3 px-2 text-right">💰 原始經費</th>
+                            <th class="py-3 px-2 text-right">💎 淨額</th>
+                            <th class="py-3 px-2 text-right">🧾 已核銷</th>
+                            <th class="py-3 px-2 text-right">⏳ 剩餘</th>
+                            <th class="py-3 px-2 text-center">📊 執行率</th>
+                            <th class="py-3 px-3 text-center">⚙️ 操作</th>
                         </tr>
                     </thead>
                     <tbody id="dataTableBody" class="divide-y divide-purple-100 font-medium text-slate-700">
@@ -260,7 +245,7 @@
                     <span>📭</span>
                 </div>
                 <h3 class="text-base font-bold text-slate-700">目前沒有符合條件的經費資料</h3>
-                <p class="text-xs text-slate-500 mt-1">請點擊上方「從 Google 試算表重新載入」或「新增項目」建立資料。</p>
+                <p class="text-xs text-slate-500 mt-1">請點擊上方「重新載入」或「新增」建立資料。</p>
             </div>
         </div>
     </main>
@@ -310,11 +295,17 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">📖 支用說明與編列基準</label>
-                    <input type="text" id="inputStandard" placeholder="例: 依本校標準支用，每場次2000元" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <textarea id="inputStandard" rows="2" placeholder="例: 依本校深耕計畫經費編列原則支用..." class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">💰 原始經費金額 (NT$) <span class="text-rose-500">*</span></label>
-                    <input type="number" id="inputBudget" required min="0" step="1" placeholder="例: 150000" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs font-bold text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">💰 原始經費金額 (NT$) <span class="text-rose-500">*</span></label>
+                        <input type="number" id="inputBudget" required min="0" step="1" placeholder="例: 150000" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs font-bold text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">🧾 已核銷金額 (NT$)</label>
+                        <input type="number" id="inputDisbursed" min="0" step="1" value="0" placeholder="例: 50000" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs font-bold text-teal-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-3 border-t border-purple-100">
@@ -380,13 +371,6 @@
                     </div>
                 </div>
 
-                <div class="bg-purple-100/80 p-3 rounded-2xl text-xs text-purple-900 flex items-start gap-2.5 border border-purple-200">
-                    <span class="text-base">🛡️</span>
-                    <div>
-                        <span class="font-bold">年度隔離防護與智能雙向同步：</span> 系統會嚴格限制對應目標項目必須與當前項目屬於<strong>同一年度</strong>，確保調整時絕不會跨年度誤動！
-                    </div>
-                </div>
-
                 <div class="flex justify-end gap-3 pt-3 border-t border-purple-100">
                     <button type="button" onclick="closeChangeModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">取消</button>
                     <button type="submit" class="px-5 py-2 bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold rounded-xl shadow transition">確認送出變更</button>
@@ -437,12 +421,12 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCYDSXjoeW3wiXNEnEZSnYyiTCyww5ogzVq6icyi2O0vwQlKuOl3Is3XTS8WX3CSZV/exec";
 
         let fallbackSampleData = [
-            { id: 1, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '業務費', detailName: 'D業務費', category: '經常門', standard: '依教育部深耕計畫經費編列原則支用', budget: 1000000, changes: [] },
-            { id: 2, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', standard: '採購專業心理諮商與檢測設備', budget: 2000000, changes: [] },
-            { id: 3, year: '117', scope: '教學創新', subProject: 'AI智慧醫療跨領域課程開發', itemName: '業務費', detailName: '專家諮詢費', category: '經常門', standard: '外聘專家鐘點費及審查費', budget: 800000, changes: [] }
+            { id: 1, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '業務費', detailName: 'D業務費', category: '經常門', standard: '依教育部深耕計畫經費編列原則支用', budget: 1000000, disbursed: 450000, changes: [] },
+            { id: 2, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', standard: '採購專業心理諮商與檢測設備', budget: 2000000, disbursed: 1200000, changes: [] },
+            { id: 3, year: '117', scope: '教學創新', subProject: 'AI智慧醫療跨領域課程開發', itemName: '業務費', detailName: '專家諮詢費', category: '經常門', standard: '外聘專家鐘點費及審查費', budget: 800000, disbursed: 300000, changes: [] }
         ];
 
-        let budgetData = JSON.parse(localStorage.getItem('deep_cultivation_budget_v3')) || [];
+        let budgetData = JSON.parse(localStorage.getItem('deep_cultivation_budget_v4')) || [];
 
         window.onload = function() {
             if (budgetData.length === 0) {
@@ -456,7 +440,7 @@
             const btn = document.getElementById('reloadSheetBtn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 正在從 Google 試算表載入...';
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 載入中...';
             }
 
             let csvText = null;
@@ -536,31 +520,28 @@
                             const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
                             const itemName = String(getField(['項目名稱', '項目']) || '業務費').trim();
                             const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || 'D業務費').trim();
-                            const standard = String(getField(['支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
+                            const standard = String(getField(['支用說明與編列基準', '支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
                             
                             let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
                             let category = rawCat.includes('資本') ? '資本門' : '經常門';
 
                             let rawBudget = getField(['總金額', '總經費', '經費總計', '核定經費', '原始經費', '預算', '金額', '小計', 'total', 'budget']);
-                            if (rawBudget === '' || rawBudget === null || rawBudget === undefined) {
-                                for (let rk in rowObj) {
-                                    if (rk.includes('總金額') || rk.includes('總經費') || rk.includes('金額') || rk.includes('經費') || rk.includes('預算')) {
-                                        let val = rowObj[rk];
-                                        if (val !== undefined && val !== null && String(val).trim() !== '') {
-                                            rawBudget = val;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-
                             let budget = 0;
                             if (rawBudget !== undefined && rawBudget !== null && rawBudget !== '') {
                                 if (typeof rawBudget === 'number') {
                                     budget = Math.round(rawBudget);
                                 } else {
-                                    let cleaned = String(rawBudget).replace(/[^0-9.-]+/g, "");
-                                    budget = Math.round(Number(cleaned) || 0);
+                                    budget = Math.round(Number(String(rawBudget).replace(/[^0-9.-]+/g, "")) || 0);
+                                }
+                            }
+
+                            let rawDisbursed = getField(['已核銷', '核銷金額', '已支用', 'disbursed', 'spent']);
+                            let disbursed = 0;
+                            if (rawDisbursed !== undefined && rawDisbursed !== null && rawDisbursed !== '') {
+                                if (typeof rawDisbursed === 'number') {
+                                    disbursed = Math.round(rawDisbursed);
+                                } else {
+                                    disbursed = Math.round(Number(String(rawDisbursed).replace(/[^0-9.-]+/g, "")) || 0);
                                 }
                             }
 
@@ -574,13 +555,14 @@
                                 category: category,
                                 standard: standard,
                                 budget: budget,
+                                disbursed: disbursed,
                                 changes: []
                             };
                         });
 
                         budgetData = imported;
                         saveToLocalStorage();
-                        showNotification('☁️ 成功從 Google 試算表載入最新經費資料！', 'success');
+                        showNotification('☁️ 成功從 Google 試算表載入最新資料！', 'success');
                     } else {
                         throw new Error("試算表無資料");
                     }
@@ -594,7 +576,7 @@
 
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> ☁️ 從 Google 試算表重新載入';
+                btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> ☁️ 重新載入';
             }
             initDashboard();
         }
@@ -607,7 +589,7 @@
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('deep_cultivation_budget_v3', JSON.stringify(budgetData));
+            localStorage.setItem('deep_cultivation_budget_v4', JSON.stringify(budgetData));
         }
 
         function initDashboard() {
@@ -680,7 +662,7 @@
                 const matchCat = !category || String(d.category) === category;
                 const matchItemName = !itemName || String(d.itemName) === itemName;
 
-                const rowStr = `${d.year} ${d.scope} ${d.subProject} ${d.itemName} ${d.detailName} ${d.category}`.toLowerCase();
+                const rowStr = `${d.year} ${d.scope} ${d.subProject} ${d.itemName} ${d.detailName} ${d.category} ${d.standard}`.toLowerCase();
                 const matchSearch = !searchVal || rowStr.includes(searchVal);
 
                 return matchYear && matchScope && matchSubProj && matchCat && matchItemName && matchSearch;
@@ -691,6 +673,7 @@
 
         function renderDashboard(filteredData) {
             renderTable(filteredData);
+            renderCards(filteredData);
             renderKPIs(filteredData);
         }
 
@@ -698,38 +681,40 @@
             let totalBudget = 0;
             let totalInflow = 0;
             let totalOutflow = 0;
+            let totalDisbursed = 0;
 
             data.forEach(d => {
                 const base = Math.round(Number(d.budget) || 0);
                 totalBudget += base;
+                totalDisbursed += Math.round(Number(d.disbursed) || 0);
 
                 if (d.changes && Array.isArray(d.changes)) {
                     d.changes.forEach(c => {
                         if (c.isChanged === '是' && c.datetime) {
                             const amt = Math.round(Number(c.amount) || 0);
-                            if (c.type === 'inflow') {
-                                totalInflow += amt;
-                            } else if (c.type === 'outflow') {
-                                totalOutflow += amt;
-                            }
+                            if (c.type === 'inflow') totalInflow += amt;
+                            if (c.type === 'outflow') totalOutflow += amt;
                         }
                     });
                 }
             });
 
             const netBudget = totalBudget + totalInflow - totalOutflow;
+            const avgRate = netBudget > 0 ? ((totalDisbursed / netBudget) * 100).toFixed(1) : '0.0';
 
             document.getElementById('kpiTotalBudget').innerText = 'NT$ ' + totalBudget.toLocaleString();
             document.getElementById('kpiInflow').innerText = 'NT$ ' + totalInflow.toLocaleString();
             document.getElementById('kpiOutflow').innerText = 'NT$ ' + totalOutflow.toLocaleString();
             document.getElementById('kpiNetBudget').innerText = 'NT$ ' + netBudget.toLocaleString();
+            document.getElementById('kpiDisbursed').innerText = 'NT$ ' + totalDisbursed.toLocaleString();
+            document.getElementById('kpiAvgRate').innerText = avgRate + '%';
             document.getElementById('recordCountBadge').innerText = `${data.length} 筆項目`;
         }
 
-        function renderTable(data) {
-            const tbody = document.getElementById('dataTableBody');
+        function renderCards(data) {
+            const container = document.getElementById('cardContainer');
             const emptyState = document.getElementById('emptyState');
-            tbody.innerHTML = '';
+            container.innerHTML = '';
 
             if (data.length === 0) {
                 emptyState.classList.remove('hidden');
@@ -740,11 +725,9 @@
 
             data.forEach(d => {
                 const base = Math.round(Number(d.budget) || 0);
+                const disbursed = Math.round(Number(d.disbursed) || 0);
                 let inflowSum = 0;
                 let outflowSum = 0;
-                
-                // Safe integer conversion for change count
-                let changeCount = Math.round(Number(d.changes && Array.isArray(d.changes) ? d.changes.length : 0) || 0);
 
                 if (d.changes && Array.isArray(d.changes)) {
                     d.changes.forEach(c => {
@@ -757,38 +740,115 @@
                 }
 
                 const net = base + inflowSum - outflowSum;
+                const remaining = net - disbursed;
+                const rate = net > 0 ? ((disbursed / net) * 100).toFixed(1) : '0.0';
+                const rateNum = Number(rate);
+
+                let rateBadgeClass = 'bg-slate-100 text-slate-700';
+                if (rateNum >= 80) rateBadgeClass = 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+                else if (rateNum >= 40) rateBadgeClass = 'bg-blue-100 text-blue-800 border border-blue-200';
+                else rateBadgeClass = 'bg-amber-100 text-amber-800 border border-amber-200';
+
+                const card = document.createElement('div');
+                card.className = "bg-white/80 border border-purple-200 rounded-2xl p-4 shadow-md space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-900 rounded-full">${escapeHtml(d.year)}年</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 ${d.category === '資本門' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} rounded-full ml-1">${escapeHtml(d.category)}</span>
+                            <h3 class="text-sm font-black text-slate-900 mt-1">${escapeHtml(d.subProject)}</h3>
+                            <p class="text-xs font-semibold text-purple-700">${escapeHtml(d.itemName)} / <span class="text-slate-600">${escapeHtml(d.detailName)}</span></p>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-black ${rateBadgeClass}">${rate}%</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs bg-purple-50/60 p-2.5 rounded-xl">
+                        <div><span class="text-slate-500 block text-[10px]">原始經費</span><strong class="text-slate-900">$${base.toLocaleString()}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">淨經費</span><strong class="text-purple-700">$${net.toLocaleString()}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">已核銷</span><strong class="text-teal-700">$${disbursed.toLocaleString()}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">剩餘金額</span><strong class="${remaining < 0 ? 'text-rose-600' : 'text-slate-800'}">$${remaining.toLocaleString()}</strong></div>
+                    </div>
+                    <div class="bg-purple-100/60 p-2.5 rounded-xl text-xs">
+                        <span class="text-[10px] font-bold text-purple-900 block mb-0.5">📖 支用說明與編列基準：</span>
+                        <p class="text-slate-700 font-medium">${escapeHtml(d.standard) || '無'}</p>
+                    </div>
+                    <div class="flex justify-end gap-1.5 pt-2 border-t border-purple-100">
+                        <button onclick="openChangeModalWithTarget(${d.id})" class="px-2.5 py-1 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-lg text-xs font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-shuffle"></i> 變更
+                        </button>
+                        <button onclick="editBudget(${d.id})" class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg text-xs font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-pen-to-square"></i> 編輯
+                        </button>
+                        <button onclick="deleteBudget(${d.id})" class="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-lg text-xs font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-trash"></i> 刪
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(d => {
+                const base = Math.round(Number(d.budget) || 0);
+                const disbursed = Math.round(Number(d.disbursed) || 0);
+                let inflowSum = 0;
+                let outflowSum = 0;
+
+                if (d.changes && Array.isArray(d.changes)) {
+                    d.changes.forEach(c => {
+                        if (c.isChanged === '是' && c.datetime) {
+                            const amt = Math.round(Number(c.amount) || 0);
+                            if (c.type === 'inflow') inflowSum += amt;
+                            if (c.type === 'outflow') outflowSum += amt;
+                        }
+                    });
+                }
+
+                const net = base + inflowSum - outflowSum;
+                const remaining = net - disbursed;
+                const rate = net > 0 ? ((disbursed / net) * 100).toFixed(1) : '0.0';
+                const rateNum = Number(rate);
+
+                let rateBadgeClass = 'bg-slate-100 text-slate-700';
+                if (rateNum >= 80) rateBadgeClass = 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+                else if (rateNum >= 40) rateBadgeClass = 'bg-blue-100 text-blue-800 border border-blue-200';
+                else rateBadgeClass = 'bg-amber-100 text-amber-800 border border-amber-200';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-purple-50/80 transition duration-150 border-b border-purple-100";
                 tr.innerHTML = `
-                    <td class="py-3 px-3 font-bold text-purple-900 truncate" title="${escapeHtml(d.year)}">${escapeHtml(d.year)}</td>
-                    <td class="py-3 px-3 font-semibold truncate" title="${escapeHtml(d.scope)}">${escapeHtml(d.scope)}</td>
-                    <td class="py-3 px-3 font-semibold text-slate-800 truncate" title="${escapeHtml(d.subProject)}">${escapeHtml(d.subProject)}</td>
-                    <td class="py-3 px-3 font-bold text-indigo-700 truncate" title="${escapeHtml(d.itemName)}">${escapeHtml(d.itemName)}</td>
-                    <td class="py-3 px-3 text-slate-600 truncate" title="${escapeHtml(d.detailName)}">${escapeHtml(d.detailName)}</td>
-                    <td class="py-3 px-3 truncate">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${d.category === '資本門' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">
+                    <td class="py-3 px-3">
+                        <div class="font-bold text-purple-900">${escapeHtml(d.year)}年 | <span class="text-slate-800">${escapeHtml(d.subProject)}</span></div>
+                        <div class="text-[11px] text-purple-600 font-semibold">${escapeHtml(d.scope)} &gt; ${escapeHtml(d.itemName)} &gt; <span class="text-slate-600">${escapeHtml(d.detailName)}</span></div>
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${d.category === '資本門' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">
                             ${escapeHtml(d.category)}
                         </span>
                     </td>
-                    <td class="py-3 px-3 text-slate-600 truncate" title="${escapeHtml(d.standard || '無')}">${escapeHtml(d.standard || '-')}</td>
-                    <td class="py-3 px-3 text-right font-bold text-slate-900 truncate" title="$${base.toLocaleString()}">$${base.toLocaleString()}</td>
-                    <td class="py-3 px-3 text-center">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${changeCount > 0 ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-slate-100 text-slate-500'}">
-                            ${changeCount} 筆
-                        </span>
+                    <td class="py-3 px-3 text-slate-600 max-w-xs">
+                        <div class="line-clamp-2" title="${escapeHtml(d.standard)}">${escapeHtml(d.standard) || '<span class="text-slate-300">無</span>'}</div>
                     </td>
-                    <td class="py-3 px-3 text-right font-black text-purple-700 truncate" title="$${net.toLocaleString()}">$${net.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-bold text-slate-900">$${base.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-black text-purple-700">$${net.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-bold text-teal-700">$${disbursed.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-bold ${remaining < 0 ? 'text-rose-600' : 'text-slate-800'}">$${remaining.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-center">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${rateBadgeClass}">${rate}%</span>
+                    </td>
                     <td class="py-3 px-3 text-center">
-                        <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                            <button onclick="openChangeModalWithTarget(${d.id})" class="px-2.5 py-1.5 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-xl transition shadow-sm text-[11px] font-bold flex items-center gap-1" title="經費變更申請">
-                                <i class="fa-solid fa-shuffle"></i> 變更
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="openChangeModalWithTarget(${d.id})" class="px-2 py-1 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-lg transition text-[10px] font-bold" title="經費變更">
+                                <i class="fa-solid fa-shuffle"></i>
                             </button>
-                            <button onclick="editBudget(${d.id})" class="px-2.5 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-xl transition shadow-sm text-[11px] font-bold flex items-center gap-1" title="編輯項目">
-                                <i class="fa-solid fa-pen-to-square"></i> 編輯
+                            <button onclick="editBudget(${d.id})" class="px-2 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition text-[10px] font-bold" title="編輯項目">
+                                <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button onclick="deleteBudget(${d.id})" class="px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition shadow-sm text-[11px] font-bold flex items-center gap-1" title="刪除項目">
-                                <i class="fa-solid fa-trash"></i> 刪除
+                            <button onclick="deleteBudget(${d.id})" class="px-2 py-1 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-lg transition text-[10px] font-bold" title="刪除項目">
+                                <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
                     </td>
@@ -801,6 +861,7 @@
             document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus-circle text-purple-600"></i> 新增經費明細項目';
             document.getElementById('editRecordId').value = '';
             document.getElementById('budgetForm').reset();
+            document.getElementById('inputDisbursed').value = 0;
             document.getElementById('dataModal').classList.remove('hidden');
             document.getElementById('dataModal').classList.add('flex');
         }
@@ -819,6 +880,7 @@
             document.getElementById('inputDetailName').value = item.detailName;
             document.getElementById('inputStandard').value = item.standard || '';
             document.getElementById('inputBudget').value = item.budget;
+            document.getElementById('inputDisbursed').value = item.disbursed || 0;
 
             document.getElementById('dataModal').classList.remove('hidden');
             document.getElementById('dataModal').classList.add('flex');
@@ -842,6 +904,7 @@
                 detailName: document.getElementById('inputDetailName').value.trim(),
                 standard: document.getElementById('inputStandard').value.trim(),
                 budget: Math.round(Number(document.getElementById('inputBudget').value) || 0),
+                disbursed: Math.round(Number(document.getElementById('inputDisbursed').value) || 0),
                 changes: []
             };
 
@@ -851,10 +914,10 @@
                     newItem.changes = budgetData[idx].changes || [];
                     budgetData[idx] = newItem;
                 }
-                showNotification('✨ 經費項目已成功更新！', 'success');
+                showNotification('✨ 項目已更新！', 'success');
             } else {
                 budgetData.push(newItem);
-                showNotification('🚀 成功新增經費項目！', 'success');
+                showNotification('🚀 成功新增！', 'success');
             }
 
             saveToLocalStorage();
@@ -863,7 +926,7 @@
         }
 
         function deleteBudget(id) {
-            if (confirm('⚠️ 確定要刪除此筆經費項目與相關異動紀錄嗎？')) {
+            if (confirm('⚠️ 確定要刪除此筆經費項目嗎？')) {
                 budgetData = budgetData.filter(d => d.id !== id);
                 saveToLocalStorage();
                 initDashboard();
@@ -890,7 +953,7 @@
             let targetHtml = '<option value="">-- 無 (單向異動) --</option>';
             
             budgetData.filter(d => d.id !== item.id && String(d.year).trim() === String(item.year).trim()).forEach(d => {
-                targetHtml += `<option value="${d.id}">[同年度 ${d.year}年] ${d.subProject} - ${d.detailName}</option>`;
+                targetHtml += `<option value="${d.id}">[${d.year}年] ${d.subProject} - ${d.detailName}</option>`;
             });
             targetSelect.innerHTML = targetHtml;
 
@@ -901,7 +964,7 @@
 
         function openChangeModal() {
             if (budgetData.length === 0) {
-                showNotification('⚠️ 請先新增經費項目後再進行變更申請', 'error');
+                showNotification('⚠️ 請先新增經費項目', 'error');
                 return;
             }
             openChangeModalWithTarget(budgetData[0].id);
@@ -915,10 +978,12 @@
         function onTypeChange() {
             const type = document.getElementById('inputChangeType').value;
             const hint = document.getElementById('syncHintText');
-            if (type === 'outflow') {
-                hint.innerText = '(選擇目標項目後，將自動連動流入至該同年度目標項目)';
-            } else {
-                hint.innerText = '(選擇目標項目後，將自動連動流出至該同年度目標項目)';
+            if (hint) {
+                if (type === 'outflow') {
+                    hint.innerText = '(選擇目標項目後，將自動連動流入至該同年度目標項目)';
+                } else {
+                    hint.innerText = '(選擇目標項目後，將自動連動流出至該同年度目標項目)';
+                }
             }
         }
 
@@ -954,7 +1019,7 @@
                 if (targetItem && String(targetItem.year).trim() === String(sourceItem.year).trim()) {
                     if (!targetItem.changes) targetItem.changes = [];
                     const reciprocalType = type === 'outflow' ? 'inflow' : 'outflow';
-                    const reciprocalNote = `[雙向連動] 與 ${sourceItem.detailName} 互抵流用 (${note || '無備註'})`;
+                    const reciprocalNote = `[雙向連動] 與 ${sourceItem.detailName} 互抵 (${note || '無'})`;
                     
                     targetItem.changes.push({
                         id: changeRecordId + 1,
@@ -971,7 +1036,7 @@
             saveToLocalStorage();
             closeChangeModal();
             initDashboard();
-            showNotification('✨ 經費變更與流用申請已成功紀錄並雙向連動！', 'success');
+            showNotification('✨ 變更申請已紀錄並雙向連動！', 'success');
         }
 
         function openHistoryModal() {
@@ -1004,7 +1069,7 @@
             });
 
             if (allChanges.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">目前尚無任何經費異動紀錄</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">目前尚無異動紀錄</td></tr>`;
                 return;
             }
 
@@ -1036,7 +1101,7 @@
                         </span>
                     </td>
                     <td class="p-3 text-center">
-                        <button onclick="deleteChangeRecord(${c.sourceId}, ${c.id})" class="p-1 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-lg transition" title="刪除此異動">
+                        <button onclick="deleteChangeRecord(${c.sourceId}, ${c.id})" class="p-1 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-lg transition" title="刪除">
                             <i class="fa-solid fa-trash text-xs"></i>
                         </button>
                     </td>
@@ -1072,7 +1137,7 @@
                     const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
                     if (jsonRows.length === 0) {
-                        showNotification('⚠️ 上傳的檔案無有效資料', 'error');
+                        showNotification('⚠️ 檔案無有效資料', 'error');
                         return;
                     }
 
@@ -1106,31 +1171,28 @@
                         const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
                         const itemName = String(getField(['項目名稱', '項目']) || '業務費').trim();
                         const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || 'D業務費').trim();
-                        const standard = String(getField(['支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
+                        const standard = String(getField(['支用說明與編列基準', '支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
                         
                         let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
                         let category = rawCat.includes('資本') ? '資本門' : '經常門';
 
                         let rawBudget = getField(['總金額', '總經費', '經費總計', '核定經費', '原始經費', '預算', '金額', '小計', 'total', 'budget']);
-                        if (rawBudget === '' || rawBudget === null || rawBudget === undefined) {
-                            for (let rk in rowObj) {
-                                if (rk.includes('總金額') || rk.includes('總經費') || rk.includes('金額') || rk.includes('經費') || rk.includes('預算')) {
-                                    let val = rowObj[rk];
-                                    if (val !== undefined && val !== null && String(val).trim() !== '') {
-                                        rawBudget = val;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
                         let budget = 0;
                         if (rawBudget !== undefined && rawBudget !== null && rawBudget !== '') {
                             if (typeof rawBudget === 'number') {
                                 budget = Math.round(rawBudget);
                             } else {
-                                let cleaned = String(rawBudget).replace(/[^0-9.-]+/g, "");
-                                budget = Math.round(Number(cleaned) || 0);
+                                budget = Math.round(Number(String(rawBudget).replace(/[^0-9.-]+/g, "")) || 0);
+                            }
+                        }
+
+                        let rawDisbursed = getField(['已核銷', '核銷金額', '已支用', 'disbursed', 'spent']);
+                        let disbursed = 0;
+                        if (rawDisbursed !== undefined && rawDisbursed !== null && rawDisbursed !== '') {
+                            if (typeof rawDisbursed === 'number') {
+                                disbursed = Math.round(rawDisbursed);
+                            } else {
+                                disbursed = Math.round(Number(String(rawDisbursed).replace(/[^0-9.-]+/g, "")) || 0);
                             }
                         }
 
@@ -1144,6 +1206,7 @@
                             category: category,
                             standard: standard,
                             budget: budget,
+                            disbursed: disbursed,
                             changes: []
                         };
                     });
@@ -1151,10 +1214,10 @@
                     budgetData = imported;
                     saveToLocalStorage();
                     initDashboard();
-                    showNotification(`🎉 成功匯入 ${imported.length} 筆經費明細資料！`, 'success');
+                    showNotification(`🎉 成功匯入 ${imported.length} 筆資料！`, 'success');
                 } catch (err) {
                     console.error(err);
-                    showNotification('❌ 檔案讀取發生錯誤，請上傳正確的 Excel 檔案', 'error');
+                    showNotification('❌ 檔案讀取錯誤', 'error');
                 } finally {
                     e.target.value = '';
                 }
@@ -1187,8 +1250,12 @@
                     });
                 }
 
-                const netBudget = Math.round(Number(d.budget) || 0) + inflow - outflow;
-                const changeTimesStr = activeChangeDates.length > 0 ? activeChangeDates.join('; ') : '無異動';
+                const base = Math.round(Number(d.budget) || 0);
+                const disbursed = Math.round(Number(d.disbursed) || 0);
+                const netBudget = base + inflow - outflow;
+                const remaining = netBudget - disbursed;
+                const rate = netBudget > 0 ? ((disbursed / netBudget) * 100).toFixed(1) + '%' : '0.0%';
+                const changeTimesStr = activeChangeDates.length > 0 ? activeChangeDates.join('; ') : '无';
                 const exportChangeCount = Math.round(Number(d.changes && Array.isArray(d.changes) ? d.changes.length : 0) || 0);
 
                 exportData.push({
@@ -1199,26 +1266,29 @@
                     '細項名稱': d.detailName,
                     '門別': d.category,
                     '支用說明與編列基準': d.standard || '',
-                    '原始經費 (NT$)': d.budget,
+                    '原始經費 (NT$)': base,
                     '變更流入 (NT$)': inflow,
                     '變更流出 (NT$)': outflow,
                     '調整後淨額 (NT$)': netBudget,
+                    '已核銷金額 (NT$)': disbursed,
+                    '剩餘金額 (NT$)': remaining,
+                    '執行率': rate,
                     '異動筆數': exportChangeCount,
-                    '最近或全部異動時間': changeTimesStr
+                    '異動時間': changeTimesStr
                 });
             });
 
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "經費系統總表與異動時間");
-            XLSX.writeFile(workbook, "深耕計畫經費系統表_含支用說明與編列基準.xlsx");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "經費核銷與執行率總表");
+            XLSX.writeFile(workbook, "深耕計畫經費與執行率報表.xlsx");
             showNotification('📥 報表匯出成功！', 'success');
         }
 
         async function syncToCloud() {
             const btn = document.getElementById('syncBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 正在同步雲端...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 同步中...';
 
             try {
                 const payloadData = budgetData.map(d => {
@@ -1235,9 +1305,11 @@
                             }
                         });
                     }
-                    const netBudget = Math.round(Number(d.budget) || 0) + inflow - outflow;
-                    
-                    // Strictly compute integer change count
+                    const base = Math.round(Number(d.budget) || 0);
+                    const disbursed = Math.round(Number(d.disbursed) || 0);
+                    const netBudget = base + inflow - outflow;
+                    const remaining = netBudget - disbursed;
+                    const rate = netBudget > 0 ? ((disbursed / netBudget) * 100).toFixed(1) + '%' : '0.0%';
                     const exactChangeCount = Math.round(Number(d.changes && Array.isArray(d.changes) ? d.changes.length : 0) || 0);
 
                     return {
@@ -1245,29 +1317,37 @@
                         inflowTotal: inflow,
                         outflowTotal: outflow,
                         netBudget: netBudget,
+                        disbursed: disbursed,
+                        remaining: remaining,
+                        executionRate: rate,
                         cloudChangeCount: exactChangeCount,
-                        changeTimes: activeChangeDates.length > 0 ? activeChangeDates.join('; ') : '無異動'
+                        changeTimes: activeChangeDates.length > 0 ? activeChangeDates.join('; ') : '无'
                     };
                 });
 
-                // Explicitly ordered headers and row arrays to prevent mapping offset or type mismatch
                 const payload = {
                     action: 'save_all',
-                    headers: ["年度", "範疇", "子計畫", "項目名稱", "細項名稱", "門別", "支用說明與編列基準", "原始經費", "變更流入", "變更流出", "調整後淨額", "異動筆數", "異動時間"],
+                    headers: [
+                        "年度", "範疇", "子計畫", "項目名稱", "細項名稱", "門別", "支用說明與編列基準", 
+                        "原始經費", "變更流入", "變更流出", "調整後淨額", "已核銷金額", "剩餘金額", "執行率", "異動筆數", "異動時間"
+                    ],
                     rows: payloadData.map(d => [
-                        d.year,                                   // 0: 年度
-                        d.scope,                                  // 1: 範疇
-                        d.subProject,                             // 2: 子計畫
-                        d.itemName,                               // 3: 項目名稱
-                        d.detailName,                             // 4: 細項名稱
-                        d.category,                               // 5: 門別
-                        d.standard || '',                         // 6: 支用說明與編列基準
-                        Number(d.budget) || 0,                    // 7: 原始經費
-                        Number(d.inflowTotal) || 0,               // 8: 變更流入
-                        Number(d.outflowTotal) || 0,              // 9: 變更流出
-                        Number(d.netBudget) || 0,                 // 10: 調整後淨額
-                        Math.round(Number(d.cloudChangeCount) || 0), // 11: 異動筆數 (Strict Integer)
-                        String(d.changeTimes || '無異動')          // 12: 異動時間 (String)
+                        String(d.year || ''),
+                        String(d.scope || ''),
+                        String(d.subProject || ''),
+                        String(d.itemName || ''),
+                        String(d.detailName || ''),
+                        String(d.category || ''),
+                        String(d.standard || ''),
+                        Math.round(Number(d.budget) || 0),
+                        Math.round(Number(d.inflowTotal) || 0),
+                        Math.round(Number(d.outflowTotal) || 0),
+                        Math.round(Number(d.netBudget) || 0),
+                        Math.round(Number(d.disbursed) || 0),
+                        Math.round(Number(d.remaining) || 0),
+                        String(d.executionRate || '0.0%'),
+                        Math.round(Number(d.cloudChangeCount) || 0),
+                        String(d.changeTimes || '无')
                     ]),
                     spreadsheetUrl: GOOGLE_SHEET_CSV_URL,
                     timestamp: new Date().toISOString()
@@ -1276,22 +1356,20 @@
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 setTimeout(() => {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步雲端';
-                    showNotification('☁️ 成功將經費與整數異動筆數同步至 Google 試算表！', 'success');
+                    btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步';
+                    showNotification('☁️ 成功同步至 Google 試算表！', 'success');
                 }, 1200);
 
             } catch (err) {
                 console.warn("Apps Script 同步提示：", err);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步雲端';
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步';
                 showNotification('❌ 同步雲端發生錯誤', 'error');
             }
         }
