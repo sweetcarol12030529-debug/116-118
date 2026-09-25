@@ -51,6 +51,15 @@
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        .table-fixed-layout {
+            table-layout: fixed;
+            width: 100%;
+        }
+        .table-fixed-layout th, .table-fixed-layout td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-wrap: break-word;
+        }
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -236,20 +245,20 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
+                <table class="w-full text-left border-collapse text-xs table-fixed-layout min-w-[1100px]">
                     <thead>
                         <tr class="bg-purple-100/80 text-purple-900 font-extrabold uppercase tracking-wider text-[11px] border-b border-purple-200">
-                            <th class="py-3.5 px-4">📅 年度</th>
-                            <th class="py-3.5 px-4">🌌 範疇</th>
-                            <th class="py-3.5 px-4">📂 子計畫</th>
-                            <th class="py-3.5 px-4">🏷️ 項目名稱</th>
-                            <th class="py-3.5 px-4">📝 細項名稱</th>
-                            <th class="py-3.5 px-4">🚪 門別</th>
-                            <th class="py-3.5 px-4">📖 支用說明與編列基準</th>
-                            <th class="py-3.5 px-4 text-right">💰 原始經費</th>
-                            <th class="py-3.5 px-4 text-center">🔄 異動筆數</th>
-                            <th class="py-3.5 px-4 text-right">💎 調整後淨額</th>
-                            <th class="py-3.5 px-4 text-center">⚙️ 操作與異動</th>
+                            <th class="py-3 px-3 w-[7%]">📅 年度</th>
+                            <th class="py-3 px-3 w-[8%]">🌌 範疇</th>
+                            <th class="py-3 px-3 w-[11%]">📂 子計畫</th>
+                            <th class="py-3 px-3 w-[9%]">🏷️ 項目名稱</th>
+                            <th class="py-3 px-3 w-[11%]">📝 細項名稱</th>
+                            <th class="py-3 px-3 w-[7%]">🚪 門別</th>
+                            <th class="py-3 px-3 w-[15%]">📖 支用說明與編列基準</th>
+                            <th class="py-3 px-3 w-[9%] text-right">💰 原始經費</th>
+                            <th class="py-3 px-3 w-[7%] text-center">🔄 異動筆數</th>
+                            <th class="py-3 px-3 w-[9%] text-right">💎 調整後淨額</th>
+                            <th class="py-3 px-3 w-[12%] text-center">⚙️ 操作與異動</th>
                         </tr>
                     </thead>
                     <tbody id="dataTableBody" class="divide-y divide-purple-100 font-medium text-slate-700">
@@ -763,25 +772,25 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-purple-50/80 transition duration-150 border-b border-purple-100";
                 tr.innerHTML = `
-                    <td class="py-3.5 px-4 font-bold text-purple-900">${escapeHtml(d.year)}</td>
-                    <td class="py-3.5 px-4 font-semibold">${escapeHtml(d.scope)}</td>
-                    <td class="py-3.5 px-4 font-semibold text-slate-800">${escapeHtml(d.subProject)}</td>
-                    <td class="py-3.5 px-4 font-bold text-indigo-700">${escapeHtml(d.itemName)}</td>
-                    <td class="py-3.5 px-4 text-slate-600">${escapeHtml(d.detailName)}</td>
-                    <td class="py-3.5 px-4">
-                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold ${d.category === '資本門' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">
+                    <td class="py-3 px-3 font-bold text-purple-900 truncate" title="${escapeHtml(d.year)}">${escapeHtml(d.year)}</td>
+                    <td class="py-3 px-3 font-semibold truncate" title="${escapeHtml(d.scope)}">${escapeHtml(d.scope)}</td>
+                    <td class="py-3 px-3 font-semibold text-slate-800 truncate" title="${escapeHtml(d.subProject)}">${escapeHtml(d.subProject)}</td>
+                    <td class="py-3 px-3 font-bold text-indigo-700 truncate" title="${escapeHtml(d.itemName)}">${escapeHtml(d.itemName)}</td>
+                    <td class="py-3 px-3 text-slate-600 truncate" title="${escapeHtml(d.detailName)}">${escapeHtml(d.detailName)}</td>
+                    <td class="py-3 px-3 truncate">
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${d.category === '資本門' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">
                             ${escapeHtml(d.category)}
                         </span>
                     </td>
-                    <td class="py-3.5 px-4 text-slate-600 max-w-xs truncate" title="${escapeHtml(d.standard || '無')}">${escapeHtml(d.standard || '-')}</td>
-                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">$${base.toLocaleString()}</td>
-                    <td class="py-3.5 px-4 text-center">
+                    <td class="py-3 px-3 text-slate-600 truncate" title="${escapeHtml(d.standard || '無')}">${escapeHtml(d.standard || '-')}</td>
+                    <td class="py-3 px-3 text-right font-bold text-slate-900 truncate" title="$${base.toLocaleString()}">$${base.toLocaleString()}</td>
+                    <td class="py-3 px-3 text-center">
                         <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${changeCount > 0 ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-slate-100 text-slate-500'}">
-                            ${changeCount} 筆
+                            ${Number(changeCount)} 筆
                         </span>
                     </td>
-                    <td class="py-3.5 px-4 text-right font-black text-purple-700">$${net.toLocaleString()}</td>
-                    <td class="py-3.5 px-4 text-center">
+                    <td class="py-3 px-3 text-right font-black text-purple-700 truncate" title="$${net.toLocaleString()}">$${net.toLocaleString()}</td>
+                    <td class="py-3 px-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
                             <button onclick="openChangeModalWithTarget(${d.id})" class="p-1.5 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-xl transition shadow-sm" title="經費變更申請">
                                 <i class="fa-solid fa-shuffle text-xs"></i>
