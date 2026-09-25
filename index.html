@@ -65,10 +65,10 @@
             </div>
             <div>
                 <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-                    🦄 深耕計畫經費系統表 <span class="text-xs px-2.5 py-1 bg-pink-500/80 rounded-full font-bold uppercase tracking-widest text-white shadow-sm">補助款與配合款執行版</span>
+                    🦄 深耕計畫經費系統表 <span class="text-xs px-2.5 py-1 bg-pink-500/80 rounded-full font-bold uppercase tracking-widest text-white shadow-sm">補助款與機構配合款執行版</span>
                 </h1>
                 <p class="text-xs sm:text-sm text-purple-200 mt-1 font-medium">
-                    🚀 整合「補助款（人事費、業務費、設備費、管理費）」與「配合款」雙軌檢視！✨
+                    🚀 完整呈現補助款與機構配合款雙軌分類檢視！✨
                 </p>
             </div>
         </div>
@@ -160,11 +160,12 @@
                 </div>
             </div>
 
-            <!-- Counterpart Card -->
-            <div onclick="filterByCoreType('配合款')" class="glass-card p-4 rounded-3xl shadow-lg cursor-pointer hover:bg-rose-50 transition border-2 border-rose-200 flex items-center justify-between">
+            <!-- Institutional Counterpart Card -->
+            <div onclick="filterByCoreType('機構配合款')" class="glass-card p-4 rounded-3xl shadow-lg cursor-pointer hover:bg-rose-50 transition border-2 border-rose-200 flex items-center justify-between">
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-black text-rose-700 uppercase px-2 py-0.5 bg-rose-100 rounded-full">🎯 配合款</span>
+                        <span class="text-xs font-black text-rose-700 uppercase px-2 py-0.5 bg-rose-100 rounded-full">🎯 機構配合款</span>
+                        <span class="text-[11px] text-rose-600 font-bold">(點擊篩選檢視)</span>
                     </div>
                     <h4 id="summaryCounterpart" class="text-lg font-black text-rose-900 mt-1">NT$ 0 (0%)</h4>
                 </div>
@@ -174,11 +175,11 @@
             </div>
         </div>
 
-        <!-- Collapsible Breakdown for Subsidy Components (Personnel, Business, Equipment, Management) -->
+        <!-- Collapsible Breakdown for Subsidy Components -->
         <div id="subsidyBreakdownPanel" class="hidden glass-card p-4 rounded-3xl shadow-xl border border-indigo-200 space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-indigo-100">
                 <h3 class="text-xs font-black text-indigo-900 flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group text-indigo-600"></i> 📊 補助款四大子項目執行狀況（點擊可直接篩選）
+                    <i class="fa-solid fa-layer-group text-indigo-600"></i> 📊 依補助款經費大類分類呈現（點擊可直接篩選）
                 </h3>
                 <span class="text-[11px] text-slate-500">單位：新臺幣 (NT$)</span>
             </div>
@@ -220,7 +221,7 @@
                 </div>
             </div>
             
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">📅 年度</label>
                     <select id="filterYear" onchange="applyFilters()" class="w-full bg-purple-50/80 border border-purple-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
@@ -240,13 +241,21 @@
                     </select>
                 </div>
                 <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">🏛️ 經費大類</label>
+                    <select id="filterFundingSourceType" onchange="applyFilters()" class="w-full bg-purple-50/80 border border-purple-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">全部經費大類</option>
+                        <option value="補助款">🏛️ 補助款 (人事/業務/設備/管理)</option>
+                        <option value="機構配合款">🎯 機構配合款</option>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">🚪 門別</label>
                     <select id="filterCategory" onchange="applyFilters()" class="w-full bg-purple-50/80 border border-purple-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">全部門別</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">🏷️ 項目名稱 (經費來源)</label>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">🏷️ 項目名稱</label>
                     <select id="filterItemName" onchange="applyFilters()" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">全部項目名稱</option>
                     </select>
@@ -260,7 +269,7 @@
                     <h2 class="text-base font-black flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-pink-400"></i> 📊 深耕計畫經費系統與執行總表
                     </h2>
-                    <p class="text-xs text-purple-200 mt-0.5">💡 清楚呈現補助款與配合款執行狀況！✨</p>
+                    <p class="text-xs text-purple-200 mt-0.5">💡 清楚呈現補助款與機構配合款執行狀況！✨</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <span id="recordCountBadge" class="text-xs bg-white/20 text-purple-100 px-3 py-1 rounded-full font-bold">0 筆項目</span>
@@ -277,18 +286,19 @@
 
             <!-- Desktop Table View -->
             <div class="overflow-x-auto hidden lg:block">
-                <table class="w-full text-left border-collapse text-xs table-fixed min-w-[1200px]">
+                <table class="w-full text-left border-collapse text-xs table-fixed min-w-[1400px]">
                     <thead>
                         <tr class="bg-purple-100/80 text-purple-900 font-extrabold uppercase tracking-wider text-[11px] border-b border-purple-200">
-                            <th class="py-3 px-3 w-[22%]">📅 年度/計畫/細項</th>
-                            <th class="py-3 px-2 text-center w-[8%]">🚪 門別</th>
-                            <th class="py-3 px-3 w-[22%]">📖 支用說明與編列基準</th>
-                            <th class="py-3 px-2 text-right w-[8%]">💰 原始經費</th>
-                            <th class="py-3 px-2 text-right w-[8%]">💎 淨額</th>
-                            <th class="py-3 px-2 text-right w-[8%]">🧾 已核銷</th>
-                            <th class="py-3 px-2 text-right w-[8%]">⏳ 剩餘</th>
-                            <th class="py-3 px-2 text-center w-[8%]">📊 執行率</th>
-                            <th class="py-3 px-3 text-center w-[8%]">⚙️ 操作</th>
+                            <th class="py-3 px-3 w-[26%]">📅 年度 / 計畫 / 項目與細項說明</th>
+                            <th class="py-3 px-2 text-center w-[7%]">🚪 門別</th>
+                            <th class="py-3 px-2 text-right w-[7%]">💰 原始經費</th>
+                            <th class="py-3 px-2 text-right w-[7%]">📈 補助款</th>
+                            <th class="py-3 px-2 text-right w-[7%]">🎯 配合款</th>
+                            <th class="py-3 px-2 text-right w-[7%]">💎 淨額</th>
+                            <th class="py-3 px-2 text-right w-[7%]">🧾 已核銷</th>
+                            <th class="py-3 px-2 text-right w-[7%]">⏳ 剩餘</th>
+                            <th class="py-3 px-2 text-center w-[7%]">📊 執行率</th>
+                            <th class="py-3 px-3 text-center w-[6%]">⚙️ 操作</th>
                         </tr>
                     </thead>
                     <tbody id="dataTableBody" class="divide-y divide-purple-100 font-medium text-slate-700">
@@ -348,7 +358,7 @@
                             <option value="業務費">業務費 (補助款)</option>
                             <option value="設備費">設備費 (補助款)</option>
                             <option value="管理費">管理費 (補助款)</option>
-                            <option value="配合款">配合款</option>
+                            <option value="機構配合款">機構配合款</option>
                         </select>
                     </div>
                     <div>
@@ -488,17 +498,13 @@
             { id: 2, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '業務費', detailName: '專家諮詢費與差旅費', category: '經常門', standard: '外聘專家鐘點費及國內出差旅費', budget: 800000, disbursed: 350000, changes: [] },
             { id: 3, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '心理諮商與檢測儀器', category: '資本門', standard: '採購專業心理檢測軟硬體設備', budget: 1500000, disbursed: 1200000, changes: [] },
             { id: 4, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '管理費', detailName: '學校行政管理與水電費', category: '經常門', standard: '依校務基金管理費提撥比例編列', budget: 500000, disbursed: 200000, changes: [] },
-            { id: 5, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '配合款', detailName: '配合款分攤', category: '經常門', standard: '依深耕計畫配合款分攤比例編列', budget: 400000, disbursed: 150000, changes: [] }
+            { id: 5, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '機構配合款', detailName: '校方機構配合款支應項目', category: '經常門', standard: '依深耕計畫學校機構配合款分攤比例編列', budget: 800000, disbursed: 400000, changes: [] }
         ];
 
         let budgetData = JSON.parse(localStorage.getItem('deep_cultivation_budget_v7')) || [];
 
         window.onload = function() {
-            if (budgetData.length === 0) {
-                loadFromGoogleSheet();
-            } else {
-                initDashboard();
-            }
+            loadFromGoogleSheet();
         };
 
         async function loadFromGoogleSheet() {
@@ -584,38 +590,48 @@
                             const scope = String(getField(['範疇', 'scope']) || '校務發展').trim();
                             const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
                             
-                            let rawItem = String(getField(['項目名稱', '項目', 'itemname']) || '業務費').trim();
-                            let itemName = '業務費';
-                            if (rawItem.includes('人事')) itemName = '人事費';
-                            else if (rawItem.includes('設備')) itemName = '設備費';
-                            else if (rawItem.includes('管理')) itemName = '管理費';
-                            else if (rawItem.includes('配合')) itemName = '配合款';
-                            else if (rawItem.includes('業務')) itemName = '業務費';
+                            let rawItem = String(getField(['經費類別', '項目名稱', '項目', 'itemname']) || '').trim();
+                            let detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || '').trim();
+                            let standard = String(getField(['支用說明與編列基準', '支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
 
-                            const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || '經費明細').trim();
-                            const standard = String(getField(['支用說明與編列基準', '支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
-                            
+                            let rawCounterpartBudget = getField(['配合款', '機構配合款', '學校配合款', 'counterpart', '配合款金額']);
+                            let counterpartBudgetVal = Math.round(Number(String(rawCounterpartBudget).replace(/[^0-9.-]+/g, "")) || 0);
+
+                            let itemName = '業務費';
+                            if (counterpartBudgetVal > 0 || rawItem.includes('配合') || rawItem.includes('機構') || rawItem === '機構配合款' || rawItem === '配合款') {
+                                itemName = '機構配合款';
+                            } else if (rawItem.includes('人事') || detailName.includes('人事') || rawItem === '人事費') {
+                                itemName = '人事費';
+                            } else if (rawItem.includes('設備') || detailName.includes('設備') || rawItem === '設備費') {
+                                itemName = '設備費';
+                            } else if (rawItem.includes('管理') || detailName.includes('管理') || rawItem === '管理費') {
+                                itemName = '管理費';
+                            } else if (rawItem.includes('業務') || detailName.includes('業務') || rawItem === '業務費') {
+                                itemName = '業務費';
+                            }
+
+                            if (!detailName) {
+                                detailName = rawItem || '經費明細';
+                            }
+
                             let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
                             let category = rawCat.includes('資本') ? '資本門' : '經常門';
 
-                            let rawBudget = getField(['總金額', '總經費', '經費總計', '核定經費', '原始經費', '預算', '金額', '小計', 'total', 'budget']);
+                            let rawBudget = counterpartBudgetVal > 0 ? counterpartBudgetVal : getField(['原始經費', '總金額', '總經費', '經費總計', '核定經費', '預算', '經費', '金額', '小計', 'total', 'budget']);
+                            
+                            if ((!rawBudget || Number(String(rawBudget).replace(/[^0-9.-]+/g, "")) === 0) && (itemName === '機構配合款' || rawItem.includes('配合') || rawItem.includes('機構'))) {
+                                rawBudget = getField(['配合款', '機構配合款', '學校配合款', 'counterpart', '配合款金額']);
+                            }
+
                             let budget = 0;
                             if (rawBudget !== undefined && rawBudget !== null && rawBudget !== '') {
-                                if (typeof rawBudget === 'number') {
-                                    budget = Math.round(rawBudget);
-                                } else {
-                                    budget = Math.round(Number(String(rawBudget).replace(/[^0-9.-]+/g, "")) || 0);
-                                }
+                                budget = Math.round(Number(String(rawBudget).replace(/[^0-9.-]+/g, "")) || 0);
                             }
 
                             let rawDisbursed = getField(['已核銷', '核銷金額', '已支用', 'disbursed', 'spent']);
                             let disbursed = 0;
                             if (rawDisbursed !== undefined && rawDisbursed !== null && rawDisbursed !== '') {
-                                if (typeof rawDisbursed === 'number') {
-                                    disbursed = Math.round(rawDisbursed);
-                                } else {
-                                    disbursed = Math.round(Number(String(rawDisbursed).replace(/[^0-9.-]+/g, "")) || 0);
-                                }
+                                disbursed = Math.round(Number(String(rawDisbursed).replace(/[^0-9.-]+/g, "")) || 0);
                             }
 
                             return {
@@ -635,7 +651,7 @@
 
                         budgetData = imported;
                         saveToLocalStorage();
-                        showNotification('☁️ 成功從 Google 試算表載入經費資料！', 'success');
+                        showNotification('☁️ 成功從 Google 試算表載入經費資料（含經費類別對應）！', 'success');
                     } else {
                         throw new Error("試算表無資料");
                     }
@@ -657,6 +673,7 @@
         function fallbackToCacheOrSample() {
             if (budgetData.length === 0) {
                 budgetData = fallbackSampleData;
+                saveToLocalStorage();
             }
             showNotification('💡 無法連線至 Google 試算表，已載入經費範例資料', 'info');
         }
@@ -704,13 +721,13 @@
             const subProjects = [...new Set(subProjectSource.map(d => String(d.subProject)))].filter(Boolean).sort();
 
             const categories = [...new Set(budgetData.map(d => String(d.category)))].filter(Boolean).sort();
-            const itemNames = ['人事費', '業務費', '設備費', '管理費', '配合款'];
+            const itemNames = ['人事費', '業務費', '設備費', '管理費', '機構配合款'];
 
             updateSelectOptions('filterYear', years, '全部年度', currentYear);
             updateSelectOptions('filterScope', scopes, '全部範疇', currentScope);
             updateSelectOptions('filterSubProject', subProjects, '全部子計畫', currentSubProject);
             updateSelectOptions('filterCategory', categories, '全部門別', currentCategory);
-            updateSelectOptions('filterItemName', itemNames, '全部項目名稱', currentItemName);
+            updateSelectOptions('filterItemName', itemNames, '全部經費類別', currentItemName);
         }
 
         function updateSelectOptions(elementId, optionsArray, defaultLabel, currentVal) {
@@ -728,6 +745,7 @@
             document.getElementById('filterYear').value = '';
             document.getElementById('filterScope').value = '';
             document.getElementById('filterSubProject').value = '';
+            document.getElementById('filterFundingSourceType').value = '';
             document.getElementById('filterCategory').value = '';
             document.getElementById('filterItemName').value = '';
             document.getElementById('searchInput').value = '';
@@ -736,7 +754,13 @@
         }
 
         function filterByCoreType(typeName) {
-            document.getElementById('filterItemName').value = typeName;
+            if (typeName === '機構配合款') {
+                document.getElementById('filterFundingSourceType').value = '機構配合款';
+                document.getElementById('filterItemName').value = '';
+            } else {
+                document.getElementById('filterFundingSourceType').value = '補助款';
+                document.getElementById('filterItemName').value = typeName;
+            }
             applyFilters();
             showNotification(`🎯 已篩選「${typeName}」執行狀況`, 'info');
         }
@@ -783,17 +807,18 @@
                 }
             });
 
-            // Calculate Subsidy Total Summary
             const subsidyRate = subsidyNetTotal > 0 ? ((subsidyDisbTotal / subsidyNetTotal) * 100).toFixed(1) : '0.0';
             const subsidyTotalEl = document.getElementById('summarySubsidyTotal');
             if (subsidyTotalEl) {
                 subsidyTotalEl.innerText = `NT$ ${subsidyDisbTotal.toLocaleString()} (${subsidyRate}%)`;
             }
 
-            // Calculate Counterpart Summary
             let counterpartNet = 0;
             let counterpartDisb = 0;
-            budgetData.filter(d => String(d.itemName).trim() === '配合款').forEach(d => {
+            budgetData.filter(d => {
+                const name = String(d.itemName).trim();
+                return name === '機構配合款' || name === '配合款' || name.includes('配合') || name.includes('機構');
+            }).forEach(d => {
                 const base = Math.round(Number(d.budget) || 0);
                 let inflow = 0, outflow = 0;
                 if (d.changes && Array.isArray(d.changes)) {
@@ -821,6 +846,7 @@
             const year = document.getElementById('filterYear').value;
             const scope = document.getElementById('filterScope').value;
             const subProject = document.getElementById('filterSubProject').value;
+            const fundingSourceType = document.getElementById('filterFundingSourceType').value;
             const category = document.getElementById('filterCategory').value;
             const itemName = document.getElementById('filterItemName').value;
             const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -830,12 +856,30 @@
                 const matchScope = !scope || String(d.scope) === scope;
                 const matchSubProj = !subProject || String(d.subProject) === subProject;
                 const matchCat = !category || String(d.category) === category;
-                const matchItemName = !itemName || String(d.itemName) === itemName;
+                
+                const currentItemName = String(d.itemName).trim();
+                const isCounterpart = currentItemName === '機構配合款' || currentItemName === '配合款' || currentItemName.includes('配合') || currentItemName.includes('機構');
+
+                let matchFundingSource = true;
+                if (fundingSourceType === '補助款') {
+                    matchFundingSource = !isCounterpart;
+                } else if (fundingSourceType === '機構配合款') {
+                    matchFundingSource = isCounterpart;
+                }
+
+                let matchItemName = true;
+                if (itemName) {
+                    if (itemName === '機構配合款') {
+                        matchItemName = isCounterpart;
+                    } else {
+                        matchItemName = currentItemName === itemName;
+                    }
+                }
 
                 const rowStr = `${d.year} ${d.scope} ${d.subProject} ${d.itemName} ${d.detailName} ${d.category} ${d.standard}`.toLowerCase();
                 const matchSearch = !searchVal || rowStr.includes(searchVal);
 
-                return matchYear && matchScope && matchSubProj && matchCat && matchItemName && matchSearch;
+                return matchYear && matchScope && matchSubProj && matchFundingSource && matchCat && matchItemName && matchSearch;
             });
 
             renderDashboard(filtered);
@@ -920,6 +964,12 @@
                 else if (rateNum >= 40) rateBadgeClass = 'bg-blue-100 text-blue-800 border border-blue-200';
                 else rateBadgeClass = 'bg-amber-100 text-amber-800 border border-amber-200';
 
+                const currentItemName = String(d.itemName).trim();
+                const isCounterpart = currentItemName === '機構配合款' || currentItemName === '配合款' || currentItemName.includes('配合') || currentItemName.includes('機構');
+                const displayItemName = isCounterpart ? '機構配合款' : d.itemName;
+                const subsidyVal = isCounterpart ? 0 : net;
+                const counterpartVal = isCounterpart ? net : 0;
+
                 const card = document.createElement('div');
                 card.className = "bg-white/80 border border-purple-200 rounded-2xl p-4 shadow-md space-y-3";
                 card.innerHTML = `
@@ -928,12 +978,14 @@
                             <span class="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-900 rounded-full">${escapeHtml(d.year)}年</span>
                             <span class="text-[10px] font-bold px-2 py-0.5 ${d.category === '資本門' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} rounded-full ml-1">${escapeHtml(d.category)}</span>
                             <h3 class="text-sm font-black text-slate-900 mt-1">${escapeHtml(d.subProject)}</h3>
-                            <p class="text-xs font-semibold text-purple-700">${escapeHtml(d.itemName)} / <span class="text-slate-600">${escapeHtml(d.detailName)}</span></p>
+                            <p class="text-xs font-semibold text-purple-700">${escapeHtml(displayItemName)} / <span class="text-slate-600">${escapeHtml(d.detailName)}</span></p>
                         </div>
                         <span class="px-2 py-1 rounded-full text-xs font-black ${rateBadgeClass}">${rate}%</span>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-xs bg-purple-50/60 p-2.5 rounded-xl">
                         <div><span class="text-slate-500 block text-[10px]">原始經費</span><strong class="text-slate-900">$${base.toLocaleString()}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">補助款</span><strong class="text-indigo-700">$${subsidyVal.toLocaleString()}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">配合款</span><strong class="text-rose-600">$${counterpartVal.toLocaleString()}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">淨經費</span><strong class="text-purple-700">$${net.toLocaleString()}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">已核銷</span><strong class="text-teal-700">$${disbursed.toLocaleString()}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">剩餘金額</span><strong class="${remaining < 0 ? 'text-rose-600' : 'text-slate-800'}">$${remaining.toLocaleString()}</strong></div>
@@ -988,29 +1040,37 @@
                 else if (rateNum >= 40) rateBadgeClass = 'bg-blue-100 text-blue-800 border border-blue-200';
                 else rateBadgeClass = 'bg-amber-100 text-amber-800 border border-amber-200';
 
+                const currentItemName = String(d.itemName).trim();
+                const isCounterpart = currentItemName === '機構配合款' || currentItemName === '配合款' || currentItemName.includes('配合') || currentItemName.includes('機構');
+                const displayItemName = isCounterpart ? '機構配合款' : d.itemName;
+                const subsidyVal = isCounterpart ? 0 : net;
+                const counterpartVal = isCounterpart ? net : 0;
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-purple-50/80 transition duration-150 border-b border-purple-100";
                 tr.innerHTML = `
-                    <td class="py-3 px-3 w-[22%] align-middle overflow-hidden text-ellipsis">
+                    <td class="py-3 px-3 w-[26%] align-middle overflow-hidden">
                         <div class="font-bold text-purple-900 truncate">${escapeHtml(d.year)}年 | <span class="text-slate-800">${escapeHtml(d.subProject)}</span></div>
-                        <div class="text-[11px] text-purple-600 font-semibold truncate">${escapeHtml(d.scope)} &gt; <span class="text-indigo-700 font-bold">[${escapeHtml(d.itemName)}]</span> &gt; <span class="text-slate-600">${escapeHtml(d.detailName)}</span></div>
+                        <div class="text-[11px] text-purple-700 font-semibold mt-0.5 truncate">
+                            🏷️ <span class="text-indigo-700 font-black">[${escapeHtml(displayItemName)}]</span> &gt; 📝 <span class="text-slate-800 font-bold">${escapeHtml(d.detailName)}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-0.5 truncate" title="${escapeHtml(d.standard)}">📖 基準：${escapeHtml(d.standard) || '<span class="text-slate-300">無</span>'}</div>
                     </td>
-                    <td class="py-3 px-2 text-center w-[8%] align-middle">
+                    <td class="py-3 px-2 text-center w-[7%] align-middle">
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${d.category === '資本門' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">
                             ${escapeHtml(d.category)}
                         </span>
                     </td>
-                    <td class="py-3 px-3 text-slate-600 w-[22%] align-middle">
-                        <div class="line-clamp-2" title="${escapeHtml(d.standard)}">${escapeHtml(d.standard) || '<span class="text-slate-300">無</span>'}</div>
-                    </td>
-                    <td class="py-3 px-2 text-right font-bold text-slate-900 w-[8%] align-middle">$${base.toLocaleString()}</td>
-                    <td class="py-3 px-2 text-right font-black text-purple-700 w-[8%] align-middle">$${net.toLocaleString()}</td>
-                    <td class="py-3 px-2 text-right font-bold text-teal-700 w-[8%] align-middle">$${disbursed.toLocaleString()}</td>
-                    <td class="py-3 px-2 text-right font-bold ${remaining < 0 ? 'text-rose-600' : 'text-slate-800'} w-[8%] align-middle">$${remaining.toLocaleString()}</td>
-                    <td class="py-3 px-2 text-center w-[8%] align-middle">
+                    <td class="py-3 px-2 text-right font-bold text-slate-900 w-[7%] align-middle">$${base.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-bold text-indigo-700 w-[7%] align-middle">$${subsidyVal.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-bold text-rose-600 w-[7%] align-middle">$${counterpartVal.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-black text-purple-700 w-[7%] align-middle">$${net.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-bold text-teal-700 w-[7%] align-middle">$${disbursed.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-bold ${remaining < 0 ? 'text-rose-600' : 'text-slate-800'} w-[7%] align-middle">$${remaining.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-center w-[7%] align-middle">
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${rateBadgeClass}">${rate}%</span>
                     </td>
-                    <td class="py-3 px-3 text-center w-[8%] align-middle">
+                    <td class="py-3 px-3 text-center w-[6%] align-middle">
                         <div class="flex items-center justify-center gap-1">
                             <button onclick="openChangeModalWithTarget(${d.id})" class="px-2 py-1 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-lg transition text-[10px] font-bold" title="經費變更">
                                 <i class="fa-solid fa-shuffle"></i>
@@ -1047,7 +1107,11 @@
             document.getElementById('inputScope').value = item.scope;
             document.getElementById('inputSubProject').value = item.subProject;
             document.getElementById('inputCategory').value = item.category;
-            document.getElementById('inputItemName').value = item.itemName;
+            
+            let formItemName = item.itemName;
+            if (formItemName === '配合款' || formItemName.includes('配合') || formItemName.includes('機構')) formItemName = '機構配合款';
+            document.getElementById('inputItemName').value = formItemName;
+
             document.getElementById('inputDetailName').value = item.detailName;
             document.getElementById('inputStandard').value = item.standard || '';
             document.getElementById('inputBudget').value = item.budget;
@@ -1065,13 +1129,15 @@
         function saveBudgetRecord(e) {
             e.preventDefault();
             const editId = document.getElementById('editRecordId').value;
+            const rawItemName = document.getElementById('inputItemName').value;
+            
             const newItem = {
                 id: editId ? Number(editId) : Date.now(),
                 year: document.getElementById('inputYear').value.trim(),
                 scope: document.getElementById('inputScope').value.trim(),
                 subProject: document.getElementById('inputSubProject').value.trim(),
                 category: document.getElementById('inputCategory').value,
-                itemName: document.getElementById('inputItemName').value,
+                itemName: rawItemName,
                 detailName: document.getElementById('inputDetailName').value.trim(),
                 standard: document.getElementById('inputStandard').value.trim(),
                 budget: Math.round(Number(document.getElementById('inputBudget').value) || 0),
@@ -1110,7 +1176,8 @@
             if (!item) return;
 
             document.getElementById('changeSourceRecordId').value = item.id;
-            document.getElementById('lblTargetDetailName').innerText = `[${item.year}年] ${item.subProject} - ${item.itemName} (${item.detailName}) 原額: $${item.budget.toLocaleString()}`;
+            const displayItemName = (String(item.itemName).trim() === '配合款' || String(item.itemName).includes('配合') || String(item.itemName).includes('機構')) ? '機構配合款' : item.itemName;
+            document.getElementById('lblTargetDetailName').innerText = `[${item.year}年] ${item.subProject} - ${displayItemName} (${item.detailName}) 原額: $${item.budget.toLocaleString()}`;
             
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -1124,7 +1191,8 @@
             let targetHtml = '<option value="">-- 無 (單向異動) --</option>';
             
             budgetData.filter(d => d.id !== item.id && String(d.year).trim() === String(item.year).trim()).forEach(d => {
-                targetHtml += `<option value="${d.id}">[${d.year}年] ${d.subProject} - ${d.itemName} (${d.detailName})</option>`;
+                let dItemName = (String(d.itemName).trim() === '配合款' || String(d.itemName).includes('配合') || String(d.itemName).includes('機構')) ? '機構配合款' : d.itemName;
+                targetHtml += `<option value="${d.id}">[${d.year}年] ${d.subProject} - ${dItemName} (${d.detailName})</option>`;
             });
             targetSelect.innerHTML = targetHtml;
 
@@ -1190,7 +1258,8 @@
                 if (targetItem && String(targetItem.year).trim() === String(sourceItem.year).trim()) {
                     if (!targetItem.changes) targetItem.changes = [];
                     const reciprocalType = type === 'outflow' ? 'inflow' : 'outflow';
-                    const reciprocalNote = `[雙向連動] 與 ${sourceItem.itemName}(${sourceItem.detailName}) 互抵 (${note || '無'})`;
+                    const srcItemName = (String(sourceItem.itemName).trim() === '配合款' || String(sourceItem.itemName).includes('配合') || String(sourceItem.itemName).includes('機構')) ? '機構配合款' : sourceItem.itemName;
+                    const reciprocalNote = `[雙向連動] 與 ${srcItemName}(${sourceItem.detailName}) 互抵 (${note || '無'})`;
                     
                     targetItem.changes.push({
                         id: changeRecordId + 1,
@@ -1229,10 +1298,11 @@
             budgetData.forEach(d => {
                 if (d.changes && Array.isArray(d.changes)) {
                     d.changes.forEach(c => {
+                        let itName = (String(d.itemName).trim() === '配合款' || String(d.itemName).includes('配合') || String(d.itemName).includes('機構')) ? '機構配合款' : d.itemName;
                         allChanges.push({
                             sourceId: d.id,
                             year: d.year,
-                            sourceName: `${d.subProject} - ${d.itemName} (${d.detailName})`,
+                            sourceName: `${d.subProject} - ${itName} (${d.detailName})`,
                             ...c
                         });
                     });
@@ -1250,7 +1320,10 @@
                 let targetName = '無';
                 if (c.targetId) {
                     const tItem = budgetData.find(d => d.id === c.targetId);
-                    if (tItem) targetName = `${tItem.subProject} - ${tItem.itemName} (${tItem.detailName})`;
+                    if (tItem) {
+                        let tItName = (String(tItem.itemName).trim() === '配合款' || String(tItem.itemName).includes('配合') || String(tItem.itemName).includes('機構')) ? '機構配合款' : tItem.itemName;
+                        targetName = `${tItem.subProject} - ${tItName} (${tItem.detailName})`;
+                    }
                 }
 
                 const tr = document.createElement('tr');
@@ -1341,38 +1414,48 @@
                         const scope = String(getField(['範疇', 'scope']) || '校務發展').trim();
                         const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
                         
-                        let rawItem = String(getField(['項目名稱', '項目', 'itemname']) || '業務費').trim();
-                        let itemName = '業務費';
-                        if (rawItem.includes('人事')) itemName = '人事費';
-                        else if (rawItem.includes('設備')) itemName = '設備費';
-                        else if (rawItem.includes('管理')) itemName = '管理費';
-                        else if (rawItem.includes('配合')) itemName = '配合款';
-                        else if (rawItem.includes('業務')) itemName = '業務費';
-
-                        const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || '經費明細').trim();
-                        const standard = String(getField(['支用說明與編列基準', '支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
+                        let rawItem = String(getField(['經費類別', '項目名稱', '項目', 'itemname']) || '').trim();
+                        let detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || '').trim();
+                        let standard = String(getField(['支用說明與編列基準', '支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
                         
+                        let rawCounterpartBudget = getField(['配合款', '機構配合款', '學校配合款', 'counterpart', '配合款金額']);
+                        let counterpartBudgetVal = Math.round(Number(String(rawCounterpartBudget).replace(/[^0-9.-]+/g, "")) || 0);
+
+                        let itemName = '業務費';
+                        if (counterpartBudgetVal > 0 || rawItem.includes('配合') || rawItem.includes('機構') || rawItem === '機構配合款' || rawItem === '配合款') {
+                            itemName = '機構配合款';
+                        } else if (rawItem.includes('人事') || detailName.includes('人事') || rawItem === '人事費') {
+                            itemName = '人事費';
+                        } else if (rawItem.includes('設備') || detailName.includes('設備') || rawItem === '設備費') {
+                            itemName = '設備費';
+                        } else if (rawItem.includes('管理') || detailName.includes('管理') || rawItem === '管理費') {
+                            itemName = '管理費';
+                        } else if (rawItem.includes('業務') || detailName.includes('業務') || rawItem === '業務費') {
+                            itemName = '業務費';
+                        }
+
+                        if (!detailName) {
+                            detailName = rawItem || '經費明細';
+                        }
+
                         let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
                         let category = rawCat.includes('資本') ? '資本門' : '經常門';
 
-                        let rawBudget = getField(['總金額', '總經費', '經費總計', '核定經費', '原始經費', '預算', '金額', '小計', 'total', 'budget']);
+                        let rawBudget = counterpartBudgetVal > 0 ? counterpartBudgetVal : getField(['原始經費', '總金額', '總經費', '經費總計', '核定經費', '預算', '經費', '金額', '小計', 'total', 'budget']);
+
+                        if ((!rawBudget || Number(String(rawBudget).replace(/[^0-9.-]+/g, "")) === 0) && (itemName === '機構配合款' || rawItem.includes('配合') || rawItem.includes('機構'))) {
+                            rawBudget = getField(['配合款', '機構配合款', '學校配合款', 'counterpart', '配合款金額']);
+                        }
+
                         let budget = 0;
                         if (rawBudget !== undefined && rawBudget !== null && rawBudget !== '') {
-                            if (typeof rawBudget === 'number') {
-                                budget = Math.round(rawBudget);
-                            } else {
-                                budget = Math.round(Number(String(rawBudget).replace(/[^0-9.-]+/g, "")) || 0);
-                            }
+                            budget = Math.round(Number(String(rawBudget).replace(/[^0-9.-]+/g, "")) || 0);
                         }
 
                         let rawDisbursed = getField(['已核銷', '核銷金額', '已支用', 'disbursed', 'spent']);
                         let disbursed = 0;
                         if (rawDisbursed !== undefined && rawDisbursed !== null && rawDisbursed !== '') {
-                            if (typeof rawDisbursed === 'number') {
-                                disbursed = Math.round(rawDisbursed);
-                            } else {
-                                disbursed = Math.round(Number(String(rawDisbursed).replace(/[^0-9.-]+/g, "")) || 0);
-                            }
+                            disbursed = Math.round(Number(String(rawDisbursed).replace(/[^0-9.-]+/g, "")) || 0);
                         }
 
                         return {
@@ -1436,16 +1519,24 @@
                 const rate = netBudget > 0 ? ((disbursed / netBudget) * 100).toFixed(1) + '%' : '0.0%';
                 const changeTimesStr = activeChangeDates.length > 0 ? activeChangeDates.join('; ') : '无';
                 const exportChangeCount = Math.round(Number(d.changes && Array.isArray(d.changes) ? d.changes.length : 0) || 0);
+                
+                const currentItemName = String(d.itemName).trim();
+                const isCounterpart = currentItemName === '機構配合款' || currentItemName === '配合款' || currentItemName.includes('配合') || currentItemName.includes('機構');
+                const displayItemName = isCounterpart ? '機構配合款' : d.itemName;
+                const subsidyVal = isCounterpart ? 0 : netBudget;
+                const counterpartVal = isCounterpart ? netBudget : 0;
 
                 exportData.push({
                     '年度': d.year,
                     '範疇': d.scope,
                     '子計畫': d.subProject,
-                    '項目名稱': d.itemName,
+                    '經費類別': displayItemName,
                     '細項名稱': d.detailName,
                     '門別': d.category,
                     '支用說明與編列基準': d.standard || '',
                     '原始經費 (NT$)': base,
+                    '補助款 (NT$)': subsidyVal,
+                    '配合款 (NT$)': counterpartVal,
                     '變更流入 (NT$)': inflow,
                     '變更流出 (NT$)': outflow,
                     '調整後淨額 (NT$)': netBudget,
@@ -1490,9 +1581,18 @@
                     const remaining = netBudget - disbursed;
                     const rate = netBudget > 0 ? ((disbursed / netBudget) * 100).toFixed(1) + '%' : '0.0%';
                     const exactChangeCount = Math.round(Number(d.changes && Array.isArray(d.changes) ? d.changes.length : 0) || 0);
+                    
+                    const currentItemName = String(d.itemName).trim();
+                    const isCounterpart = currentItemName === '機構配合款' || currentItemName === '配合款' || currentItemName.includes('配合') || currentItemName.includes('機構');
+                    const displayItemName = isCounterpart ? '機構配合款' : d.itemName;
+                    const subsidyVal = isCounterpart ? 0 : netBudget;
+                    const counterpartVal = isCounterpart ? netBudget : 0;
 
                     return {
                         ...d,
+                        itemName: displayItemName,
+                        subsidyVal: subsidyVal,
+                        counterpartVal: counterpartVal,
                         inflowTotal: inflow,
                         outflowTotal: outflow,
                         netBudget: netBudget,
@@ -1507,8 +1607,8 @@
                 const payload = {
                     action: 'save_all',
                     headers: [
-                        "年度", "範疇", "子計畫", "項目名稱", "細項名稱", "門別", "支用說明與編列基準", 
-                        "原始經費", "變更流入", "變更流出", "調整後淨額", "已核銷金額", "剩餘金額", "執行率", "異動筆數", "異動時間"
+                        "年度", "範疇", "子計畫", "經費類別", "細項名稱", "門別", "支用說明與編列基準", 
+                        "原始經費", "補助款", "配合款", "變更流入", "變更流出", "調整後淨額", "已核銷金額", "剩餘金額", "執行率", "異動筆數", "異動時間"
                     ],
                     rows: payloadData.map(d => [
                         String(d.year || ''),
@@ -1519,6 +1619,8 @@
                         String(d.category || ''),
                         String(d.standard || ''),
                         Math.round(Number(d.budget) || 0),
+                        Math.round(Number(d.subsidyVal) || 0),
+                        Math.round(Number(d.counterpartVal) || 0),
                         Math.round(Number(d.inflowTotal) || 0),
                         Math.round(Number(d.outflowTotal) || 0),
                         Math.round(Number(d.netBudget) || 0),
