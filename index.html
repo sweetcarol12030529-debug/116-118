@@ -309,7 +309,7 @@
                 <div class="bg-purple-100/60 p-2.5 rounded-2xl text-[10px] text-purple-900 flex items-start gap-2">
                     <i class="fa-solid fa-circle-info text-purple-600 mt-0.5"></i>
                     <div>
-                        <span class="font-bold">智能自動雙向同步說明：</span> 當您選定「對應目標項目」進行流出時，系統將<strong>自動幫您同步在該目標項目建立流入記錄</strong>，反之亦然，確保雙邊經費增減完全平衡且金額完全一致！
+                        <span class="font-bold">智能自動雙向同步說明：</span> 當您選定「對應目標項目」進行流出時，系統將<strong>自動幫您同步在該目標項目建立對應的流入記錄</strong>，反之亦然，且雙邊變更狀態與日期完美保持一致！
                     </div>
                 </div>
 
@@ -356,7 +356,7 @@
             { id: 2, year: '116', scope: '範疇一', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', budget: 2000, changes: [] }
         ];
 
-        let budgetData = JSON.parse(localStorage.getItem('secondStageBudgetDataFinalV68')) || sampleData;
+        let budgetData = JSON.parse(localStorage.getItem('secondStageBudgetDataFinalV69')) || sampleData;
         let subProjectChartInstance = null;
         let categoryChartInstance = null;
 
@@ -365,7 +365,7 @@
         };
 
         function saveToLocalStorage() {
-            localStorage.setItem('secondStageBudgetDataFinalV68', JSON.stringify(budgetData));
+            localStorage.setItem('secondStageBudgetDataFinalV69', JSON.stringify(budgetData));
         }
 
         function initDashboard() {
@@ -710,9 +710,10 @@
             if (!sourceRecord) return;
             if (!sourceRecord.changes) sourceRecord.changes = [];
 
-            const baseChangeId = 'chg_' + Date.now();
+            const syncPairId = 'pair_' + Date.now();
             const sourceChangeObj = {
-                id: baseChangeId,
+                id: 'chg_' + Date.now() + '_src',
+                pairId: targetId ? syncPairId : null,
                 isChanged: isChanged,
                 date: date,
                 type: type, 
@@ -722,17 +723,17 @@
             };
             sourceRecord.changes.push(sourceChangeObj);
 
-            // 智能自動雙向同步流出與流入
             if (targetId) {
                 const targetRecord = budgetData.find(d => String(d.id) === String(targetId));
                 if (targetRecord) {
                     if (!targetRecord.changes) targetRecord.changes = [];
+                    // If source is outflow, target gets inflow. If source is inflow, target gets outflow.
                     const targetType = (type === 'outflow') ? 'inflow' : 'outflow';
                     const targetTypeNameText = targetType === 'inflow' ? '流入' : '流出';
-                    const twinId = baseChangeId + '_twin';
                     
                     const targetChangeObj = {
-                        id: twinId,
+                        id: 'chg_' + Date.now() + '_tgt',
+                        pairId: syncPairId,
                         isChanged: isChanged,
                         date: date,
                         type: targetType,
@@ -821,7 +822,7 @@
             const dateInput = document.getElementById(`actDate_${changeId}`);
             const effectiveDate = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
             
-            let foundChange = null;
+            let targetPairId = null;
 
             budgetData.forEach(d => {
                 if (d.changes && Array.isArray(d.changes)) {
@@ -829,21 +830,20 @@
                         if (c.id === changeId) {
                             c.isChanged = '是';
                             c.date = effectiveDate;
-                            foundChange = c;
+                            targetPairId = c.pairId;
                         }
                     });
                 }
             });
 
-            if (foundChange) {
-                const twinId = changeId.includes('_twin') ? changeId : changeId + '_twin';
+            // If there is a paired twin record, activate/update it simultaneously
+            if (targetPairId) {
                 budgetData.forEach(d => {
                     if (d.changes && Array.isArray(d.changes)) {
                         d.changes.forEach(c => {
-                            if (c.id === twinId || (foundChange.targetId && String(d.id) === String(foundChange.targetId) && c.targetId === String(sourceId))) {
+                            if (c.pairId === targetPairId) {
                                 c.isChanged = '是';
                                 c.date = effectiveDate;
-                                c.amount = foundChange.amount;
                             }
                         });
                     }
@@ -861,12 +861,25 @@
         }
 
         function deleteChangeRecord(changeId, sourceId) {
-            const twinId = changeId.includes('_twin') ? changeId : changeId + '_twin';
+            let targetPairId = null;
+
             budgetData.forEach(d => {
                 if (d.changes) {
-                    d.changes = d.changes.filter(c => c.id !== changeId && c.id !== twinId && c.targetId !== String(sourceId));
+                    d.changes.forEach(c => {
+                        if (c.id === changeId) {
+                            targetPairId = c.pairId;
+                        }
+                    });
                 }
             });
+
+            // Remove both the source change and its paired twin record atomically
+            budgetData.forEach(d => {
+                if (d.changes) {
+                    d.changes = d.changes.filter(c => c.id !== changeId && (!targetPairId || c.pairId !== targetPairId));
+                }
+            });
+
             saveToLocalStorage();
             initDashboard();
             openHistoryModal();
