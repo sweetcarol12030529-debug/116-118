@@ -6,7 +6,6 @@
     <title>第二階段經費追蹤儀表板</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
@@ -57,9 +56,6 @@
             <div class="mt-3 md:mt-0 flex flex-wrap gap-2">
                 <button onclick="fetchGoogleSheetData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
                     <i class="fa-solid fa-rotate" id="syncIcon"></i> 即時同步雲端試算表
-                </button>
-                <button onclick="exportGoogleSheetReadyCSV()" class="bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs" title="匯出相容 Google 試算表的 CSV 格式，便於上傳或覆蓋回 Google Sheet">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> 匯出 Google 試算表格式
                 </button>
                 <label class="cursor-pointer bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
                     <i class="fa-solid fa-file-excel"></i> 備用匯入 Excel
@@ -140,25 +136,6 @@
                 <p class="text-[11px] font-semibold text-gray-500">調整後淨經費 (篩選範圍)</p>
                 <h3 id="kpiNetBudget" class="text-xl sm:text-2xl font-black text-blue-900 mt-1">NT$ 0</h3>
                 <span class="text-[10px] text-blue-600 mt-0.5 inline-block"><i class="fa-solid fa-calculator"></i> 原始 + 流入 - 流出</span>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-            <div class="glass-card p-4 rounded-3xl shadow">
-                <h3 class="text-xs sm:text-sm font-bold text-purple-900 mb-2.5 flex items-center justify-between">
-                    <span><i class="fa-solid fa-chart-bar text-purple-600 mr-2"></i> 各子計畫經費分佈</span>
-                </h3>
-                <div class="relative h-48 sm:h-56">
-                    <canvas id="subProjectChart"></canvas>
-                </div>
-            </div>
-            <div class="glass-card p-4 rounded-3xl shadow">
-                <h3 class="text-xs sm:text-sm font-bold text-purple-900 mb-2.5 flex items-center justify-between">
-                    <span><i class="fa-solid fa-chart-pie text-purple-600 mr-2"></i> 門別經費比例</span>
-                </h3>
-                <div class="relative h-48 sm:h-56">
-                    <canvas id="categoryChart"></canvas>
-                </div>
             </div>
         </div>
 
@@ -360,12 +337,9 @@
             { id: 2, year: '116', scope: '範疇一', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', budget: 2000, changes: [] }
         ];
 
-        let budgetData = JSON.parse(localStorage.getItem('secondStageBudgetDataFinalV71')) || sampleData;
-        let subProjectChartInstance = null;
-        let categoryChartInstance = null;
+        let budgetData = JSON.parse(localStorage.getItem('secondStageBudgetDataFinalV72')) || sampleData;
 
         const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/16X4VGRQwvlusnaAp-w2rOg8HOzOzmaZgngeh5dD7PUY/export?format=csv&gid=0';
-        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLjasN0nHx8h0FSTUmm7EYXbKCcarHitWqzZZDtYdt3e4oYX_ORz4wlGXHN1UHmqle/exec';
 
         window.onload = function() {
             initDashboard();
@@ -373,7 +347,7 @@
         };
 
         function saveToLocalStorage() {
-            localStorage.setItem('secondStageBudgetDataFinalV71', JSON.stringify(budgetData));
+            localStorage.setItem('secondStageBudgetDataFinalV72', JSON.stringify(budgetData));
         }
 
         async function fetchGoogleSheetData(isSilent = false) {
@@ -581,7 +555,6 @@
         function renderDashboard(filteredData) {
             renderTable(filteredData);
             renderKPIs(filteredData);
-            renderCharts(filteredData);
         }
 
         function renderKPIs(data) {
@@ -665,72 +638,6 @@
             tbody.innerHTML = html;
         }
 
-        function renderCharts(data) {
-            const subProjectMap = {};
-            const categoryMap = { '資本門': 0, '經常門': 0 };
-
-            data.forEach(d => {
-                if (!d.changes) d.changes = [];
-                const base = Math.round(Number(d.budget) || 0);
-                let changeNet = 0;
-                d.changes.forEach(c => {
-                    if (c.isChanged === '是' && c.datetime) {
-                        const amt = Math.round(Number(c.amount) || 0);
-                        if (c.type === 'inflow') changeNet += amt;
-                        if (c.type === 'outflow') changeNet -= amt;
-                    }
-                });
-                const net = base + changeNet;
-
-                const subKey = `[${d.year}] ${d.subProject || '未分類子計畫'}`;
-                subProjectMap[subKey] = (subProjectMap[subKey] || 0) + net;
-                
-                const catKey = String(d.category).includes('資本') ? '資本門' : '經常門';
-                categoryMap[catKey] = (categoryMap[catKey] || 0) + net;
-            });
-
-            const subCtx = document.getElementById('subProjectChart').getContext('2d');
-            if (subProjectChartInstance) subProjectChartInstance.destroy();
-            subProjectChartInstance = new Chart(subCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(subProjectMap),
-                    datasets: [{
-                        label: '淨經費總額 (NT$)',
-                        data: Object.values(subProjectMap),
-                        backgroundColor: '#8b5cf6',
-                        borderRadius: 10,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
-                }
-            });
-
-            const catCtx = document.getElementById('categoryChart').getContext('2d');
-            if (categoryChartInstance) categoryChartInstance.destroy();
-            categoryChartInstance = new Chart(catCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(categoryMap),
-                    datasets: [{
-                        data: Object.values(categoryMap),
-                        backgroundColor: ['#7c3aed', '#c4b5fd', '#a78bfa', '#4c1d95'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-        }
-
         function openModal() {
             document.getElementById('editRecordId').value = '';
             document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-purple-600"></i> 新增經費項目';
@@ -809,7 +716,6 @@
             document.getElementById('lblTargetDetailName').innerText = `[${record.year}年] ${record.scope} / ${record.subProject} / ${record.detailName || record.itemName}`;
             document.getElementById('changeForm').reset();
             
-            // 預設填入當前本地日期與時間 (YYYY-MM-DDTHH:mm)
             const now = new Date();
             const yearStr = now.getFullYear();
             const monthStr = String(now.getMonth() + 1).padStart(2, '0');
@@ -821,7 +727,6 @@
             const datetimeInput = document.getElementById('inputChangeDatetime');
             if (datetimeInput) datetimeInput.value = currentDatetimeLocal;
 
-            // 嚴格隔離：目標對應項目必須與來源項目屬於同一年度 (record.year)
             const targetSelect = document.getElementById('inputChangeTargetSubItem');
             let html = '<option value="">-- 無 (單向異動) --</option>';
             budgetData.filter(d => d.id !== record.id && String(d.year).trim() === String(record.year).trim()).forEach(d => {
@@ -1040,52 +945,20 @@
             openHistoryModal();
         }
 
-        function exportGoogleSheetReadyCSV() {
-            const wsData = budgetData.map(d => {
-                let changeNet = 0;
-                if (d.changes) {
-                    d.changes.forEach(c => {
-                        if (c.isChanged === '是' && c.datetime) {
-                            const amt = Math.round(Number(c.amount) || 0);
-                            if (c.type === 'inflow') changeNet += amt;
-                            if (c.type === 'outflow') changeNet -= amt;
-                        }
-                    });
-                }
-                return {
-                    '年度': d.year,
-                    '範疇': d.scope,
-                    '子計畫': d.subProject,
-                    '項目名稱': d.itemName,
-                    '細項名稱': d.detailName,
-                    '門別': d.category,
-                    '原始總金額': Math.round(d.budget),
-                    '異動筆數': d.changes ? d.changes.length : 0,
-                    '調整後淨額': Math.round(d.budget) + changeNet
-                };
-            });
-            const ws = XLSX.utils.json_to_sheet(wsData);
-            const csvOutput = XLSX.utils.sheet_to_csv(ws);
-            
-            const blob = new Blob(["\ufeff" + csvOutput], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'GoogleSheet_Ready_Budget_Export.csv';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
         function exportToExcel() {
             const wsData = budgetData.map(d => {
                 let changeNet = 0;
-                if (d.changes) {
+                let changeDatesList = [];
+                if (d.changes && Array.isArray(d.changes)) {
                     d.changes.forEach(c => {
                         if (c.isChanged === '是' && c.datetime) {
                             const amt = Math.round(Number(c.amount) || 0);
                             if (c.type === 'inflow') changeNet += amt;
                             if (c.type === 'outflow') changeNet -= amt;
+                            
+                            const formattedDt = c.datetime.replace('T', ' ');
+                            const typeText = c.type === 'inflow' ? '流入(+)' : '流出(-)';
+                            changeDatesList.push(`${formattedDt} [${typeText} ${amt.toLocaleString()}]`);
                         }
                     });
                 }
@@ -1098,44 +971,16 @@
                     '門別': d.category,
                     '原始總金額': Math.round(d.budget),
                     '異動筆數': d.changes ? d.changes.length : 0,
+                    '異動日期與時間紀錄': changeDatesList.length > 0 ? changeDatesList.join('; ') : '無異動',
                     '調整後淨額': Math.round(d.budget) + changeNet
                 };
             });
-            const ws1 = XLSX.utils.json_to_sheet(wsData);
 
-            let allChangesData = [];
-            budgetData.forEach(d => {
-                if (d.changes && Array.isArray(d.changes)) {
-                    d.changes.forEach(c => {
-                        let targetName = '-';
-                        if (c.targetId) {
-                            const tRec = budgetData.find(tr => String(tr.id) === String(c.targetId));
-                            if (tRec) targetName = `[${tRec.year}年] ${tRec.scope || ''} / ${tRec.subProject || ''} / ${tRec.detailName || tRec.itemName || ''}`;
-                        }
-                        const isInf = c.type === 'inflow';
-                        const isEffective = c.isChanged === '是' && c.datetime;
-                        const formattedDt = c.datetime ? c.datetime.replace('T', ' ') : '未設定';
-
-                        allChangesData.push({
-                            '年度': d.year,
-                            '變更日期與時間': formattedDt,
-                            '來源項目名稱': `[${d.year}年] ${d.scope || ''} / ${d.subProject || ''} / ${d.detailName || d.itemName || ''}`,
-                            '異動類型': isInf ? '流入 (+)' : '流出 (-)',
-                            '金額': Math.round(c.amount),
-                            '對應目標項目名稱': targetName,
-                            '狀態': isEffective ? '已生效' : '未生效',
-                            '備註說明': c.note || ''
-                        });
-                    });
-                }
-            });
-            const ws2 = XLSX.utils.json_to_sheet(allChangesData);
-
+            const ws = XLSX.utils.json_to_sheet(wsData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws1, "經費項目明細");
-            XLSX.utils.book_append_sheet(wb, ws2, "異動查詢表");
+            XLSX.utils.book_append_sheet(wb, ws, "經費項目明細");
 
-            XLSX.writeFile(wb, "第二階段經費追蹤與異動完整報表.xlsx");
+            XLSX.writeFile(wb, "第二階段經費追蹤完整報表.xlsx");
         }
     </script>
 </body>
@@ -1143,6 +988,4 @@
 ```
 eof
 
-### 修正重點說明：
-1. **年度隔離防護**：在新增經費異動與比對時，系統已強制加入年度條件限制 (`year`)。當您在 116 年操作異動並選擇對應目標時，選單將只會列出同屬 116 年的項目，徹底防止 117 年或 118 年的同名項目被連動或覆蓋。
-2. **異動日期與時間**：異動表單中的日期欄位已升級為「日期與時間」選擇器 (`datetime-local`)，且在「匯出完整報表」時，第二個工作表（異動查詢表）已完整包含「年度」、「變更日期與時間」、「來源項目名稱」及「對應目標項目名稱」，提供更精確的時間追蹤。
+I have successfully removed both the subproject performance chart and the category analysis chart from the dashboard.
