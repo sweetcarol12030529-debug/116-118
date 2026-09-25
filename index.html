@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二階段經費追蹤儀表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purple: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                            950: '#2e1065',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #2e1065 0%, #4c1d95 50%, #6d28d9 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="text-gray-800 p-2 sm:p-4 md:p-6">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-5 bg-purple-900/40 p-4 sm:p-5 rounded-3xl border border-purple-700/50 backdrop-blur-md shadow-xl text-white">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-extrabold flex items-center gap-2.5">
+                    <i class="fa-solid fa-chart-pie text-purple-300"></i> 第二階段經費追蹤儀表板
+                </h1>
+                <p class="text-purple-200 text-xs mt-1">支援多筆異動紀錄、自動雙向同步流出流入與精確總金額追蹤 (116-118年)</p>
+            </div>
+            <div class="mt-3 md:mt-0 flex flex-wrap gap-2">
+                <label class="cursor-pointer bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-file-excel"></i> 匯入 Excel
+                    <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFileUpload(event)">
+                </label>
+                <button onclick="openModal()" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-plus-circle"></i> 新增經費項目
+                </button>
+                <button onclick="openHistoryModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-clock-rotate-left"></i> 異動查詢表
+                </button>
+                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-file-arrow-down"></i> 匯出完整報表
+                </button>
+            </div>
+        </header>
+
+        <div class="glass-card p-4 rounded-3xl shadow-lg mb-5">
+            <div class="flex justify-between items-center mb-2.5">
+                <h2 class="text-xs sm:text-sm font-bold text-purple-900 flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-purple-600"></i> 篩選條件
+                </h2>
+                <button onclick="resetFilters()" class="text-[11px] bg-purple-100 text-purple-700 hover:bg-purple-200 px-2.5 py-1 rounded-xl font-medium transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> 重設篩選
+                </button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-600 mb-1">年度</label>
+                    <select id="filterYear" onchange="applyFilters()" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">全部年度</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-600 mb-1">範疇</label>
+                    <select id="filterScope" onchange="applyFilters()" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">全部範疇</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-600 mb-1">子計畫</label>
+                    <select id="filterSubProject" onchange="applyFilters()" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">全部子計畫</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-600 mb-1">門別</label>
+                    <select id="filterCategory" onchange="applyFilters()" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">全部門別</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-600 mb-1">項目名稱</label>
+                    <select id="filterItemName" onchange="applyFilters()" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">全部項目名稱</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+            <div class="glass-card p-4 rounded-3xl shadow border-l-4 border-purple-600">
+                <p class="text-[11px] font-semibold text-gray-500">原始總經費 (篩選範圍)</p>
+                <h3 id="kpiTotalBudget" class="text-xl sm:text-2xl font-black text-purple-900 mt-1">NT$ 0</h3>
+                <span class="text-[10px] text-purple-600 mt-0.5 inline-block"><i class="fa-solid fa-wallet"></i> 篩選項目總金額加總</span>
+            </div>
+            <div class="glass-card p-4 rounded-3xl shadow border-l-4 border-emerald-500">
+                <p class="text-[11px] font-semibold text-gray-500">變更流入總額 (篩選範圍)</p>
+                <h3 id="kpiInflow" class="text-xl sm:text-2xl font-black text-emerald-600 mt-1">NT$ 0</h3>
+                <span class="text-[10px] text-emerald-600 mt-0.5 inline-block"><i class="fa-solid fa-arrow-trend-up"></i> 異動流入累計</span>
+            </div>
+            <div class="glass-card p-4 rounded-3xl shadow border-l-4 border-rose-500">
+                <p class="text-[11px] font-semibold text-gray-500">變更流出總額 (篩選範圍)</p>
+                <h3 id="kpiOutflow" class="text-xl sm:text-2xl font-black text-rose-600 mt-1">NT$ 0</h3>
+                <span class="text-[10px] text-rose-600 mt-0.5 inline-block"><i class="fa-solid fa-arrow-trend-down"></i> 異動流出累計</span>
+            </div>
+            <div class="glass-card p-4 rounded-3xl shadow border-l-4 border-blue-600">
+                <p class="text-[11px] font-semibold text-gray-500">調整後淨經費 (篩選範圍)</p>
+                <h3 id="kpiNetBudget" class="text-xl sm:text-2xl font-black text-blue-900 mt-1">NT$ 0</h3>
+                <span class="text-[10px] text-blue-600 mt-0.5 inline-block"><i class="fa-solid fa-calculator"></i> 原始 + 流入 - 流出</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+            <div class="glass-card p-4 rounded-3xl shadow">
+                <h3 class="text-xs sm:text-sm font-bold text-purple-900 mb-2.5 flex items-center justify-between">
+                    <span><i class="fa-solid fa-chart-bar text-purple-600 mr-2"></i> 各子計畫經費分佈</span>
+                </h3>
+                <div class="relative h-48 sm:h-56">
+                    <canvas id="subProjectChart"></canvas>
+                </div>
+            </div>
+            <div class="glass-card p-4 rounded-3xl shadow">
+                <h3 class="text-xs sm:text-sm font-bold text-purple-900 mb-2.5 flex items-center justify-between">
+                    <span><i class="fa-solid fa-chart-pie text-purple-600 mr-2"></i> 門別經費比例</span>
+                </h3>
+                <div class="relative h-48 sm:h-56">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-3xl shadow overflow-hidden mb-10">
+            <div class="p-4 bg-purple-900/10 border-b border-purple-100 flex justify-between items-center flex-wrap gap-2.5">
+                <div>
+                    <h2 class="text-sm font-bold text-purple-900 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-purple-600"></i> 經費項目明細
+                    </h2>
+                    <p class="text-[10px] text-gray-500 mt-0.5">完整呈現所有項目、項目名稱、細項名稱與經費淨額（支援多筆異動與自動雙向同步）</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="recordCount" class="text-[11px] bg-purple-200 text-purple-800 px-2.5 py-0.5 rounded-full font-semibold">0 筆資料</span>
+                    <button onclick="clearAllData()" class="text-[11px] bg-rose-100 text-rose-700 hover:bg-rose-200 px-2.5 py-1 rounded-xl font-medium transition">
+                        <i class="fa-solid fa-trash-can mr-1"></i> 清空全部
+                    </button>
+                </div>
+            </div>
+            <div class="w-full overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[11px] min-w-[1050px] table-fixed">
+                    <thead>
+                        <tr class="bg-purple-900 text-white uppercase tracking-wider text-[10px]">
+                            <th class="p-2.5 w-[6%]">年度</th>
+                            <th class="p-2.5 w-[11%]">範疇</th>
+                            <th class="p-2.5 w-[15%]">子計畫</th>
+                            <th class="p-2.5 w-[11%]">項目名稱</th>
+                            <th class="p-2.5 w-[13%]">細項名稱</th>
+                            <th class="p-2.5 w-[8%]">門別</th>
+                            <th class="p-2.5 w-[9%] text-right">原始經費</th>
+                            <th class="p-2.5 w-[7%] text-center">異動筆數</th>
+                            <th class="p-2.5 w-[9%] text-right">調整後淨額</th>
+                            <th class="p-2.5 w-[11%] text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody" class="divide-y divide-purple-100">
+                        <!-- Dynamic rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dataModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
+        <div class="glass-card max-w-xl w-full p-5 sm:p-6 rounded-3xl shadow-2xl relative border border-purple-200 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-base">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 id="modalTitle" class="text-base font-extrabold text-purple-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-purple-600"></i> 新增經費項目
+            </h2>
+            <form id="budgetForm" onsubmit="saveBudgetRecord(event)" class="space-y-3">
+                <input type="hidden" id="editRecordId">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">年度 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="inputYear" required placeholder="例: 116" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">範疇 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="inputScope" required placeholder="例: 校務發展" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">子計畫 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="inputSubProject" required placeholder="例: 子計畫一" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">門別 <span class="text-rose-500">*</span></label>
+                        <select id="inputCategory" required class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="資本門">資本門</option>
+                            <option value="經常門">經常門</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">項目名稱 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="inputItemName" required placeholder="例: 業務費" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">細項名稱 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="inputDetailName" required placeholder="例: D業務費" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-600 mb-1">原始經費金額 (NT$) <span class="text-rose-500">*</span></label>
+                    <input type="number" id="inputBudget" required placeholder="例: 1000" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal()" class="px-3 py-1.5 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs font-medium transition">取消</button>
+                    <button type="submit" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium shadow transition">儲存資料</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="changeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
+        <div class="glass-card max-w-xl w-full p-5 sm:p-6 rounded-3xl shadow-2xl relative border border-purple-200 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeChangeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-base">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 class="text-base font-extrabold text-purple-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-shuffle text-purple-600"></i> 新增經費異動紀錄 (流入 / 流出)
+            </h2>
+            <div id="changeModalTargetInfo" class="text-[11px] text-purple-800 bg-purple-100/70 p-2.5 rounded-2xl mb-3 font-medium">
+                目前細項名稱：<span id="lblTargetDetailName" class="font-bold"></span>
+            </div>
+            <form id="changeForm" onsubmit="saveChangeRecord(event)" class="space-y-3">
+                <input type="hidden" id="changeSourceRecordId">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">是否完成變更 <span class="text-rose-500">*</span></label>
+                        <select id="inputChangeIsChanged" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="是">是 (立即生效並自動雙向同步)</option>
+                            <option value="否">否 (暫不生效，保留為待確認)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">變更日期 <span class="text-rose-500">*</span></label>
+                        <input type="date" id="inputChangeDate" required class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">異動類型 <span class="text-rose-500">*</span></label>
+                        <select id="inputChangeType" onchange="onTypeChange()" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="outflow">流出 (本項目金額減少)</option>
+                            <option value="inflow">流入 (本項目金額增加)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">異動金額 (NT$) <span class="text-rose-500">*</span></label>
+                        <input type="number" id="inputChangeAmount" required placeholder="例: 50" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">
+                            對應目標項目 (細項名稱) 
+                            <span id="syncHintText" class="text-purple-600 font-bold">(選擇後自動連動至目標項目)</span>
+                        </label>
+                        <select id="inputChangeTargetSubItem" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="">-- 無 (單向異動) --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">備註說明</label>
+                        <input type="text" id="inputChangeNote" placeholder="例: 經費互抵流出/流入" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+
+                <div class="bg-purple-100/60 p-2.5 rounded-2xl text-[10px] text-purple-900 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-purple-600 mt-0.5"></i>
+                    <div>
+                        <span class="font-bold">智能自動雙向同步說明：</span> 當您選定「對應目標項目」進行流出時，系統將<strong>自動幫您同步在該目標項目建立流入記錄</strong>，反之亦然，確保雙邊經費增減完全平衡且金額完全一致！
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeChangeModal()" class="px-3 py-1.5 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs font-medium transition">取消</button>
+                    <button type="submit" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium shadow transition">新增異動紀錄</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="historyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
+        <div class="glass-card max-w-4xl w-full p-5 sm:p-6 rounded-3xl shadow-2xl relative border border-purple-200 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeHistoryModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-base">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 class="text-base font-extrabold text-purple-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-purple-600"></i> 全部經費異動查詢表
+            </h2>
+            <div class="w-full overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[11px] min-w-[650px]">
+                    <thead>
+                        <tr class="bg-purple-900 text-white uppercase tracking-wider text-[10px]">
+                            <th class="p-2.5">日期</th>
+                            <th class="p-2.5">來源細項名稱</th>
+                            <th class="p-2.5">異動類型</th>
+                            <th class="p-2.5 text-right">金額</th>
+                            <th class="p-2.5">對應目標細項名稱</th>
+                            <th class="p-2.5">狀態</th>
+                            <th class="p-2.5 text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody" class="divide-y divide-purple-100">
+                        <!-- History items -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sampleData = [
+            { id: 1, year: '116', scope: '範疇一', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '業務費', detailName: 'D業務費', category: '經常門', budget: 1000, changes: [] },
+            { id: 2, year: '116', scope: '範疇一', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', budget: 2000, changes: [] }
+        ];
+
+        let budgetData = JSON.parse(localStorage.getItem('secondStageBudgetDataFinalV68')) || sampleData;
+        let subProjectChartInstance = null;
+        let categoryChartInstance = null;
+
+        window.onload = function() {
+            initDashboard();
+        };
+
+        function saveToLocalStorage() {
+            localStorage.setItem('secondStageBudgetDataFinalV68', JSON.stringify(budgetData));
+        }
+
+        function initDashboard() {
+            populateFilterDropdowns();
+            applyFilters();
+        }
+
+        function populateFilterDropdowns() {
+            const currentYear = document.getElementById('filterYear').value;
+            const currentScope = document.getElementById('filterScope').value;
+            const currentSubProject = document.getElementById('filterSubProject').value;
+            const currentCategory = document.getElementById('filterCategory').value;
+            const currentItemName = document.getElementById('filterItemName').value;
+
+            const years = [...new Set(budgetData.map(d => String(d.year)))].filter(Boolean).sort();
+            const scopes = [...new Set(budgetData.map(d => String(d.scope)))].filter(Boolean).sort();
+            
+            let subProjectSource = budgetData;
+            if (currentScope) {
+                subProjectSource = budgetData.filter(d => String(d.scope) === currentScope);
+            }
+            const subProjects = [...new Set(subProjectSource.map(d => String(d.subProject)))].filter(Boolean).sort();
+
+            const categories = [...new Set(budgetData.map(d => String(d.category)))].filter(Boolean).sort();
+            const itemNames = [...new Set(budgetData.map(d => String(d.itemName)))].filter(Boolean).sort();
+
+            updateSelectOptions('filterYear', years, '全部年度', currentYear);
+            updateSelectOptions('filterScope', scopes, '全部範疇', currentScope);
+            updateSelectOptions('filterSubProject', subProjects, '全部子計畫', currentSubProject);
+            updateSelectOptions('filterCategory', categories, '全部門別', currentCategory);
+            updateSelectOptions('filterItemName', itemNames, '全部項目名稱', currentItemName);
+        }
+
+        function updateSelectOptions(elementId, optionsArray, defaultLabel, currentVal) {
+            const selectEl = document.getElementById(elementId);
+            if (!selectEl) return;
+            let html = `<option value="">${defaultLabel}</option>`;
+            optionsArray.forEach(opt => {
+                const selected = (opt === currentVal) ? 'selected' : '';
+                html += `<option value="${opt}" ${selected}>${opt}</option>`;
+            });
+            selectEl.innerHTML = html;
+        }
+
+        function resetFilters() {
+            document.getElementById('filterYear').value = '';
+            document.getElementById('filterScope').value = '';
+            document.getElementById('filterSubProject').value = '';
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterItemName').value = '';
+            populateFilterDropdowns();
+            applyFilters();
+        }
+
+        function applyFilters() {
+            populateFilterDropdowns();
+
+            const year = document.getElementById('filterYear').value;
+            const scope = document.getElementById('filterScope').value;
+            const subProject = document.getElementById('filterSubProject').value;
+            const category = document.getElementById('filterCategory').value;
+            const itemName = document.getElementById('filterItemName').value;
+
+            const filtered = budgetData.filter(d => {
+                return (!year || String(d.year) === year) &&
+                       (!scope || String(d.scope) === scope) &&
+                       (!subProject || String(d.subProject) === subProject) &&
+                       (!category || String(d.category) === category) &&
+                       (!itemName || String(d.itemName) === itemName);
+            });
+
+            renderDashboard(filtered);
+        }
+
+        function renderDashboard(filteredData) {
+            renderTable(filteredData);
+            renderKPIs(filteredData);
+            renderCharts(filteredData);
+        }
+
+        function renderKPIs(data) {
+            let totalBudget = 0;
+            let totalInflow = 0;
+            let totalOutflow = 0;
+
+            data.forEach(d => {
+                const base = Math.round(Number(d.budget) || 0);
+                totalBudget += base;
+
+                if (d.changes && Array.isArray(d.changes)) {
+                    d.changes.forEach(c => {
+                        if (c.isChanged === '是' && c.date) {
+                            const amt = Math.round(Number(c.amount) || 0);
+                            if (c.type === 'inflow') {
+                                totalInflow += amt;
+                            } else if (c.type === 'outflow') {
+                                totalOutflow += amt;
+                            }
+                        }
+                    });
+                }
+            });
+
+            const netBudget = totalBudget + totalInflow - totalOutflow;
+
+            document.getElementById('kpiTotalBudget').innerText = 'NT$ ' + Math.round(totalBudget).toLocaleString();
+            document.getElementById('kpiInflow').innerText = 'NT$ ' + Math.round(totalInflow).toLocaleString();
+            document.getElementById('kpiOutflow').innerText = 'NT$ ' + Math.round(totalOutflow).toLocaleString();
+            document.getElementById('kpiNetBudget').innerText = 'NT$ ' + Math.round(netBudget).toLocaleString();
+            document.getElementById('recordCount').innerText = `${data.length} 筆資料`;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('dataTableBody');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-400"><i class="fa-solid fa-folder-open text-2xl mb-1.5 block"></i> 目前尚無符合條件的經費資料</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            data.forEach(d => {
+                if (!d.changes) d.changes = [];
+                const base = Math.round(Number(d.budget) || 0);
+                let changeNet = 0;
+                d.changes.forEach(c => {
+                    if (c.isChanged === '是' && c.date) {
+                        const amt = Math.round(Number(c.amount) || 0);
+                        if (c.type === 'inflow') changeNet += amt;
+                        if (c.type === 'outflow') changeNet -= amt;
+                    }
+                });
+                const net = base + changeNet;
+
+                html += `
+                    <tr class="hover:bg-purple-50/50 transition">
+                        <td class="p-2.5 font-semibold text-purple-900 truncate">${d.year || '-'}</td>
+                        <td class="p-2.5 truncate" title="${d.scope || '-'}">${d.scope || '-'}</td>
+                        <td class="p-2.5 truncate" title="${d.subProject || '-'}">${d.subProject || '-'}</td>
+                        <td class="p-2.5 font-medium truncate text-gray-700" title="${d.itemName || '-'}">${d.itemName || '-'}</td>
+                        <td class="p-2.5 font-bold truncate text-purple-900" title="${d.detailName || '-'}">${d.detailName || '-'}</td>
+                        <td class="p-2.5 truncate"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${String(d.category).includes('資本') ? 'bg-indigo-100 text-indigo-800' : 'bg-purple-100 text-purple-800'}">${d.category || '經常門'}</span></td>
+                        <td class="p-2.5 text-right font-medium truncate">${base.toLocaleString()}</td>
+                        <td class="p-2.5 text-center truncate"><span class="bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full text-[9px] font-bold">${d.changes.length} 筆</span></td>
+                        <td class="p-2.5 text-right font-bold text-purple-900 truncate">${net.toLocaleString()}</td>
+                        <td class="p-2.5 text-center flex items-center justify-center gap-1">
+                            <button onclick="openChangeModal(${d.id})" class="text-purple-600 hover:text-purple-800 transition p-1 rounded hover:bg-purple-100 text-[10px] font-medium bg-purple-50 px-1.5 border border-purple-200" title="新增異動">
+                                <i class="fa-solid fa-shuffle"></i> 異動
+                            </button>
+                            <button onclick="openEditModal(${d.id})" class="text-blue-600 hover:text-blue-800 transition p-1" title="編輯項目">
+                                <i class="fa-solid fa-pen text-[10px]"></i>
+                            </button>
+                            <button onclick="deleteRecord(${d.id})" class="text-rose-500 hover:text-rose-700 transition p-1" title="刪除">
+                                <i class="fa-solid fa-trash text-[10px]"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderCharts(data) {
+            const subProjectMap = {};
+            const categoryMap = { '資本門': 0, '經常門': 0 };
+
+            data.forEach(d => {
+                if (!d.changes) d.changes = [];
+                const base = Math.round(Number(d.budget) || 0);
+                let changeNet = 0;
+                d.changes.forEach(c => {
+                    if (c.isChanged === '是' && c.date) {
+                        const amt = Math.round(Number(c.amount) || 0);
+                        if (c.type === 'inflow') changeNet += amt;
+                        if (c.type === 'outflow') changeNet -= amt;
+                    }
+                });
+                const net = base + changeNet;
+
+                const subKey = d.subProject || '未分類子計畫';
+                subProjectMap[subKey] = (subProjectMap[subKey] || 0) + net;
+                
+                const catKey = String(d.category).includes('資本') ? '資本門' : '經常門';
+                categoryMap[catKey] = (categoryMap[catKey] || 0) + net;
+            });
+
+            const subCtx = document.getElementById('subProjectChart').getContext('2d');
+            if (subProjectChartInstance) subProjectChartInstance.destroy();
+            subProjectChartInstance = new Chart(subCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(subProjectMap),
+                    datasets: [{
+                        label: '淨經費總額 (NT$)',
+                        data: Object.values(subProjectMap),
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 10,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
+                }
+            });
+
+            const catCtx = document.getElementById('categoryChart').getContext('2d');
+            if (categoryChartInstance) categoryChartInstance.destroy();
+            categoryChartInstance = new Chart(catCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categoryMap),
+                    datasets: [{
+                        data: Object.values(categoryMap),
+                        backgroundColor: ['#7c3aed', '#c4b5fd', '#a78bfa', '#4c1d95'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function openModal() {
+            document.getElementById('editRecordId').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-purple-600"></i> 新增經費項目';
+            document.getElementById('budgetForm').reset();
+            document.getElementById('dataModal').classList.remove('hidden');
+            document.getElementById('dataModal').classList.add('flex');
+        }
+
+        function openEditModal(id) {
+            const record = budgetData.find(d => d.id === id);
+            if (!record) return;
+
+            document.getElementById('editRecordId').value = record.id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-purple-600"></i> 編輯經費項目';
+            document.getElementById('inputYear').value = record.year || '';
+            document.getElementById('inputScope').value = record.scope || '';
+            document.getElementById('inputSubProject').value = record.subProject || '';
+            document.getElementById('inputCategory').value = record.category || '經常門';
+            document.getElementById('inputItemName').value = record.itemName || '';
+            document.getElementById('inputDetailName').value = record.detailName || '';
+            document.getElementById('inputBudget').value = Math.round(record.budget || 0);
+
+            document.getElementById('dataModal').classList.remove('hidden');
+            document.getElementById('dataModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').classList.remove('flex');
+            document.getElementById('dataModal').classList.add('hidden');
+            document.getElementById('budgetForm').reset();
+        }
+
+        function saveBudgetRecord(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editRecordId').value;
+            
+            const recordData = {
+                year: document.getElementById('inputYear').value.trim(),
+                scope: document.getElementById('inputScope').value.trim(),
+                subProject: document.getElementById('inputSubProject').value.trim(),
+                itemName: document.getElementById('inputItemName').value.trim(),
+                detailName: document.getElementById('inputDetailName').value.trim(),
+                category: document.getElementById('inputCategory').value,
+                budget: Math.round(parseFloat(document.getElementById('inputBudget').value) || 0)
+            };
+
+            if (editId) {
+                const idx = budgetData.findIndex(d => String(d.id) === String(editId));
+                if (idx !== -1) {
+                    budgetData[idx] = { ...budgetData[idx], ...recordData };
+                }
+            } else {
+                recordData.id = Date.now();
+                recordData.changes = [];
+                budgetData.push(recordData);
+            }
+
+            saveToLocalStorage();
+            initDashboard();
+            closeModal();
+        }
+
+        function openChangeModal(id) {
+            const record = budgetData.find(d => d.id === id);
+            if (!record) return;
+
+            document.getElementById('changeSourceRecordId').value = record.id;
+            document.getElementById('lblTargetDetailName').innerText = `${record.detailName || record.itemName || '-'}`;
+            document.getElementById('changeForm').reset();
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('inputChangeDate');
+            if (dateInput) dateInput.value = todayStr;
+
+            const targetSelect = document.getElementById('inputChangeTargetSubItem');
+            let html = '<option value="">-- 無 (單向異動) --</option>';
+            budgetData.filter(d => d.id !== record.id).forEach(d => {
+                html += `<option value="${d.id}">${d.detailName || d.itemName || '-'} (${d.scope || ''} / ${d.subProject || ''})</option>`;
+            });
+            targetSelect.innerHTML = html;
+
+            onTypeChange();
+
+            document.getElementById('changeModal').classList.remove('hidden');
+            document.getElementById('changeModal').classList.add('flex');
+        }
+
+        function onTypeChange() {
+            const type = document.getElementById('inputChangeType').value;
+            const hint = document.getElementById('syncHintText');
+            if (!hint) return;
+            if (type === 'outflow') {
+                hint.innerText = '(選擇後自動連動至目標項目作為流入)';
+            } else {
+                hint.innerText = '(選擇後自動連動至目標項目作為流出)';
+            }
+        }
+
+        function closeChangeModal() {
+            document.getElementById('changeModal').classList.remove('flex');
+            document.getElementById('changeModal').classList.add('hidden');
+        }
+
+        function saveChangeRecord(e) {
+            e.preventDefault();
+            const sourceId = Number(document.getElementById('changeSourceRecordId').value);
+            const isChanged = document.getElementById('inputChangeIsChanged').value;
+            const date = document.getElementById('inputChangeDate').value;
+            const type = document.getElementById('inputChangeType').value;
+            const amount = Math.round(parseFloat(document.getElementById('inputChangeAmount').value) || 0);
+            const targetId = document.getElementById('inputChangeTargetSubItem').value;
+            const note = document.getElementById('inputChangeNote').value.trim();
+
+            const sourceRecord = budgetData.find(d => Number(d.id) === sourceId);
+            if (!sourceRecord) return;
+            if (!sourceRecord.changes) sourceRecord.changes = [];
+
+            const baseChangeId = 'chg_' + Date.now();
+            const sourceChangeObj = {
+                id: baseChangeId,
+                isChanged: isChanged,
+                date: date,
+                type: type, 
+                amount: amount,
+                targetId: targetId ? String(targetId) : null,
+                note: note
+            };
+            sourceRecord.changes.push(sourceChangeObj);
+
+            // 智能自動雙向同步流出與流入
+            if (targetId) {
+                const targetRecord = budgetData.find(d => String(d.id) === String(targetId));
+                if (targetRecord) {
+                    if (!targetRecord.changes) targetRecord.changes = [];
+                    const targetType = (type === 'outflow') ? 'inflow' : 'outflow';
+                    const targetTypeNameText = targetType === 'inflow' ? '流入' : '流出';
+                    const twinId = baseChangeId + '_twin';
+                    
+                    const targetChangeObj = {
+                        id: twinId,
+                        isChanged: isChanged,
+                        date: date,
+                        type: targetType,
+                        amount: amount,
+                        targetId: String(sourceId),
+                        note: note ? `(自動同步: ${note})` : `與 ${sourceRecord.detailName || sourceRecord.itemName} 互抵${targetTypeNameText}`
+                    };
+                    targetRecord.changes.push(targetChangeObj);
+                }
+            }
+
+            saveToLocalStorage();
+            initDashboard();
+            closeChangeModal();
+        }
+
+        function openHistoryModal() {
+            const tbody = document.getElementById('historyTableBody');
+            let allChanges = [];
+
+            budgetData.forEach(d => {
+                if (d.changes && Array.isArray(d.changes)) {
+                    d.changes.forEach(c => {
+                        let targetName = '-';
+                        if (c.targetId) {
+                            const tRec = budgetData.find(tr => String(tr.id) === String(c.targetId));
+                            if (tRec) targetName = `${tRec.scope || ''} / ${tRec.subProject || ''} / ${tRec.detailName || tRec.itemName || ''}`;
+                        }
+                        allChanges.push({
+                            ...c,
+                            sourceId: d.id,
+                            sourceName: `${d.scope || ''} / ${d.subProject || ''} / ${d.detailName || d.itemName || ''}`,
+                            targetName: targetName
+                        });
+                    });
+                }
+            });
+
+            if (allChanges.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-400"><i class="fa-solid fa-clock-rotate-left text-xl mb-1 block"></i> 目前尚無任何異動紀錄</td></tr>`;
+            } else {
+                let html = '';
+                allChanges.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).forEach(c => {
+                    const isInf = c.type === 'inflow';
+                    const isEffective = c.isChanged === '是' && c.date;
+                    
+                    html += `
+                        <tr class="hover:bg-purple-50/50 transition">
+                            <td class="p-2.5 font-semibold text-purple-900">
+                                ${isEffective ? c.date : `<input type="date" id="actDate_${c.id}" value="${c.date || new Date().toISOString().split('T')[0]}" class="bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5 text-[10px]">`}
+                            </td>
+                            <td class="p-2.5 font-medium truncate" title="${c.sourceName}">${c.sourceName}</td>
+                            <td class="p-2.5">
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${isInf ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                    ${isInf ? '流入 (+)' : '流出 (-)'}
+                                </span>
+                            </td>
+                            <td class="p-2.5 text-right font-bold ${isInf ? 'text-emerald-600' : 'text-rose-600'}">${Math.round(c.amount).toLocaleString()}</td>
+                            <td class="p-2.5 truncate" title="${c.targetName}">${c.targetName}</td>
+                            <td class="p-2.5">
+                                <span class="px-1.5 py-0.5 rounded text-[9px] ${isEffective ? 'bg-blue-100 text-blue-800 font-medium' : 'bg-amber-100 text-amber-800 font-bold'}">
+                                    ${isEffective ? '已生效' : '未生效'}
+                                </span>
+                            </td>
+                            <td class="p-2.5 text-center flex items-center justify-center gap-1">
+                                ${!isEffective ? `
+                                    <button onclick="activateChangeRecord('${c.id}', ${c.sourceId})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-1.5 py-0.5 rounded text-[10px] font-medium transition" title="確認生效">
+                                        <i class="fa-solid fa-check"></i> 生效
+                                    </button>
+                                ` : ''}
+                                <button onclick="deleteChangeRecord('${c.id}', ${c.sourceId})" class="text-rose-500 hover:text-rose-700 transition p-1" title="刪除">
+                                    <i class="fa-solid fa-trash text-[10px]"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
+
+            document.getElementById('historyModal').classList.remove('hidden');
+            document.getElementById('historyModal').classList.add('flex');
+        }
+
+        function activateChangeRecord(changeId, sourceId) {
+            const dateInput = document.getElementById(`actDate_${changeId}`);
+            const effectiveDate = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+            
+            let foundChange = null;
+
+            budgetData.forEach(d => {
+                if (d.changes && Array.isArray(d.changes)) {
+                    d.changes.forEach(c => {
+                        if (c.id === changeId) {
+                            c.isChanged = '是';
+                            c.date = effectiveDate;
+                            foundChange = c;
+                        }
+                    });
+                }
+            });
+
+            if (foundChange) {
+                const twinId = changeId.includes('_twin') ? changeId : changeId + '_twin';
+                budgetData.forEach(d => {
+                    if (d.changes && Array.isArray(d.changes)) {
+                        d.changes.forEach(c => {
+                            if (c.id === twinId || (foundChange.targetId && String(d.id) === String(foundChange.targetId) && c.targetId === String(sourceId))) {
+                                c.isChanged = '是';
+                                c.date = effectiveDate;
+                                c.amount = foundChange.amount;
+                            }
+                        });
+                    }
+                });
+            }
+
+            saveToLocalStorage();
+            initDashboard();
+            openHistoryModal();
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.remove('flex');
+            document.getElementById('historyModal').classList.add('hidden');
+        }
+
+        function deleteChangeRecord(changeId, sourceId) {
+            const twinId = changeId.includes('_twin') ? changeId : changeId + '_twin';
+            budgetData.forEach(d => {
+                if (d.changes) {
+                    d.changes = d.changes.filter(c => c.id !== changeId && c.id !== twinId && c.targetId !== String(sourceId));
+                }
+            });
+            saveToLocalStorage();
+            initDashboard();
+            openHistoryModal();
+        }
+
+        function deleteRecord(id) {
+            budgetData = budgetData.filter(d => d.id !== id);
+            saveToLocalStorage();
+            initDashboard();
+        }
+
+        function clearAllData() {
+            if (confirm('確定要清空所有經費資料嗎？此動作無法復原。')) {
+                budgetData = [];
+                saveToLocalStorage();
+                initDashboard();
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                    if (json.length === 0) {
+                        alert('上傳的 Excel 檔案內沒有找到有效資料！');
+                        return;
+                    }
+
+                    const imported = json.map((row, idx) => {
+                        let rowObj = {};
+                        for (let key in row) {
+                            let cleanKey = String(key).trim().toLowerCase().replace(/[\s\r\n]+/g, '');
+                            rowObj[cleanKey] = row[key];
+                        }
+
+                        const getField = (possibleKeys) => {
+                            for (let pk of possibleKeys) {
+                                let cleanPk = String(pk).trim().toLowerCase().replace(/[\s\r\n]+/g, '');
+                                if (rowObj[cleanPk] !== undefined && rowObj[cleanPk] !== null && String(rowObj[cleanPk]).trim() !== '') {
+                                    return rowObj[cleanPk];
+                                }
+                                for (let rk in rowObj) {
+                                    if (rk === cleanPk || rk.includes(cleanPk) || cleanPk.includes(rk)) {
+                                        let val = rowObj[rk];
+                                        if (val !== undefined && val !== null && String(val).trim() !== '') {
+                                            return val;
+                                        }
+                                    }
+                                }
+                            }
+                            return '';
+                        };
+
+                        const year = String(getField(['年度', 'year', '116', '117', '118']) || '116').trim();
+                        const scope = String(getField(['範疇', 'scope', '計畫範疇', '計畫']) || '校務發展').trim();
+                        const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
+                        const itemName = String(getField(['項目名稱', '項目', 'item']) || '業務費').trim();
+                        const detailName = String(getField(['細項名稱', '品名', '名稱', 'detailname']) || 'D業務費').trim();
+                        
+                        let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
+                        let category = rawCat.includes('資本') ? '資本門' : '經常門';
+
+                        let rawBudget = getField(['總金額', '總經費', '核定經費', '原始經費', '補助金額', '申請金額', '合計', '總計', '核定金額', '經費', '預算', '金額']);
+                        let budget = 0;
+                        if (rawBudget !== undefined && rawBudget !== null && rawBudget !== '') {
+                            if (typeof rawBudget === 'number') {
+                                budget = Math.round(rawBudget);
+                            } else {
+                                let cleaned = String(rawBudget).replace(/[^0-9.-]+/g, "");
+                                budget = Math.round(Number(cleaned) || 0);
+                            }
+                        }
+
+                        return {
+                            id: Date.now() + idx,
+                            year: year,
+                            scope: scope,
+                            subProject: subProject,
+                            itemName: itemName,
+                            detailName: detailName,
+                            category: category,
+                            budget: budget,
+                            changes: []
+                        };
+                    });
+
+                    budgetData = imported;
+                    saveToLocalStorage();
+                    initDashboard();
+                    alert(`成功匯入 ${imported.length} 筆經費資料！`);
+                } catch (err) {
+                    console.error(err);
+                    alert('檔案解析失敗，請確認 Excel 格式是否正確。');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exportToExcel() {
+            const wsData = budgetData.map(d => {
+                let changeNet = 0;
+                if (d.changes) {
+                    d.changes.forEach(c => {
+                        if (c.isChanged === '是' && c.date) {
+                            const amt = Math.round(Number(c.amount) || 0);
+                            if (c.type === 'inflow') changeNet += amt;
+                            if (c.type === 'outflow') changeNet -= amt;
+                        }
+                    });
+                }
+                return {
+                    '年度': d.year,
+                    '範疇': d.scope,
+                    '子計畫': d.subProject,
+                    '項目名稱': d.itemName,
+                    '細項名稱': d.detailName,
+                    '門別': d.category,
+                    '原始總金額': Math.round(d.budget),
+                    '異動筆數': d.changes ? d.changes.length : 0,
+                    '調整後淨額': Math.round(d.budget) + changeNet
+                };
+            });
+            const ws1 = XLSX.utils.json_to_sheet(wsData);
+
+            let allChangesData = [];
+            budgetData.forEach(d => {
+                if (d.changes && Array.isArray(d.changes)) {
+                    d.changes.forEach(c => {
+                        let targetName = '-';
+                        if (c.targetId) {
+                            const tRec = budgetData.find(tr => String(tr.id) === String(c.targetId));
+                            if (tRec) targetName = `${tRec.scope || ''} / ${tRec.subProject || ''} / ${tRec.detailName || tRec.itemName || ''}`;
+                        }
+                        const isInf = c.type === 'inflow';
+                        const isEffective = c.isChanged === '是' && c.date;
+
+                        allChangesData.push({
+                            '變更日期': c.date || '未設定',
+                            '來源細項名稱': `${d.scope || ''} / ${d.subProject || ''} / ${d.detailName || d.itemName || ''}`,
+                            '異動類型': isInf ? '流入 (+)' : '流出 (-)',
+                            '金額': Math.round(c.amount),
+                            '對應目標細項名稱': targetName,
+                            '狀態': isEffective ? '已生效' : '未生效',
+                            '備註說明': c.note || ''
+                        });
+                    });
+                }
+            });
+            const ws2 = XLSX.utils.json_to_sheet(allChangesData);
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws1, "經費項目明細");
+            XLSX.utils.book_append_sheet(wb, ws2, "異動查詢表");
+
+            XLSX.writeFile(wb, "第二階段經費追蹤與異動完整報表.xlsx");
+        }
+    </script>
+</body>
+</html>
