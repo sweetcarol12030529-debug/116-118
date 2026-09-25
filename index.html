@@ -65,10 +65,10 @@
             </div>
             <div>
                 <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-                    🦄 深耕計畫經費系統表 <span class="text-xs px-2.5 py-1 bg-pink-500/80 rounded-full font-bold uppercase tracking-widest text-white shadow-sm">完整保留支用說明版</span>
+                    🦄 深耕計畫經費系統表 <span class="text-xs px-2.5 py-1 bg-pink-500/80 rounded-full font-bold uppercase tracking-widest text-white shadow-sm">補助款與配合款執行版</span>
                 </h1>
                 <p class="text-xs sm:text-sm text-purple-200 mt-1 font-medium">
-                    🚀 智慧卡片與表格完整呈現「支用說明與編列基準」，資訊絕不遺漏！✨
+                    🚀 整合「補助款（人事費、業務費、設備費、管理費）」與「配合款」雙軌檢視！✨
                 </p>
             </div>
         </div>
@@ -145,6 +145,63 @@
             </div>
         </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Subsidy Main Card (Clickable to toggle Sub-items breakdown) -->
+            <div id="subsidySummaryCard" onclick="toggleSubsidyDropdown()" class="glass-card p-4 rounded-3xl shadow-lg cursor-pointer hover:bg-purple-50 transition border-2 border-indigo-300 flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black text-indigo-700 uppercase px-2 py-0.5 bg-indigo-100 rounded-full">🏛️ 補助款總計</span>
+                        <span id="subsidyToggleHint" class="text-[11px] text-purple-600 font-bold">(點擊展開各分項)</span>
+                    </div>
+                    <h4 id="summarySubsidyTotal" class="text-lg font-black text-indigo-900 mt-1">NT$ 0 (0%)</h4>
+                </div>
+                <div class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-base font-bold shadow-sm">
+                    <i id="subsidyToggleIcon" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                </div>
+            </div>
+
+            <!-- Counterpart Card -->
+            <div onclick="filterByCoreType('配合款')" class="glass-card p-4 rounded-3xl shadow-lg cursor-pointer hover:bg-rose-50 transition border-2 border-rose-200 flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black text-rose-700 uppercase px-2 py-0.5 bg-rose-100 rounded-full">🎯 配合款</span>
+                    </div>
+                    <h4 id="summaryCounterpart" class="text-lg font-black text-rose-900 mt-1">NT$ 0 (0%)</h4>
+                </div>
+                <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-base font-bold shadow-sm">
+                    <i class="fa-solid fa-handshake-angle"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collapsible Breakdown for Subsidy Components (Personnel, Business, Equipment, Management) -->
+        <div id="subsidyBreakdownPanel" class="hidden glass-card p-4 rounded-3xl shadow-xl border border-indigo-200 space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b border-indigo-100">
+                <h3 class="text-xs font-black text-indigo-900 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-indigo-600"></i> 📊 補助款四大子項目執行狀況（點擊可直接篩選）
+                </h3>
+                <span class="text-[11px] text-slate-500">單位：新臺幣 (NT$)</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div onclick="filterByCoreType('人事費')" class="bg-white/80 p-3 rounded-2xl shadow-sm cursor-pointer hover:bg-purple-100/80 transition border border-purple-200">
+                    <span class="text-[10px] font-bold text-purple-700 uppercase block">👤 人事費</span>
+                    <h5 id="summaryPersonnel" class="text-xs sm:text-sm font-black text-purple-900 mt-1">NT$ 0 (0%)</h5>
+                </div>
+                <div onclick="filterByCoreType('業務費')" class="bg-white/80 p-3 rounded-2xl shadow-sm cursor-pointer hover:bg-blue-100/80 transition border border-blue-200">
+                    <span class="text-[10px] font-bold text-blue-700 uppercase block">💼 業務費</span>
+                    <h5 id="summaryBusiness" class="text-xs sm:text-sm font-black text-blue-900 mt-1">NT$ 0 (0%)</h5>
+                </div>
+                <div onclick="filterByCoreType('設備費')" class="bg-white/80 p-3 rounded-2xl shadow-sm cursor-pointer hover:bg-amber-100/80 transition border border-amber-200">
+                    <span class="text-[10px] font-bold text-amber-700 uppercase block">💻 設備費</span>
+                    <h5 id="summaryEquipment" class="text-xs sm:text-sm font-black text-amber-900 mt-1">NT$ 0 (0%)</h5>
+                </div>
+                <div onclick="filterByCoreType('管理費')" class="bg-white/80 p-3 rounded-2xl shadow-sm cursor-pointer hover:bg-emerald-100/80 transition border border-emerald-200">
+                    <span class="text-[10px] font-bold text-emerald-700 uppercase block">🤝 管理費</span>
+                    <h5 id="summaryMatching" class="text-xs sm:text-sm font-black text-emerald-900 mt-1">NT$ 0 (0%)</h5>
+                </div>
+            </div>
+        </div>
+
         <div class="glass-card p-4 sm:p-5 rounded-3xl shadow-xl space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-purple-100">
                 <h2 class="text-sm font-black text-purple-900 flex items-center gap-2">
@@ -189,8 +246,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">🏷️ 項目名稱</label>
-                    <select id="filterItemName" onchange="applyFilters()" class="w-full bg-purple-50/80 border border-purple-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">🏷️ 項目名稱 (經費來源)</label>
+                    <select id="filterItemName" onchange="applyFilters()" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">全部項目名稱</option>
                     </select>
                 </div>
@@ -203,7 +260,7 @@
                     <h2 class="text-base font-black flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-pink-400"></i> 📊 深耕計畫經費系統與執行總表
                     </h2>
-                    <p class="text-xs text-purple-200 mt-0.5">💡 清楚呈現支用說明與編列基準，經費明細滴水不漏！✨</p>
+                    <p class="text-xs text-purple-200 mt-0.5">💡 清楚呈現補助款與配合款執行狀況！✨</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <span id="recordCountBadge" class="text-xs bg-white/20 text-purple-100 px-3 py-1 rounded-full font-bold">0 筆項目</span>
@@ -218,7 +275,7 @@
                 <!-- Cards injected dynamically -->
             </div>
 
-            <!-- Desktop Table View (Includes Expense Standard Column) -->
+            <!-- Desktop Table View -->
             <div class="overflow-x-auto hidden lg:block">
                 <table class="w-full text-left border-collapse text-xs min-w-[1200px]">
                     <thead>
@@ -285,17 +342,23 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">🏷️ 項目名稱 <span class="text-rose-500">*</span></label>
-                        <input type="text" id="inputItemName" required placeholder="例: 業務費" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">🏷️ 項目名稱 (經費來源) <span class="text-rose-500">*</span></label>
+                        <select id="inputItemName" required class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="人事費">人事費 (補助款)</option>
+                            <option value="業務費">業務費 (補助款)</option>
+                            <option value="設備費">設備費 (補助款)</option>
+                            <option value="管理費">管理費 (補助款)</option>
+                            <option value="配合款">配合款</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">📝 細項名稱 <span class="text-rose-500">*</span></label>
-                        <input type="text" id="inputDetailName" required placeholder="例: D業務費" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="text" id="inputDetailName" required placeholder="例: 專任助理薪資" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">📖 支用說明與編列基準</label>
-                    <textarea id="inputStandard" rows="2" placeholder="例: 依本校深耕計畫經費編列原則支用..." class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                    <textarea id="inputStandard" rows="2" placeholder="例: 依本校專任助理薪津標準編列..." class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -421,12 +484,14 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCYDSXjoeW3wiXNEnEZSnYyiTCyww5ogzVq6icyi2O0vwQlKuOl3Is3XTS8WX3CSZV/exec";
 
         let fallbackSampleData = [
-            { id: 1, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '業務費', detailName: 'D業務費', category: '經常門', standard: '依教育部深耕計畫經費編列原則支用', budget: 1000000, disbursed: 450000, changes: [] },
-            { id: 2, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', standard: '採購專業心理諮商與檢測設備', budget: 2000000, disbursed: 1200000, changes: [] },
-            { id: 3, year: '117', scope: '教學創新', subProject: 'AI智慧醫療跨領域課程開發', itemName: '業務費', detailName: '專家諮詢費', category: '經常門', standard: '外聘專家鐘點費及審查費', budget: 800000, disbursed: 300000, changes: [] }
+            { id: 1, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '人事費', detailName: '專任助理薪資與勞健保', category: '經常門', standard: '依本校專任助理薪津標準編列', budget: 1200000, disbursed: 600000, changes: [] },
+            { id: 2, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '業務費', detailName: '專家諮詢費與差旅費', category: '經常門', standard: '外聘專家鐘點費及國內出差旅費', budget: 800000, disbursed: 350000, changes: [] },
+            { id: 3, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '心理諮商與檢測儀器', category: '資本門', standard: '採購專業心理檢測軟硬體設備', budget: 1500000, disbursed: 1200000, changes: [] },
+            { id: 4, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '管理費', detailName: '學校行政管理與水電費', category: '經常門', standard: '依校務基金管理費提撥比例編列', budget: 500000, disbursed: 200000, changes: [] },
+            { id: 5, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '配合款', detailName: '配合款分攤', category: '經常門', standard: '依深耕計畫配合款分攤比例編列', budget: 400000, disbursed: 150000, changes: [] }
         ];
 
-        let budgetData = JSON.parse(localStorage.getItem('deep_cultivation_budget_v4')) || [];
+        let budgetData = JSON.parse(localStorage.getItem('deep_cultivation_budget_v7')) || [];
 
         window.onload = function() {
             if (budgetData.length === 0) {
@@ -518,8 +583,16 @@
                             const year = String(getField(['年度', 'year']) || '116').trim();
                             const scope = String(getField(['範疇', 'scope']) || '校務發展').trim();
                             const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
-                            const itemName = String(getField(['項目名稱', '項目']) || '業務費').trim();
-                            const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || 'D業務費').trim();
+                            
+                            let rawItem = String(getField(['項目名稱', '項目', 'itemname']) || '業務費').trim();
+                            let itemName = '業務費';
+                            if (rawItem.includes('人事')) itemName = '人事費';
+                            else if (rawItem.includes('設備')) itemName = '設備費';
+                            else if (rawItem.includes('管理')) itemName = '管理費';
+                            else if (rawItem.includes('配合')) itemName = '配合款';
+                            else if (rawItem.includes('業務')) itemName = '業務費';
+
+                            const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || '經費明細').trim();
                             const standard = String(getField(['支用說明與編列基準', '支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
                             
                             let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
@@ -562,7 +635,7 @@
 
                         budgetData = imported;
                         saveToLocalStorage();
-                        showNotification('☁️ 成功從 Google 試算表載入最新資料！', 'success');
+                        showNotification('☁️ 成功從 Google 試算表載入經費資料！', 'success');
                     } else {
                         throw new Error("試算表無資料");
                     }
@@ -585,16 +658,33 @@
             if (budgetData.length === 0) {
                 budgetData = fallbackSampleData;
             }
-            showNotification('💡 無法連線至 Google 試算表，已載入本機範例資料', 'info');
+            showNotification('💡 無法連線至 Google 試算表，已載入經費範例資料', 'info');
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('deep_cultivation_budget_v4', JSON.stringify(budgetData));
+            localStorage.setItem('deep_cultivation_budget_v7', JSON.stringify(budgetData));
         }
 
         function initDashboard() {
             populateFilterDropdowns();
             applyFilters();
+            updateCoreTypeSummaries();
+        }
+
+        function toggleSubsidyDropdown() {
+            const panel = document.getElementById('subsidyBreakdownPanel');
+            const icon = document.getElementById('subsidyToggleIcon');
+            const hint = document.getElementById('subsidyToggleHint');
+            
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                icon.className = "fa-solid fa-chevron-up transition-transform duration-300";
+                hint.innerText = "(點擊收合)";
+            } else {
+                panel.classList.add('hidden');
+                icon.className = "fa-solid fa-chevron-down transition-transform duration-300";
+                hint.innerText = "(點擊展開各分項)";
+            }
         }
 
         function populateFilterDropdowns() {
@@ -614,7 +704,7 @@
             const subProjects = [...new Set(subProjectSource.map(d => String(d.subProject)))].filter(Boolean).sort();
 
             const categories = [...new Set(budgetData.map(d => String(d.category)))].filter(Boolean).sort();
-            const itemNames = [...new Set(budgetData.map(d => String(d.itemName)))].filter(Boolean).sort();
+            const itemNames = ['人事費', '業務費', '設備費', '管理費', '配合款'];
 
             updateSelectOptions('filterYear', years, '全部年度', currentYear);
             updateSelectOptions('filterScope', scopes, '全部範疇', currentScope);
@@ -645,6 +735,86 @@
             applyFilters();
         }
 
+        function filterByCoreType(typeName) {
+            document.getElementById('filterItemName').value = typeName;
+            applyFilters();
+            showNotification(`🎯 已篩選「${typeName}」執行狀況`, 'info');
+        }
+
+        function updateCoreTypeSummaries() {
+            const types = ['人事費', '業務費', '設備費', '管理費'];
+            const mapping = {
+                '人事費': 'summaryPersonnel',
+                '業務費': 'summaryBusiness',
+                '設備費': 'summaryEquipment',
+                '管理費': 'summaryMatching'
+            };
+
+            let subsidyNetTotal = 0;
+            let subsidyDisbTotal = 0;
+
+            types.forEach(type => {
+                let totalNet = 0;
+                let totalDisb = 0;
+
+                budgetData.filter(d => String(d.itemName).trim() === type).forEach(d => {
+                    const base = Math.round(Number(d.budget) || 0);
+                    let inflow = 0, outflow = 0;
+                    if (d.changes && Array.isArray(d.changes)) {
+                        d.changes.forEach(c => {
+                            if (c.isChanged === '是' && c.datetime) {
+                                const amt = Math.round(Number(c.amount) || 0);
+                                if (c.type === 'inflow') inflow += amt;
+                                if (c.type === 'outflow') outflow += amt;
+                            }
+                        });
+                    }
+                    totalNet += (base + inflow - outflow);
+                    totalDisb += Math.round(Number(d.disbursed) || 0);
+                });
+
+                subsidyNetTotal += totalNet;
+                subsidyDisbTotal += totalDisb;
+
+                const rate = totalNet > 0 ? ((totalDisb / totalNet) * 100).toFixed(1) : '0.0';
+                const elId = mapping[type];
+                if (document.getElementById(elId)) {
+                    document.getElementById(elId).innerText = `NT$ ${totalDisb.toLocaleString()} (${rate}%)`;
+                }
+            });
+
+            // Calculate Subsidy Total Summary
+            const subsidyRate = subsidyNetTotal > 0 ? ((subsidyDisbTotal / subsidyNetTotal) * 100).toFixed(1) : '0.0';
+            const subsidyTotalEl = document.getElementById('summarySubsidyTotal');
+            if (subsidyTotalEl) {
+                subsidyTotalEl.innerText = `NT$ ${subsidyDisbTotal.toLocaleString()} (${subsidyRate}%)`;
+            }
+
+            // Calculate Counterpart Summary
+            let counterpartNet = 0;
+            let counterpartDisb = 0;
+            budgetData.filter(d => String(d.itemName).trim() === '配合款').forEach(d => {
+                const base = Math.round(Number(d.budget) || 0);
+                let inflow = 0, outflow = 0;
+                if (d.changes && Array.isArray(d.changes)) {
+                    d.changes.forEach(c => {
+                        if (c.isChanged === '是' && c.datetime) {
+                            const amt = Math.round(Number(c.amount) || 0);
+                            if (c.type === 'inflow') inflow += amt;
+                            if (c.type === 'outflow') outflow += amt;
+                        }
+                    });
+                }
+                counterpartNet += (base + inflow - outflow);
+                counterpartDisb += Math.round(Number(d.disbursed) || 0);
+            });
+            const counterpartRate = counterpartNet > 0 ? ((counterpartDisb / counterpartNet) * 100).toFixed(1) : '0.0';
+            const counterpartEl = document.getElementById('summaryCounterpart');
+            if (counterpartEl) {
+                counterpartEl.innerText = `NT$ ${counterpartDisb.toLocaleString()} (${counterpartRate}%)`;
+            }
+        }
+
         function applyFilters() {
             populateFilterDropdowns();
 
@@ -669,6 +839,7 @@
             });
 
             renderDashboard(filtered);
+            updateCoreTypeSummaries();
         }
 
         function renderDashboard(filteredData) {
@@ -822,7 +993,7 @@
                 tr.innerHTML = `
                     <td class="py-3 px-3">
                         <div class="font-bold text-purple-900">${escapeHtml(d.year)}年 | <span class="text-slate-800">${escapeHtml(d.subProject)}</span></div>
-                        <div class="text-[11px] text-purple-600 font-semibold">${escapeHtml(d.scope)} &gt; ${escapeHtml(d.itemName)} &gt; <span class="text-slate-600">${escapeHtml(d.detailName)}</span></div>
+                        <div class="text-[11px] text-purple-600 font-semibold">${escapeHtml(d.scope)} &gt; <span class="text-indigo-700 font-bold">[${escapeHtml(d.itemName)}]</span> &gt; <span class="text-slate-600">${escapeHtml(d.detailName)}</span></div>
                     </td>
                     <td class="py-3 px-2 text-center">
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${d.category === '資本門' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">
@@ -900,7 +1071,7 @@
                 scope: document.getElementById('inputScope').value.trim(),
                 subProject: document.getElementById('inputSubProject').value.trim(),
                 category: document.getElementById('inputCategory').value,
-                itemName: document.getElementById('inputItemName').value.trim(),
+                itemName: document.getElementById('inputItemName').value,
                 detailName: document.getElementById('inputDetailName').value.trim(),
                 standard: document.getElementById('inputStandard').value.trim(),
                 budget: Math.round(Number(document.getElementById('inputBudget').value) || 0),
@@ -939,7 +1110,7 @@
             if (!item) return;
 
             document.getElementById('changeSourceRecordId').value = item.id;
-            document.getElementById('lblTargetDetailName').innerText = `[${item.year}年] ${item.subProject} - ${item.detailName} (原額: $${item.budget.toLocaleString()})`;
+            document.getElementById('lblTargetDetailName').innerText = `[${item.year}年] ${item.subProject} - ${item.itemName} (${item.detailName}) 原額: $${item.budget.toLocaleString()}`;
             
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -953,7 +1124,7 @@
             let targetHtml = '<option value="">-- 無 (單向異動) --</option>';
             
             budgetData.filter(d => d.id !== item.id && String(d.year).trim() === String(item.year).trim()).forEach(d => {
-                targetHtml += `<option value="${d.id}">[${d.year}年] ${d.subProject} - ${d.detailName}</option>`;
+                targetHtml += `<option value="${d.id}">[${d.year}年] ${d.subProject} - ${d.itemName} (${d.detailName})</option>`;
             });
             targetSelect.innerHTML = targetHtml;
 
@@ -1019,7 +1190,7 @@
                 if (targetItem && String(targetItem.year).trim() === String(sourceItem.year).trim()) {
                     if (!targetItem.changes) targetItem.changes = [];
                     const reciprocalType = type === 'outflow' ? 'inflow' : 'outflow';
-                    const reciprocalNote = `[雙向連動] 與 ${sourceItem.detailName} 互抵 (${note || '無'})`;
+                    const reciprocalNote = `[雙向連動] 與 ${sourceItem.itemName}(${sourceItem.detailName}) 互抵 (${note || '無'})`;
                     
                     targetItem.changes.push({
                         id: changeRecordId + 1,
@@ -1061,7 +1232,7 @@
                         allChanges.push({
                             sourceId: d.id,
                             year: d.year,
-                            sourceName: `${d.subProject} - ${d.detailName}`,
+                            sourceName: `${d.subProject} - ${d.itemName} (${d.detailName})`,
                             ...c
                         });
                     });
@@ -1079,7 +1250,7 @@
                 let targetName = '無';
                 if (c.targetId) {
                     const tItem = budgetData.find(d => d.id === c.targetId);
-                    if (tItem) targetName = `${tItem.subProject} - ${tItem.detailName}`;
+                    if (tItem) targetName = `${tItem.subProject} - ${tItem.itemName} (${tItem.detailName})`;
                 }
 
                 const tr = document.createElement('tr');
@@ -1169,8 +1340,16 @@
                         const year = String(getField(['年度', 'year']) || '116').trim();
                         const scope = String(getField(['範疇', 'scope']) || '校務發展').trim();
                         const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
-                        const itemName = String(getField(['項目名稱', '項目']) || '業務費').trim();
-                        const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || 'D業務費').trim();
+                        
+                        let rawItem = String(getField(['項目名稱', '項目', 'itemname']) || '業務費').trim();
+                        let itemName = '業務費';
+                        if (rawItem.includes('人事')) itemName = '人事費';
+                        else if (rawItem.includes('設備')) itemName = '設備費';
+                        else if (rawItem.includes('管理')) itemName = '管理費';
+                        else if (rawItem.includes('配合')) itemName = '配合款';
+                        else if (rawItem.includes('業務')) itemName = '業務費';
+
+                        const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || '經費明細').trim();
                         const standard = String(getField(['支用說明與編列基準', '支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
                         
                         let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
@@ -1280,8 +1459,8 @@
 
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "經費核銷與執行率總表");
-            XLSX.writeFile(workbook, "深耕計畫經費與執行率報表.xlsx");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "經費執行狀況總表");
+            XLSX.writeFile(workbook, "深耕計畫經費執行狀況報表.xlsx");
             showNotification('📥 報表匯出成功！', 'success');
         }
 
