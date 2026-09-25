@@ -1,4 +1,3 @@
-<!-- ... existing code ... -->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -226,7 +225,7 @@
                     <h2 class="text-base font-black flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-pink-400"></i> 📊 深耕計畫經費系統與異動執行總表
                     </h2>
-                    <p class="text-xs text-purple-200 mt-0.5">💡 匯出報表與雲端同步已包含最新的經費異動時間與明細！✨</p>
+                    <p class="text-xs text-purple-200 mt-0.5">💡 匯出報表與雲端同步已包含最新的經費異動時間與支用說明/編列基準！✨</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <span id="recordCountBadge" class="text-xs bg-white/20 text-purple-100 px-3 py-1 rounded-full font-bold">0 筆項目</span>
@@ -246,6 +245,7 @@
                             <th class="py-3.5 px-4">🏷️ 項目名稱</th>
                             <th class="py-3.5 px-4">📝 細項名稱</th>
                             <th class="py-3.5 px-4">🚪 門別</th>
+                            <th class="py-3.5 px-4">📖 支用說明與編列基準</th>
                             <th class="py-3.5 px-4 text-right">💰 原始經費</th>
                             <th class="py-3.5 px-4 text-center">🔄 異動筆數</th>
                             <th class="py-3.5 px-4 text-right">💎 調整後淨額</th>
@@ -310,6 +310,10 @@
                         <label class="block text-xs font-bold text-slate-600 mb-1">📝 細項名稱 <span class="text-rose-500">*</span></label>
                         <input type="text" id="inputDetailName" required placeholder="例: D業務費" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">📖 支用說明與編列基準</label>
+                    <input type="text" id="inputStandard" placeholder="例: 依本校標準支用，每場次2000元" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">💰 原始經費金額 (NT$) <span class="text-rose-500">*</span></label>
@@ -436,9 +440,9 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCYDSXjoeW3wiXNEnEZSnYyiTCyww5ogzVq6icyi2O0vwQlKuOl3Is3XTS8WX3CSZV/exec";
 
         let fallbackSampleData = [
-            { id: 1, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '業務費', detailName: 'D業務費', category: '經常門', budget: 1000000, changes: [] },
-            { id: 2, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', budget: 2000000, changes: [] },
-            { id: 3, year: '117', scope: '教學創新', subProject: 'AI智慧醫療跨領域課程開發', itemName: '業務費', detailName: '專家諮詢費', category: '經常門', budget: 800000, changes: [] }
+            { id: 1, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '業務費', detailName: 'D業務費', category: '經常門', standard: '依教育部深耕計畫經費編列原則支用', budget: 1000000, changes: [] },
+            { id: 2, year: '116', scope: '校務發展', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', standard: '採購專業心理諮商與檢測設備', budget: 2000000, changes: [] },
+            { id: 3, year: '117', scope: '教學創新', subProject: 'AI智慧醫療跨領域課程開發', itemName: '業務費', detailName: '專家諮詢費', category: '經常門', standard: '外聘專家鐘點費及審查費', budget: 800000, changes: [] }
         ];
 
         let budgetData = JSON.parse(localStorage.getItem('deep_cultivation_budget_v3')) || [];
@@ -535,6 +539,7 @@
                             const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
                             const itemName = String(getField(['項目名稱', '項目']) || '業務費').trim();
                             const detailName = String(getField(['細項名稱', '細項', '品名', '說明']) || 'D業務費').trim();
+                            const standard = String(getField(['支用說明', '編列基準', '說明', 'standard', 'description']) || '').trim();
                             
                             let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
                             let category = rawCat.includes('資本') ? '資本門' : '經常門';
@@ -570,6 +575,7 @@
                                 itemName: itemName,
                                 detailName: detailName,
                                 category: category,
+                                standard: standard,
                                 budget: budget,
                                 changes: []
                             };
@@ -767,6 +773,7 @@
                             ${escapeHtml(d.category)}
                         </span>
                     </td>
+                    <td class="py-3.5 px-4 text-slate-600 max-w-xs truncate" title="${escapeHtml(d.standard || '無')}">${escapeHtml(d.standard || '-')}</td>
                     <td class="py-3.5 px-4 text-right font-bold text-slate-900">$${base.toLocaleString()}</td>
                     <td class="py-3.5 px-4 text-center">
                         <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${changeCount > 0 ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-slate-100 text-slate-500'}">
@@ -812,6 +819,7 @@
             document.getElementById('inputCategory').value = item.category;
             document.getElementById('inputItemName').value = item.itemName;
             document.getElementById('inputDetailName').value = item.detailName;
+            document.getElementById('inputStandard').value = item.standard || '';
             document.getElementById('inputBudget').value = item.budget;
 
             document.getElementById('dataModal').classList.remove('hidden');
@@ -834,6 +842,7 @@
                 category: document.getElementById('inputCategory').value,
                 itemName: document.getElementById('inputItemName').value.trim(),
                 detailName: document.getElementById('inputDetailName').value.trim(),
+                standard: document.getElementById('inputStandard').value.trim(),
                 budget: Math.round(Number(document.getElementById('inputBudget').value) || 0),
                 changes: []
             };
@@ -1153,7 +1162,6 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // 匯出報表：將異動時間合併呈現於同一個工作表
         function exportToExcel() {
             if (budgetData.length === 0) {
                 showNotification('⚠️ 目前沒有資料可供匯出', 'info');
@@ -1189,6 +1197,7 @@
                     '項目名稱': d.itemName,
                     '細項名稱': d.detailName,
                     '門別': d.category,
+                    '支用說明與編列基準': d.standard || '',
                     '原始經費 (NT$)': d.budget,
                     '變更流入 (NT$)': inflow,
                     '變更流出 (NT$)': outflow,
@@ -1201,8 +1210,8 @@
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "經費系統總表與異動時間");
-            XLSX.writeFile(workbook, "深耕計畫經費系統表_含異動時間報表.xlsx");
-            showNotification('📥 報表 (含異動時間) 匯出成功！', 'success');
+            XLSX.writeFile(workbook, "深耕計畫經費系統表_含支用說明與編列基準.xlsx");
+            showNotification('📥 報表 (含支用說明與編列基準) 匯出成功！', 'success');
         }
 
         async function syncToCloud() {
@@ -1237,7 +1246,7 @@
 
                 const payload = {
                     action: 'save_all',
-                    headers: ["年度", "範疇", "子計畫", "項目名稱", "細項名稱", "門別", "原始經費", "變更流入", "變更流出", "調整後淨額", "異動筆數", "異動時間"],
+                    headers: ["年度", "範疇", "子計畫", "項目名稱", "細項名稱", "門別", "支用說明與編列基準", "原始經費", "變更流入", "變更流出", "調整後淨額", "異動筆數", "異動時間"],
                     rows: payloadData.map(d => [
                         d.year,
                         d.scope,
@@ -1245,6 +1254,7 @@
                         d.itemName,
                         d.detailName,
                         d.category,
+                        d.standard || '',
                         d.budget,
                         d.inflowTotal,
                         d.outflowTotal,
@@ -1268,7 +1278,7 @@
                 setTimeout(() => {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步雲端';
-                    showNotification('☁️ 成功將經費與異動時間同步至 Google 試算表！', 'success');
+                    showNotification('☁️ 成功將經費與支用說明同步至 Google 試算表！', 'success');
                 }, 1200);
 
             } catch (err) {
