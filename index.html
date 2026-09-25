@@ -52,11 +52,14 @@
                 <h1 class="text-xl sm:text-2xl font-extrabold flex items-center gap-2.5">
                     <i class="fa-solid fa-chart-pie text-purple-300"></i> 第二階段經費即時追蹤儀表板
                 </h1>
-                <p class="text-purple-200 text-xs mt-1">資料即時同步自 Google 試算表，支援雙向異動流出流入與精確總金額追蹤 (116-118年)</p>
+                <p class="text-purple-200 text-xs mt-1">資料即時同步自 Google 試算表，支援年度獨立隔離、雙向異動流出流入與精確總金額追蹤 (116-118年)</p>
             </div>
             <div class="mt-3 md:mt-0 flex flex-wrap gap-2">
                 <button onclick="fetchGoogleSheetData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
                     <i class="fa-solid fa-rotate" id="syncIcon"></i> 即時同步雲端試算表
+                </button>
+                <button onclick="exportGoogleSheetReadyCSV()" class="bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs" title="匯出相容 Google 試算表的 CSV 格式，便於上傳或覆蓋回 Google Sheet">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> 匯出 Google 試算表格式
                 </button>
                 <label class="cursor-pointer bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
                     <i class="fa-solid fa-file-excel"></i> 備用匯入 Excel
@@ -165,13 +168,10 @@
                     <h2 class="text-sm font-bold text-purple-900 flex items-center gap-2">
                         <i class="fa-solid fa-table-list text-purple-600"></i> 經費項目明細
                     </h2>
-                    <p class="text-[10px] text-gray-500 mt-0.5">完整呈現所有項目、項目名稱、細項名稱與經費淨額（支援多筆異動與自動雙向同步）</p>
+                    <p class="text-[10px] text-gray-500 mt-0.5">完整呈現所有項目、項目名稱、細項名稱與經費淨額（支援年度隔離與自動雙向同步）</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <span id="recordCount" class="text-[11px] bg-purple-200 text-purple-800 px-2.5 py-0.5 rounded-full font-semibold">0 筆資料</span>
-                    <button onclick="clearAllData()" class="text-[11px] bg-rose-100 text-rose-700 hover:bg-rose-200 px-2.5 py-1 rounded-xl font-medium transition">
-                        <i class="fa-solid fa-trash-can mr-1"></i> 清空全部
-                    </button>
                 </div>
             </div>
             <div class="w-full overflow-x-auto">
@@ -263,7 +263,7 @@
                 <i class="fa-solid fa-shuffle text-purple-600"></i> 新增經費異動紀錄 (流入 / 流出)
             </h2>
             <div id="changeModalTargetInfo" class="text-[11px] text-purple-800 bg-purple-100/70 p-2.5 rounded-2xl mb-3 font-medium">
-                目前細項名稱：<span id="lblTargetDetailName" class="font-bold"></span>
+                目前項目：<span id="lblTargetDetailName" class="font-bold"></span>
             </div>
             <form id="changeForm" onsubmit="saveChangeRecord(event)" class="space-y-3">
                 <input type="hidden" id="changeSourceRecordId">
@@ -276,8 +276,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">變更日期 <span class="text-rose-500">*</span></label>
-                        <input type="date" id="inputChangeDate" required class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1">變更日期與時間 <span class="text-rose-500">*</span></label>
+                        <input type="datetime-local" id="inputChangeDatetime" required class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -296,8 +296,8 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-[10px] font-semibold text-gray-600 mb-1">
-                            對應目標項目 (細項名稱) 
-                            <span id="syncHintText" class="text-purple-600 font-bold">(選擇後自動連動至目標項目)</span>
+                            對應目標項目 (同年度) 
+                            <span id="syncHintText" class="text-purple-600 font-bold">(選擇後自動連動至同年度目標項目)</span>
                         </label>
                         <select id="inputChangeTargetSubItem" class="w-full bg-purple-50 border border-purple-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <option value="">-- 無 (單向異動) --</option>
@@ -312,7 +312,7 @@
                 <div class="bg-purple-100/60 p-2.5 rounded-2xl text-[10px] text-purple-900 flex items-start gap-2">
                     <i class="fa-solid fa-circle-info text-purple-600 mt-0.5"></i>
                     <div>
-                        <span class="font-bold">智能自動雙向同步說明：</span> 當您選定「對應目標項目」進行流出時，系統將<strong>自動幫您同步在該目標項目建立對應的流入記錄</strong>，反之亦然，且雙邊變更狀態與日期完美保持一致！
+                        <span class="font-bold">年度隔離防護與智能雙向同步：</span> 系統會嚴格限制對應目標項目必須與當前項目屬於<strong>同一年度</strong>，確保修改 116 年時絕不會誤動 117 或 118 年之同名項目！
                     </div>
                 </div>
 
@@ -333,14 +333,15 @@
                 <i class="fa-solid fa-clock-rotate-left text-purple-600"></i> 全部經費異動查詢表
             </h2>
             <div class="w-full overflow-x-auto">
-                <table class="w-full text-left border-collapse text-[11px] min-w-[650px]">
+                <table class="w-full text-left border-collapse text-[11px] min-w-[700px]">
                     <thead>
                         <tr class="bg-purple-900 text-white uppercase tracking-wider text-[10px]">
-                            <th class="p-2.5">日期</th>
-                            <th class="p-2.5">來源細項名稱</th>
-                            <th class="p-2.5">異動類型</th>
+                            <th class="p-2.5">年度</th>
+                            <th class="p-2.5">異動日期與時間</th>
+                            <th class="p-2.5">來源項目名稱</th>
+                            <th class="p-2.5">類型</th>
                             <th class="p-2.5 text-right">金額</th>
-                            <th class="p-2.5">對應目標細項名稱</th>
+                            <th class="p-2.5">對應目標項目</th>
                             <th class="p-2.5">狀態</th>
                             <th class="p-2.5 text-center">操作</th>
                         </tr>
@@ -359,21 +360,20 @@
             { id: 2, year: '116', scope: '範疇一', subProject: '雲嘉地區醫療人員心理健康支持計畫', itemName: '設備費', detailName: '儀器設備費', category: '資本門', budget: 2000, changes: [] }
         ];
 
-        let budgetData = JSON.parse(localStorage.getItem('secondStageBudgetDataFinalV69')) || sampleData;
+        let budgetData = JSON.parse(localStorage.getItem('secondStageBudgetDataFinalV71')) || sampleData;
         let subProjectChartInstance = null;
         let categoryChartInstance = null;
 
-        // Google 試算表 CSV 公開連結轉換
         const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/16X4VGRQwvlusnaAp-w2rOg8HOzOzmaZgngeh5dD7PUY/export?format=csv&gid=0';
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLjasN0nHx8h0FSTUmm7EYXbKCcarHitWqzZZDtYdt3e4oYX_ORz4wlGXHN1UHmqle/exec';
 
         window.onload = function() {
             initDashboard();
-            // 自動嘗試載入雲端即時資料
             fetchGoogleSheetData(true);
         };
 
         function saveToLocalStorage() {
-            localStorage.setItem('secondStageBudgetDataFinalV69', JSON.stringify(budgetData));
+            localStorage.setItem('secondStageBudgetDataFinalV71', JSON.stringify(budgetData));
         }
 
         async function fetchGoogleSheetData(isSilent = false) {
@@ -392,11 +392,32 @@
             } catch (error) {
                 console.warn('雲端資料讀取失敗，使用本機暫存資料:', error);
                 if (!isSilent) {
-                    alert('雲端即時同步失敗，已載入現有本機資料。請確認 Google 試算表是否已設為「知道連結的人都能檢視」。');
+                    alert('雲端即時同步失敗，已載入現有本機資料。');
                 }
             } finally {
                 if (syncIcon) syncIcon.classList.remove('fa-spin');
             }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const csvText = XLSX.utils.sheet_to_csv(worksheet);
+                    parseAndLoadCSV(csvText);
+                    alert('備用檔案匯入成功！');
+                } catch (err) {
+                    console.error(err);
+                    alert('檔案解析失敗，請確認格式是否正確。');
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         function parseAndLoadCSV(csvText) {
@@ -406,6 +427,14 @@
             const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
             if (json.length === 0) return;
+
+            const existingChangesMap = {};
+            budgetData.forEach(d => {
+                const key = `${String(d.year).trim()}_${String(d.subProject).trim()}_${String(d.detailName).trim()}`;
+                if (d.changes && d.changes.length > 0) {
+                    existingChangesMap[key] = d.changes;
+                }
+            });
 
             const imported = json.map((row, idx) => {
                 let rowObj = {};
@@ -452,11 +481,15 @@
                     }
                 }
 
-                // 精確保留現有資料中的異動紀錄（優先透過 detailName 與 subProject 匹配）
-                const existing = budgetData.find(d => String(d.detailName).trim() === detailName && String(d.subProject).trim() === subProject);
+                const key = `${year}_${subProject}_${detailName}`;
+                let assignedChanges = existingChangesMap[key];
+                if (!assignedChanges) {
+                    const existingRecord = budgetData.find(d => String(d.year).trim() === year && String(d.subProject).trim() === subProject && String(d.detailName).trim() === detailName);
+                    assignedChanges = existingRecord && Array.isArray(existingRecord.changes) ? existingRecord.changes : [];
+                }
 
                 return {
-                    id: existing ? existing.id : (Date.now() + idx),
+                    id: Date.now() + idx,
                     year: year,
                     scope: scope,
                     subProject: subProject,
@@ -464,7 +497,7 @@
                     detailName: detailName,
                     category: category,
                     budget: budget,
-                    changes: existing && Array.isArray(existing.changes) ? existing.changes : []
+                    changes: assignedChanges
                 };
             });
 
@@ -562,7 +595,7 @@
 
                 if (d.changes && Array.isArray(d.changes)) {
                     d.changes.forEach(c => {
-                        if (c.isChanged === '是' && c.date) {
+                        if (c.isChanged === '是' && c.datetime) {
                             const amt = Math.round(Number(c.amount) || 0);
                             if (c.type === 'inflow') {
                                 totalInflow += amt;
@@ -596,7 +629,7 @@
                 const base = Math.round(Number(d.budget) || 0);
                 let changeNet = 0;
                 d.changes.forEach(c => {
-                    if (c.isChanged === '是' && c.date) {
+                    if (c.isChanged === '是' && c.datetime) {
                         const amt = Math.round(Number(c.amount) || 0);
                         if (c.type === 'inflow') changeNet += amt;
                         if (c.type === 'outflow') changeNet -= amt;
@@ -641,7 +674,7 @@
                 const base = Math.round(Number(d.budget) || 0);
                 let changeNet = 0;
                 d.changes.forEach(c => {
-                    if (c.isChanged === '是' && c.date) {
+                    if (c.isChanged === '是' && c.datetime) {
                         const amt = Math.round(Number(c.amount) || 0);
                         if (c.type === 'inflow') changeNet += amt;
                         if (c.type === 'outflow') changeNet -= amt;
@@ -649,7 +682,7 @@
                 });
                 const net = base + changeNet;
 
-                const subKey = d.subProject || '未分類子計畫';
+                const subKey = `[${d.year}] ${d.subProject || '未分類子計畫'}`;
                 subProjectMap[subKey] = (subProjectMap[subKey] || 0) + net;
                 
                 const catKey = String(d.category).includes('資本') ? '資本門' : '經常門';
@@ -760,22 +793,39 @@
             closeModal();
         }
 
+        function deleteRecord(id) {
+            if (confirm('確定要刪除此經費項目嗎？')) {
+                budgetData = budgetData.filter(d => d.id !== id);
+                saveToLocalStorage();
+                initDashboard();
+            }
+        }
+
         function openChangeModal(id) {
             const record = budgetData.find(d => d.id === id);
             if (!record) return;
 
             document.getElementById('changeSourceRecordId').value = record.id;
-            document.getElementById('lblTargetDetailName').innerText = `${record.detailName || record.itemName || '-'}`;
+            document.getElementById('lblTargetDetailName').innerText = `[${record.year}年] ${record.scope} / ${record.subProject} / ${record.detailName || record.itemName}`;
             document.getElementById('changeForm').reset();
             
-            const todayStr = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('inputChangeDate');
-            if (dateInput) dateInput.value = todayStr;
+            // 預設填入當前本地日期與時間 (YYYY-MM-DDTHH:mm)
+            const now = new Date();
+            const yearStr = now.getFullYear();
+            const monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            const dayStr = String(now.getDate()).padStart(2, '0');
+            const hourStr = String(now.getHours()).padStart(2, '0');
+            const minStr = String(now.getMinutes()).padStart(2, '0');
+            const currentDatetimeLocal = `${yearStr}-${monthStr}-${dayStr}T${hourStr}:${minStr}`;
+            
+            const datetimeInput = document.getElementById('inputChangeDatetime');
+            if (datetimeInput) datetimeInput.value = currentDatetimeLocal;
 
+            // 嚴格隔離：目標對應項目必須與來源項目屬於同一年度 (record.year)
             const targetSelect = document.getElementById('inputChangeTargetSubItem');
             let html = '<option value="">-- 無 (單向異動) --</option>';
-            budgetData.filter(d => d.id !== record.id).forEach(d => {
-                html += `<option value="${d.id}">${d.detailName || d.itemName || '-'} (${d.scope || ''} / ${d.subProject || ''})</option>`;
+            budgetData.filter(d => d.id !== record.id && String(d.year).trim() === String(record.year).trim()).forEach(d => {
+                html += `<option value="${d.id}">[${d.year}年] ${d.scope || ''} / ${d.subProject || ''} / ${d.detailName || d.itemName || '-'} (${d.category || ''})</option>`;
             });
             targetSelect.innerHTML = html;
 
@@ -790,9 +840,9 @@
             const hint = document.getElementById('syncHintText');
             if (!hint) return;
             if (type === 'outflow') {
-                hint.innerText = '(選擇後自動連動至目標項目作為流入)';
+                hint.innerText = '(選擇後自動連動至同年度目標項目作為流入)';
             } else {
-                hint.innerText = '(選擇後自動連動至目標項目作為流出)';
+                hint.innerText = '(選擇後自動連動至同年度目標項目作為流出)';
             }
         }
 
@@ -805,7 +855,7 @@
             e.preventDefault();
             const sourceId = Number(document.getElementById('changeSourceRecordId').value);
             const isChanged = document.getElementById('inputChangeIsChanged').value;
-            const date = document.getElementById('inputChangeDate').value;
+            const datetimeVal = document.getElementById('inputChangeDatetime').value;
             const type = document.getElementById('inputChangeType').value;
             const amount = Math.round(parseFloat(document.getElementById('inputChangeAmount').value) || 0);
             const targetId = document.getElementById('inputChangeTargetSubItem').value;
@@ -820,7 +870,7 @@
                 id: 'chg_' + Date.now() + '_src',
                 pairId: targetId ? syncPairId : null,
                 isChanged: isChanged,
-                date: date,
+                datetime: datetimeVal,
                 type: type, 
                 amount: amount,
                 targetId: targetId ? String(targetId) : null,
@@ -830,9 +880,8 @@
 
             if (targetId) {
                 const targetRecord = budgetData.find(d => String(d.id) === String(targetId));
-                if (targetRecord) {
+                if (targetRecord && String(targetRecord.year).trim() === String(sourceRecord.year).trim()) {
                     if (!targetRecord.changes) targetRecord.changes = [];
-                    // If source is outflow, target gets inflow. If source is inflow, target gets outflow.
                     const targetType = (type === 'outflow') ? 'inflow' : 'outflow';
                     const targetTypeNameText = targetType === 'inflow' ? '流入' : '流出';
                     
@@ -840,7 +889,7 @@
                         id: 'chg_' + Date.now() + '_tgt',
                         pairId: syncPairId,
                         isChanged: isChanged,
-                        date: date,
+                        datetime: datetimeVal,
                         type: targetType,
                         amount: amount,
                         targetId: String(sourceId),
@@ -865,12 +914,13 @@
                         let targetName = '-';
                         if (c.targetId) {
                             const tRec = budgetData.find(tr => String(tr.id) === String(c.targetId));
-                            if (tRec) targetName = `${tRec.scope || ''} / ${tRec.subProject || ''} / ${tRec.detailName || tRec.itemName || ''}`;
+                            if (tRec) targetName = `[${tRec.year}年] ${tRec.scope || ''} / ${tRec.subProject || ''} / ${tRec.detailName || tRec.itemName || ''}`;
                         }
                         allChanges.push({
                             ...c,
+                            year: d.year,
                             sourceId: d.id,
-                            sourceName: `${d.scope || ''} / ${d.subProject || ''} / ${d.detailName || d.itemName || ''}`,
+                            sourceName: `[${d.year}年] ${d.scope || ''} / ${d.subProject || ''} / ${d.detailName || d.itemName || ''}`,
                             targetName: targetName
                         });
                     });
@@ -878,17 +928,19 @@
             });
 
             if (allChanges.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-400"><i class="fa-solid fa-clock-rotate-left text-xl mb-1 block"></i> 目前尚無任何異動紀錄</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-gray-400"><i class="fa-solid fa-clock-rotate-left text-xl mb-1 block"></i> 目前尚無任何異動紀錄</td></tr>`;
             } else {
                 let html = '';
-                allChanges.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).forEach(c => {
+                allChanges.sort((a, b) => new Date(b.datetime || 0) - new Date(a.datetime || 0)).forEach(c => {
                     const isInf = c.type === 'inflow';
-                    const isEffective = c.isChanged === '是' && c.date;
+                    const isEffective = c.isChanged === '是' && c.datetime;
+                    const formattedDt = c.datetime ? c.datetime.replace('T', ' ') : '未設定';
                     
                     html += `
                         <tr class="hover:bg-purple-50/50 transition">
+                            <td class="p-2.5 font-bold text-purple-900">${c.year}</td>
                             <td class="p-2.5 font-semibold text-purple-900">
-                                ${isEffective ? c.date : `<input type="date" id="actDate_${c.id}" value="${c.date || new Date().toISOString().split('T')[0]}" class="bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5 text-[10px]">`}
+                                ${isEffective ? formattedDt : `<input type="datetime-local" id="actDt_${c.id}" value="${c.datetime || new Date().toISOString().slice(0,16)}" class="bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5 text-[10px]">`}
                             </td>
                             <td class="p-2.5 font-medium truncate" title="${c.sourceName}">${c.sourceName}</td>
                             <td class="p-2.5">
@@ -905,11 +957,11 @@
                             </td>
                             <td class="p-2.5 text-center flex items-center justify-center gap-1">
                                 ${!isEffective ? `
-                                    <button onclick="activateChangeRecord('${c.id}', ${c.sourceId})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-1.5 py-0.5 rounded text-[10px] font-medium transition" title="確認生效">
+                                    <button onclick="activateChangeRecord('${c.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-1.5 py-0.5 rounded text-[10px] font-medium transition" title="確認生效">
                                         <i class="fa-solid fa-check"></i> 生效
                                     </button>
                                 ` : ''}
-                                <button onclick="deleteChangeRecord('${c.id}', ${c.sourceId})" class="text-rose-500 hover:text-rose-700 transition p-1" title="刪除">
+                                <button onclick="deleteChangeRecord('${c.id}')" class="text-rose-500 hover:text-rose-700 transition p-1" title="刪除">
                                     <i class="fa-solid fa-trash text-[10px]"></i>
                                 </button>
                             </td>
@@ -923,9 +975,9 @@
             document.getElementById('historyModal').classList.add('flex');
         }
 
-        function activateChangeRecord(changeId, sourceId) {
-            const dateInput = document.getElementById(`actDate_${changeId}`);
-            const effectiveDate = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+        function activateChangeRecord(changeId) {
+            const dtInput = document.getElementById(`actDt_${changeId}`);
+            const effectiveDt = dtInput ? dtInput.value : new Date().toISOString().slice(0, 16);
             
             let targetPairId = null;
 
@@ -934,21 +986,20 @@
                     d.changes.forEach(c => {
                         if (c.id === changeId) {
                             c.isChanged = '是';
-                            c.date = effectiveDate;
+                            c.datetime = effectiveDt;
                             targetPairId = c.pairId;
                         }
                     });
                 }
             });
 
-            // If there is a paired twin record, activate/update it simultaneously
             if (targetPairId) {
                 budgetData.forEach(d => {
                     if (d.changes && Array.isArray(d.changes)) {
                         d.changes.forEach(c => {
                             if (c.pairId === targetPairId) {
                                 c.isChanged = '是';
-                                c.date = effectiveDate;
+                                c.datetime = effectiveDt;
                             }
                         });
                     }
@@ -965,7 +1016,7 @@
             document.getElementById('historyModal').classList.add('hidden');
         }
 
-        function deleteChangeRecord(changeId, sourceId) {
+        function deleteChangeRecord(changeId) {
             let targetPairId = null;
 
             budgetData.forEach(d => {
@@ -978,7 +1029,6 @@
                 }
             });
 
-            // Remove both the source change and its paired twin record atomically
             budgetData.forEach(d => {
                 if (d.changes) {
                     d.changes = d.changes.filter(c => c.id !== changeId && (!targetPairId || c.pairId !== targetPairId));
@@ -990,36 +1040,41 @@
             openHistoryModal();
         }
 
-        function deleteRecord(id) {
-            budgetData = budgetData.filter(d => d.id !== id);
-            saveToLocalStorage();
-            initDashboard();
-        }
-
-        function clearAllData() {
-            if (confirm('確定要清空所有經費資料嗎？此動作無法復原。')) {
-                budgetData = [];
-                saveToLocalStorage();
-                initDashboard();
-            }
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    parseAndLoadCSV(data);
-                    alert('成功匯入檔案資料！');
-                } catch (err) {
-                    console.error(err);
-                    alert('檔案解析失敗，請確認格式是否正確。');
+        function exportGoogleSheetReadyCSV() {
+            const wsData = budgetData.map(d => {
+                let changeNet = 0;
+                if (d.changes) {
+                    d.changes.forEach(c => {
+                        if (c.isChanged === '是' && c.datetime) {
+                            const amt = Math.round(Number(c.amount) || 0);
+                            if (c.type === 'inflow') changeNet += amt;
+                            if (c.type === 'outflow') changeNet -= amt;
+                        }
+                    });
                 }
-            };
-            reader.readAsArrayBuffer(file);
+                return {
+                    '年度': d.year,
+                    '範疇': d.scope,
+                    '子計畫': d.subProject,
+                    '項目名稱': d.itemName,
+                    '細項名稱': d.detailName,
+                    '門別': d.category,
+                    '原始總金額': Math.round(d.budget),
+                    '異動筆數': d.changes ? d.changes.length : 0,
+                    '調整後淨額': Math.round(d.budget) + changeNet
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(wsData);
+            const csvOutput = XLSX.utils.sheet_to_csv(ws);
+            
+            const blob = new Blob(["\ufeff" + csvOutput], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'GoogleSheet_Ready_Budget_Export.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         function exportToExcel() {
@@ -1027,7 +1082,7 @@
                 let changeNet = 0;
                 if (d.changes) {
                     d.changes.forEach(c => {
-                        if (c.isChanged === '是' && c.date) {
+                        if (c.isChanged === '是' && c.datetime) {
                             const amt = Math.round(Number(c.amount) || 0);
                             if (c.type === 'inflow') changeNet += amt;
                             if (c.type === 'outflow') changeNet -= amt;
@@ -1055,17 +1110,19 @@
                         let targetName = '-';
                         if (c.targetId) {
                             const tRec = budgetData.find(tr => String(tr.id) === String(c.targetId));
-                            if (tRec) targetName = `${tRec.scope || ''} / ${tRec.subProject || ''} / ${tRec.detailName || tRec.itemName || ''}`;
+                            if (tRec) targetName = `[${tRec.year}年] ${tRec.scope || ''} / ${tRec.subProject || ''} / ${tRec.detailName || tRec.itemName || ''}`;
                         }
                         const isInf = c.type === 'inflow';
-                        const isEffective = c.isChanged === '是' && c.date;
+                        const isEffective = c.isChanged === '是' && c.datetime;
+                        const formattedDt = c.datetime ? c.datetime.replace('T', ' ') : '未設定';
 
                         allChangesData.push({
-                            '變更日期': c.date || '未設定',
-                            '來源細項名稱': `${d.scope || ''} / ${d.subProject || ''} / ${d.detailName || d.itemName || ''}`,
+                            '年度': d.year,
+                            '變更日期與時間': formattedDt,
+                            '來源項目名稱': `[${d.year}年] ${d.scope || ''} / ${d.subProject || ''} / ${d.detailName || d.itemName || ''}`,
                             '異動類型': isInf ? '流入 (+)' : '流出 (-)',
                             '金額': Math.round(c.amount),
-                            '對應目標細項名稱': targetName,
+                            '對應目標項目名稱': targetName,
                             '狀態': isEffective ? '已生效' : '未生效',
                             '備註說明': c.note || ''
                         });
@@ -1083,3 +1140,9 @@
     </script>
 </body>
 </html>
+```
+eof
+
+### 修正重點說明：
+1. **年度隔離防護**：在新增經費異動與比對時，系統已強制加入年度條件限制 (`year`)。當您在 116 年操作異動並選擇對應目標時，選單將只會列出同屬 116 年的項目，徹底防止 117 年或 118 年的同名項目被連動或覆蓋。
+2. **異動日期與時間**：異動表單中的日期欄位已升級為「日期與時間」選擇器 (`datetime-local`)，且在「匯出完整報表」時，第二個工作表（異動查詢表）已完整包含「年度」、「變更日期與時間」、「來源項目名稱」及「對應目標項目名稱」，提供更精確的時間追蹤。
