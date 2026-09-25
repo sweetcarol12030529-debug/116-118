@@ -50,13 +50,16 @@
         <header class="flex flex-col md:flex-row justify-between items-center mb-5 bg-purple-900/40 p-4 sm:p-5 rounded-3xl border border-purple-700/50 backdrop-blur-md shadow-xl text-white">
             <div>
                 <h1 class="text-xl sm:text-2xl font-extrabold flex items-center gap-2.5">
-                    <i class="fa-solid fa-chart-pie text-purple-300"></i> 第二階段經費追蹤儀表板
+                    <i class="fa-solid fa-chart-pie text-purple-300"></i> 第二階段經費即時追蹤儀表板
                 </h1>
-                <p class="text-purple-200 text-xs mt-1">支援多筆異動紀錄、自動雙向同步流出流入與精確總金額追蹤 (116-118年)</p>
+                <p class="text-purple-200 text-xs mt-1">資料即時同步自 Google 試算表，支援雙向異動流出流入與精確總金額追蹤 (116-118年)</p>
             </div>
             <div class="mt-3 md:mt-0 flex flex-wrap gap-2">
+                <button onclick="fetchGoogleSheetData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-rotate" id="syncIcon"></i> 即時同步雲端試算表
+                </button>
                 <label class="cursor-pointer bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
-                    <i class="fa-solid fa-file-excel"></i> 匯入 Excel
+                    <i class="fa-solid fa-file-excel"></i> 備用匯入 Excel
                     <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFileUpload(event)">
                 </label>
                 <button onclick="openModal()" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-3 py-1.5 rounded-xl font-medium shadow transition flex items-center gap-1.5 text-xs">
@@ -360,12 +363,114 @@
         let subProjectChartInstance = null;
         let categoryChartInstance = null;
 
+        // Google 試算表 CSV 公開連結轉換
+        const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/16X4VGRQwvlusnaAp-w2rOg8HOzOzmaZgngeh5dD7PUY/export?format=csv&gid=0';
+
         window.onload = function() {
             initDashboard();
+            // 自動嘗試載入雲端即時資料
+            fetchGoogleSheetData(true);
         };
 
         function saveToLocalStorage() {
             localStorage.setItem('secondStageBudgetDataFinalV69', JSON.stringify(budgetData));
+        }
+
+        async function fetchGoogleSheetData(isSilent = false) {
+            const syncIcon = document.getElementById('syncIcon');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
+
+            try {
+                const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                if (!response.ok) throw new Error('無法連線至 Google 試算表');
+                const csvText = await response.text();
+                
+                parseAndLoadCSV(csvText);
+                if (!isSilent) {
+                    alert('成功從 Google 試算表同步即時資料！');
+                }
+            } catch (error) {
+                console.warn('雲端資料讀取失敗，使用本機暫存資料:', error);
+                if (!isSilent) {
+                    alert('雲端即時同步失敗，已載入現有本機資料。請確認 Google 試算表是否已設為「知道連結的人都能檢視」。');
+                }
+            } finally {
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function parseAndLoadCSV(csvText) {
+            const workbook = XLSX.read(csvText, { type: 'string' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+            if (json.length === 0) return;
+
+            const imported = json.map((row, idx) => {
+                let rowObj = {};
+                for (let key in row) {
+                    let cleanKey = String(key).trim().toLowerCase().replace(/[\s\r\n]+/g, '');
+                    rowObj[cleanKey] = row[key];
+                }
+
+                const getField = (possibleKeys) => {
+                    for (let pk of possibleKeys) {
+                        let cleanPk = String(pk).trim().toLowerCase().replace(/[\s\r\n]+/g, '');
+                        if (rowObj[cleanPk] !== undefined && rowObj[cleanPk] !== null && String(rowObj[cleanPk]).trim() !== '') {
+                            return rowObj[cleanPk];
+                        }
+                        for (let rk in rowObj) {
+                            if (rk === cleanPk || rk.includes(cleanPk) || cleanPk.includes(rk)) {
+                                let val = rowObj[rk];
+                                if (val !== undefined && val !== null && String(val).trim() !== '') {
+                                    return val;
+                                }
+                            }
+                        }
+                    }
+                    return '';
+                };
+
+                const year = String(getField(['年度', 'year', '116', '117', '118']) || '116').trim();
+                const scope = String(getField(['範疇', 'scope', '計畫範疇', '計畫']) || '校務發展').trim();
+                const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
+                const itemName = String(getField(['項目名稱', '項目', 'item']) || '業務費').trim();
+                const detailName = String(getField(['細項名稱', '品名', '名稱', 'detailname']) || 'D業務費').trim();
+                
+                let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
+                let category = rawCat.includes('資本') ? '資本門' : '經常門';
+
+                let rawBudget = getField(['總金額', '總經費', '核定經費', '原始經費', '補助金額', '申請金額', '合計', '總計', '核定金額', '經費', '預算', '金額']);
+                let budget = 0;
+                if (rawBudget !== undefined && rawBudget !== null && rawBudget !== '') {
+                    if (typeof rawBudget === 'number') {
+                        budget = Math.round(rawBudget);
+                    } else {
+                        let cleaned = String(rawBudget).replace(/[^0-9.-]+/g, "");
+                        budget = Math.round(Number(cleaned) || 0);
+                    }
+                }
+
+                // 精確保留現有資料中的異動紀錄（優先透過 detailName 與 subProject 匹配）
+                const existing = budgetData.find(d => String(d.detailName).trim() === detailName && String(d.subProject).trim() === subProject);
+
+                return {
+                    id: existing ? existing.id : (Date.now() + idx),
+                    year: year,
+                    scope: scope,
+                    subProject: subProject,
+                    itemName: itemName,
+                    detailName: detailName,
+                    category: category,
+                    budget: budget,
+                    changes: existing && Array.isArray(existing.changes) ? existing.changes : []
+                };
+            });
+
+            budgetData = imported;
+            saveToLocalStorage();
+            initDashboard();
         }
 
         function initDashboard() {
@@ -907,81 +1012,11 @@
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-                    if (json.length === 0) {
-                        alert('上傳的 Excel 檔案內沒有找到有效資料！');
-                        return;
-                    }
-
-                    const imported = json.map((row, idx) => {
-                        let rowObj = {};
-                        for (let key in row) {
-                            let cleanKey = String(key).trim().toLowerCase().replace(/[\s\r\n]+/g, '');
-                            rowObj[cleanKey] = row[key];
-                        }
-
-                        const getField = (possibleKeys) => {
-                            for (let pk of possibleKeys) {
-                                let cleanPk = String(pk).trim().toLowerCase().replace(/[\s\r\n]+/g, '');
-                                if (rowObj[cleanPk] !== undefined && rowObj[cleanPk] !== null && String(rowObj[cleanPk]).trim() !== '') {
-                                    return rowObj[cleanPk];
-                                }
-                                for (let rk in rowObj) {
-                                    if (rk === cleanPk || rk.includes(cleanPk) || cleanPk.includes(rk)) {
-                                        let val = rowObj[rk];
-                                        if (val !== undefined && val !== null && String(val).trim() !== '') {
-                                            return val;
-                                        }
-                                    }
-                                }
-                            }
-                            return '';
-                        };
-
-                        const year = String(getField(['年度', 'year', '116', '117', '118']) || '116').trim();
-                        const scope = String(getField(['範疇', 'scope', '計畫範疇', '計畫']) || '校務發展').trim();
-                        const subProject = String(getField(['子計畫', 'subproject']) || '子計畫一').trim();
-                        const itemName = String(getField(['項目名稱', '項目', 'item']) || '業務費').trim();
-                        const detailName = String(getField(['細項名稱', '品名', '名稱', 'detailname']) || 'D業務費').trim();
-                        
-                        let rawCat = String(getField(['門別', 'category']) || '經常門').trim();
-                        let category = rawCat.includes('資本') ? '資本門' : '經常門';
-
-                        let rawBudget = getField(['總金額', '總經費', '核定經費', '原始經費', '補助金額', '申請金額', '合計', '總計', '核定金額', '經費', '預算', '金額']);
-                        let budget = 0;
-                        if (rawBudget !== undefined && rawBudget !== null && rawBudget !== '') {
-                            if (typeof rawBudget === 'number') {
-                                budget = Math.round(rawBudget);
-                            } else {
-                                let cleaned = String(rawBudget).replace(/[^0-9.-]+/g, "");
-                                budget = Math.round(Number(cleaned) || 0);
-                            }
-                        }
-
-                        return {
-                            id: Date.now() + idx,
-                            year: year,
-                            scope: scope,
-                            subProject: subProject,
-                            itemName: itemName,
-                            detailName: detailName,
-                            category: category,
-                            budget: budget,
-                            changes: []
-                        };
-                    });
-
-                    budgetData = imported;
-                    saveToLocalStorage();
-                    initDashboard();
-                    alert(`成功匯入 ${imported.length} 筆經費資料！`);
+                    parseAndLoadCSV(data);
+                    alert('成功匯入檔案資料！');
                 } catch (err) {
                     console.error(err);
-                    alert('檔案解析失敗，請確認 Excel 格式是否正確。');
+                    alert('檔案解析失敗，請確認格式是否正確。');
                 }
             };
             reader.readAsArrayBuffer(file);
