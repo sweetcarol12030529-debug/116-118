@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧經費管理系統</title>
+    <title>深耕計畫經費管理系統 - 活潑紫漾版</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -16,47 +16,54 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap');
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f8fafc;
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #fbcfe8 100%);
+            min-height: 100vh;
         }
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #f3e8ff;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: #d8b4fe;
             border-radius: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: #c084fc;
+        }
+        .lively-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(216, 180, 254, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.1), 0 8px 10px -6px rgba(147, 51, 234, 0.1);
         }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
     <!-- Top Navigation Header -->
-    <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-30">
+    <header class="bg-gradient-to-r from-purple-800 via-purple-700 to-indigo-800 text-white shadow-xl sticky top-0 z-30 border-b border-purple-600/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-indigo-600 p-2 rounded-lg text-white shadow">
+                    <div class="bg-gradient-to-tr from-pink-500 to-purple-500 p-2.5 rounded-xl text-white shadow-lg transform hover:scale-105 transition duration-300">
                         <i class="fa-solid fa-wallet text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="font-bold text-lg sm:text-xl tracking-tight">智慧經費管理系統</h1>
-                        <p class="text-xs text-indigo-200 hidden sm:block">多維度經費管控、動態變更履歷與雲端回寫同步平台</p>
+                        <h1 class="font-bold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-purple-100 to-pink-200 bg-clip-text text-transparent">智慧經費管理系統</h1>
+                        <p class="text-xs text-purple-200 hidden sm:block">多維度經費管控、動態變更履歷與雲端同步平台</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <button id="syncCloudBtn" onclick="syncBackToCloud()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs sm:text-sm px-3 py-2 rounded-lg transition duration-200 flex items-center shadow font-medium">
+                    <button id="syncCloudBtn" onclick="syncBackToCloud()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm px-3.5 py-2 rounded-xl transition duration-200 flex items-center shadow-md font-medium transform hover:-translate-y-0.5">
                         <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> 回寫同步至雲端
                     </button>
-                    <button id="importGSheetBtn" onclick="openGSheetModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm px-3 py-2 rounded-lg transition duration-200 flex items-center shadow">
+                    <button id="importGSheetBtn" onclick="openGSheetModal()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm px-3.5 py-2 rounded-xl transition duration-200 flex items-center shadow-md transform hover:-translate-y-0.5">
                         <i class="fa-solid fa-file-csv mr-1.5"></i> 載入 Google 試算表
                     </button>
-                    <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm px-3.5 py-2 rounded-lg font-medium transition duration-200 flex items-center shadow-md">
+                    <button onclick="openAddModal()" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-xs sm:text-sm px-4 py-2 rounded-xl font-medium transition duration-200 flex items-center shadow-lg transform hover:-translate-y-0.5">
                         <i class="fa-solid fa-plus mr-1.5"></i> 新增經費
                     </button>
                 </div>
@@ -70,83 +77,85 @@
         <!-- Top Summary KPI Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Card 1: Total Budget -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 transition-all hover:shadow-md">
+            <div class="lively-card rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:border-purple-300">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">總核定金額</p>
-                        <h3 id="statTotalBudget" class="text-2xl font-bold text-slate-900 mt-1">$0</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider text-purple-700">總核定金額</p>
+                        <h3 id="statTotalBudget" class="text-2xl font-black text-slate-900 mt-1">$0</h3>
                     </div>
-                    <div class="p-2.5 bg-blue-50 text-blue-600 rounded-lg">
+                    <div class="p-3 bg-purple-100 text-purple-700 rounded-2xl shadow-inner">
                         <i class="fa-solid fa-coins text-lg"></i>
                     </div>
                 </div>
-                <div class="mt-3 flex items-center text-xs text-slate-500">
-                    <span id="statItemCount" class="font-medium text-slate-700 mr-1">0</span> 個經費項目
+                <div class="mt-3 flex items-center text-xs text-purple-800/80">
+                    <span id="statItemCount" class="font-bold text-purple-900 mr-1">0</span> 個經費項目
                 </div>
             </div>
 
             <!-- Card 2: Executed Amount -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 transition-all hover:shadow-md">
+            <div class="lively-card rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:border-purple-300">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">累計已核銷金額</p>
-                        <h3 id="statTotalSpent" class="text-2xl font-bold text-slate-900 mt-1">$0</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider text-amber-700">累計已核銷金額</p>
+                        <h3 id="statTotalSpent" class="text-2xl font-black text-slate-900 mt-1">$0</h3>
                     </div>
-                    <div class="p-2.5 bg-amber-50 text-amber-600 rounded-lg">
+                    <div class="p-3 bg-amber-100 text-amber-700 rounded-2xl shadow-inner">
                         <i class="fa-solid fa-receipt text-lg"></i>
                     </div>
                 </div>
-                <div class="mt-3 flex items-center text-xs text-slate-500">
-                    預算執行率：<span id="statExecutionRate" class="font-bold text-amber-600 ml-1">0%</span>
+                <div class="mt-3 flex items-center text-xs text-amber-800">
+                    預算執行率：<span id="statExecutionRate" class="font-black text-amber-600 ml-1">0%</span>
                 </div>
             </div>
 
             <!-- Card 3: Remaining Budget -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 transition-all hover:shadow-md">
+            <div class="lively-card rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:border-purple-300">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">目前可用餘額</p>
-                        <h3 id="statTotalRemaining" class="text-2xl font-bold text-emerald-600 mt-1">$0</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">目前可用餘額</p>
+                        <h3 id="statTotalRemaining" class="text-2xl font-black text-emerald-600 mt-1">$0</h3>
                     </div>
-                    <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-lg">
+                    <div class="p-3 bg-emerald-100 text-emerald-700 rounded-2xl shadow-inner">
                         <i class="fa-solid fa-piggy-bank text-lg"></i>
                     </div>
                 </div>
-                <div class="mt-3 flex items-center text-xs text-slate-500">
-                    未動用比率：<span id="statRemainingRate" class="font-medium text-slate-700 ml-1">0%</span>
+                <div class="mt-3 flex items-center text-xs text-emerald-800">
+                    未動用比率：<span id="statRemainingRate" class="font-bold text-slate-700 ml-1">0%</span>
                 </div>
             </div>
 
             <!-- Card 4: Budget Changes/Adjustments -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 transition-all hover:shadow-md">
+            <div class="lively-card rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:border-purple-300">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">變更與流用次數</p>
-                        <h3 id="statTotalAdjustments" class="text-2xl font-bold text-indigo-600 mt-1">0 次</h3>
+                        <p class="text-xs font-bold uppercase tracking-wider text-pink-700">變更與流用次數</p>
+                        <h3 id="statTotalAdjustments" class="text-2xl font-black text-pink-600 mt-1">0 次</h3>
                     </div>
-                    <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-lg">
+                    <div class="p-3 bg-pink-100 text-pink-700 rounded-2xl shadow-inner">
                         <i class="fa-solid fa-right-left text-lg"></i>
                     </div>
                 </div>
-                <div class="mt-3 flex items-center text-xs text-slate-500">
-                    累計變更淨額：<span id="statAdjustmentNet" class="font-medium text-slate-700 ml-1">$0</span>
+                <div class="mt-3 flex items-center text-xs text-pink-900/80">
+                    累計變更淨額：<span id="statAdjustmentNet" class="font-bold text-slate-700 ml-1">$0</span>
                 </div>
             </div>
         </div>
 
         <!-- Multi-Dimensional Filter Panel -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5">
-            <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 mb-4 border-b border-slate-100 gap-2">
+        <div class="lively-card rounded-2xl p-5 sm:p-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 mb-4 border-b border-purple-100 gap-2">
                 <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-filter text-indigo-600"></i>
+                    <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow">
+                        <i class="fa-solid fa-filter text-sm"></i>
+                    </div>
                     <h2 class="font-bold text-slate-800 text-base">多維度篩選與條件過濾</h2>
-                    <span id="filteredBadge" class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-medium">顯示全部</span>
+                    <span id="filteredBadge" class="bg-purple-200 text-purple-800 text-xs px-2.5 py-0.5 rounded-full font-bold">顯示全部</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="resetFilters()" class="text-xs text-slate-500 hover:text-indigo-600 px-2 py-1 rounded transition flex items-center">
+                    <button onclick="resetFilters()" class="text-xs text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl transition flex items-center font-medium">
                         <i class="fa-solid fa-rotate-left mr-1"></i> 重置篩選
                     </button>
-                    <button onclick="toggleChartSection()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded transition flex items-center">
+                    <button onclick="toggleChartSection()" class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-1.5 rounded-xl transition flex items-center shadow font-medium">
                         <i class="fa-solid fa-chart-pie mr-1"></i> <span id="toggleChartText">顯示圖表分析</span>
                     </button>
                 </div>
@@ -155,34 +164,34 @@
             <!-- Filter Dropdowns Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">年度</label>
-                    <select id="filterYear" onchange="applyFilters()" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label class="block text-xs font-bold text-purple-900 mb-1">年度</label>
+                    <select id="filterYear" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
                         <option value="ALL">全部年度</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">範疇</label>
-                    <select id="filterDomain" onchange="applyFilters()" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label class="block text-xs font-bold text-purple-900 mb-1">範疇</label>
+                    <select id="filterDomain" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
                         <option value="ALL">全部範疇</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">經費來源</label>
-                    <select id="filterSource" onchange="applyFilters()" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label class="block text-xs font-bold text-purple-900 mb-1">經費來源</label>
+                    <select id="filterSource" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
                         <option value="ALL">全部經費來源</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">門別</label>
-                    <select id="filterGate" onchange="applyFilters()" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label class="block text-xs font-bold text-purple-900 mb-1">門別</label>
+                    <select id="filterGate" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
                         <option value="ALL">全部門別</option>
                         <option value="經常門">經常門</option>
                         <option value="資本門">資本門</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">項目名稱</label>
-                    <select id="filterName" onchange="applyFilters()" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label class="block text-xs font-bold text-purple-900 mb-1">項目名稱</label>
+                    <select id="filterName" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
                         <option value="ALL">全部項目名稱</option>
                     </select>
                 </div>
@@ -192,12 +201,12 @@
         <!-- Analytics & Chart Visualizations (Hidden by default) -->
         <div id="chartSection" class="grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-300 hidden">
             <!-- Chart 1: Domain Budget Breakdown -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <div class="lively-card rounded-2xl p-5">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-chart-pie text-indigo-500 mr-2"></i> 各範疇預算分布
+                        <i class="fa-solid fa-chart-pie text-purple-600 mr-2"></i> 各範疇預算分布
                     </h3>
-                    <span class="text-xs text-slate-400">比例分析</span>
+                    <span class="text-xs text-purple-600 font-bold bg-purple-100 px-2 py-0.5 rounded-full">比例分析</span>
                 </div>
                 <div class="h-56 relative">
                     <canvas id="domainChart"></canvas>
@@ -205,12 +214,12 @@
             </div>
 
             <!-- Chart 2: Operating vs Capital Comparison -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <div class="lively-card rounded-2xl p-5">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-chart-column text-emerald-500 mr-2"></i> 門別執行與餘額比較 (經常門 / 資本門)
+                        <i class="fa-solid fa-chart-column text-emerald-600 mr-2"></i> 門別執行與餘額比較 (經常門 / 資本門)
                     </h3>
-                    <span class="text-xs text-slate-400">金額對比</span>
+                    <span class="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">金額對比</span>
                 </div>
                 <div class="h-56 relative">
                     <canvas id="gateChart"></canvas>
@@ -219,31 +228,31 @@
         </div>
 
         <!-- Data Table Container -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <div class="lively-card rounded-2xl overflow-hidden flex flex-col shadow-xl">
             <!-- Table Header Toolbar -->
-            <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="p-4 sm:p-5 bg-purple-50/70 border-b border-purple-100 flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex items-center space-x-2">
-                    <h3 class="font-bold text-slate-800 text-sm sm:text-base">經費明細清單</h3>
-                    <span id="recordCount" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-medium">共 0 筆</span>
+                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">經費明細清單</h3>
+                    <span id="recordCount" class="text-xs bg-purple-200 text-purple-900 px-2.5 py-0.5 rounded-full font-bold">共 0 筆</span>
                 </div>
                 <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
-                    <button onclick="autoLoadFromCloud(true)" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 px-3 py-1.5 rounded-lg transition flex items-center shadow-sm">
+                    <button onclick="autoLoadFromCloud(true)" class="text-xs bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 px-3 py-2 rounded-xl transition flex items-center shadow-sm font-medium">
                         <i class="fa-solid fa-arrows-rotate mr-1 text-emerald-600"></i> 即時同步雲端資料
                     </button>
-                    <button onclick="exportCSV()" class="text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg transition flex items-center shadow-sm">
-                        <i class="fa-solid fa-file-export mr-1 text-slate-500"></i> 匯出 CSV
+                    <button onclick="exportCSV()" class="text-xs bg-white hover:bg-purple-50 text-purple-700 border border-purple-300 px-3 py-2 rounded-xl transition flex items-center shadow-sm font-medium">
+                        <i class="fa-solid fa-file-export mr-1 text-purple-600"></i> 匯出 CSV
                     </button>
-                    <button onclick="restoreSampleData()" class="text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg transition flex items-center shadow-sm">
+                    <button onclick="restoreSampleData()" class="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl transition flex items-center shadow-sm font-medium">
                         <i class="fa-solid fa-arrow-rotate-left mr-1 text-slate-500"></i> 恢復範例資料
                     </button>
                 </div>
             </div>
 
-            <!-- Table Responsive Wrapper with 20 columns -->
+            <!-- Table Responsive Wrapper with explicit columns including subsidy, matching, adjustedTotal, changeCount -->
             <div class="overflow-x-auto custom-scrollbar">
                 <table class="w-full text-left text-xs border-collapse whitespace-nowrap">
                     <thead>
-                        <tr class="bg-slate-100/90 text-slate-700 font-semibold border-b border-slate-200 sticky top-0">
+                        <tr class="bg-purple-900 text-white font-semibold border-b border-purple-950 sticky top-0">
                             <th class="p-3 text-center">年度</th>
                             <th class="p-3">範疇</th>
                             <th class="p-3">子計畫</th>
@@ -253,35 +262,35 @@
                             <th class="p-3">細項名稱</th>
                             <th class="p-3 min-w-[200px]">支用說明或編列基準</th>
                             <th class="p-3 text-right">總金額</th>
-                            <th class="p-3 text-right">補助款</th>
-                            <th class="p-3 text-right">配合款</th>
-                            <th class="p-3 text-right text-emerald-700">變更流入</th>
-                            <th class="p-3 text-right text-rose-700">變更流出</th>
-                            <th class="p-3 text-right font-bold text-indigo-900">調整後淨額</th>
+                            <th class="p-3 text-right font-bold text-emerald-200">補助款</th>
+                            <th class="p-3 text-right font-bold text-sky-200">配合款</th>
+                            <th class="p-3 text-right">變更流入</th>
+                            <th class="p-3 text-right">變更流出</th>
+                            <th class="p-3 text-right font-black text-pink-200 underline decoration-pink-400">調整後淨額</th>
                             <th class="p-3 text-right">已核銷金額</th>
                             <th class="p-3 text-right">剩餘金額</th>
                             <th class="p-3 text-center">執行率</th>
-                            <th class="p-3 text-center">異動筆數</th>
+                            <th class="p-3 text-center font-bold text-amber-200">異動筆數</th>
                             <th class="p-3 text-center">異動時間</th>
                             <th class="p-3 text-center">完成變更日期</th>
-                            <th class="p-3 text-center sticky right-0 bg-slate-100 shadow-l">操作功能</th>
+                            <th class="p-3 text-center sticky right-0 bg-purple-900 shadow-l">操作功能</th>
                         </tr>
                     </thead>
-                    <tbody id="budgetTableBody" class="divide-y divide-slate-200">
+                    <tbody id="budgetTableBody" class="divide-y divide-purple-100 bg-white/50">
                         <!-- Dynamic content injected here -->
                     </tbody>
                 </table>
             </div>
 
             <!-- Table Footer Pagination & Information -->
-            <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
+            <div class="p-4 bg-purple-50/70 border-t border-purple-100 flex flex-col sm:flex-row justify-between items-center text-xs text-purple-900 gap-2">
                 <div class="flex items-center space-x-3">
                     <div>
-                        顯示第 <span id="pageStart">1</span> 至 <span id="pageEnd">0</span> 筆，共 <span id="pageTotal">0</span> 筆資料
+                        顯示第 <span id="pageStart" class="font-bold">1</span> 至 <span id="pageEnd" class="font-bold">0</span> 筆，共 <span id="pageTotal" class="font-bold">0</span> 筆資料
                     </div>
                     <div class="flex items-center space-x-1">
-                        <label for="pageSizeSelect" class="text-slate-600 font-medium">每頁顯示：</label>
-                        <select id="pageSizeSelect" onchange="changePageSize()" class="bg-white border border-slate-300 text-slate-700 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        <label for="pageSizeSelect" class="text-purple-800 font-bold">每頁顯示：</label>
+                        <select id="pageSizeSelect" onchange="changePageSize()" class="bg-white border border-purple-200 text-purple-900 font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <option value="10">10 筆</option>
                             <option value="25">25 筆</option>
                             <option value="50">50 筆</option>
@@ -291,9 +300,9 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-1">
-                    <button id="prevPageBtn" onclick="changePage(-1)" class="px-2.5 py-1 bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-50">上一頁</button>
-                    <span id="pageInfo" class="px-2 font-medium text-slate-700">1 / 1</span>
-                    <button id="nextPageBtn" onclick="changePage(1)" class="px-2.5 py-1 bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-50">下一頁</button>
+                    <button id="prevPageBtn" onclick="changePage(-1)" class="px-3 py-1.5 bg-white border border-purple-200 font-bold rounded-xl hover:bg-purple-100 disabled:opacity-40">上一頁</button>
+                    <span id="pageInfo" class="px-2 font-bold text-purple-900">1 / 1</span>
+                    <button id="nextPageBtn" onclick="changePage(1)" class="px-3 py-1.5 bg-white border border-purple-200 font-bold rounded-xl hover:bg-purple-100 disabled:opacity-40">下一頁</button>
                 </div>
             </div>
         </div>
@@ -301,115 +310,115 @@
     </main>
 
     <!-- Detail View Modal (完整檢視明細視窗) -->
-    <div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-indigo-900 text-white px-6 py-4 flex justify-between items-center">
+    <div id="detailModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
+            <div class="bg-gradient-to-r from-purple-800 to-pink-700 text-white px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-base flex items-center">
                     <i class="fa-solid fa-file-invoice-dollar mr-2"></i> 經費項目完整檢視明細
                 </h3>
-                <button onclick="closeModal('detailModal')" class="text-indigo-200 hover:text-white text-lg">
+                <button onclick="closeModal('detailModal')" class="text-purple-200 hover:text-white text-lg">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div id="detailModalContent" class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5">
+            <div id="detailModalContent" class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5 bg-purple-50/20">
                 <!-- Dynamically populated detail view -->
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                <span class="text-xs text-slate-400">完整對應匯入結構資料</span>
-                <button onclick="closeModal('detailModal')" class="px-5 py-2 rounded-lg text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 shadow">關閉視窗</button>
+            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-between items-center">
+                <span class="text-xs text-purple-600 font-medium">完整對應匯入結構資料</span>
+                <button onclick="closeModal('detailModal')" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 shadow">關閉視窗</button>
             </div>
         </div>
     </div>
 
     <!-- Add / Edit Modal -->
-    <div id="addEditModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-indigo-900 text-white px-6 py-4 flex justify-between items-center">
+    <div id="addEditModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
+            <div class="bg-gradient-to-r from-purple-800 to-pink-700 text-white px-6 py-4 flex justify-between items-center">
                 <h3 id="modalTitle" class="font-bold text-base flex items-center">
                     <i class="fa-solid fa-pen-to-square mr-2"></i> 新增經費項目
                 </h3>
-                <button onclick="closeModal('addEditModal')" class="text-indigo-200 hover:text-white text-lg">
+                <button onclick="closeModal('addEditModal')" class="text-purple-200 hover:text-white text-lg">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 bg-purple-50/20">
                 <input type="hidden" id="editItemId">
                 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">年度 <span class="text-rose-500">*</span></label>
-                        <input type="text" id="formYear" placeholder="例：113" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">年度 <span class="text-pink-600">*</span></label>
+                        <input type="text" id="formYear" placeholder="例：113" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">門別 <span class="text-rose-500">*</span></label>
-                        <select id="formGate" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">門別 <span class="text-pink-600">*</span></label>
+                        <select id="formGate" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white">
                             <option value="經常門">經常門</option>
                             <option value="資本門">資本門</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">範疇 <span class="text-rose-500">*</span></label>
-                        <input type="text" id="formDomain" placeholder="例：教學創新" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">範疇 <span class="text-pink-600">*</span></label>
+                        <input type="text" id="formDomain" placeholder="例：教學創新" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">子計畫</label>
-                        <input type="text" id="formSubproject" placeholder="例：子計畫一：跨域數位人才培育" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">子計畫</label>
+                        <input type="text" id="formSubproject" placeholder="例：子計畫一：跨域數位人才培育" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">經費 (經費來源) <span class="text-rose-500">*</span></label>
-                        <input type="text" id="formSource" placeholder="例：高教深耕計畫" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">經費 (經費來源) <span class="text-pink-600">*</span></label>
+                        <input type="text" id="formSource" placeholder="例：高教深耕計畫" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">項目名稱 <span class="text-rose-500">*</span></label>
-                        <input type="text" id="formName" placeholder="請輸入項目名稱" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">項目名稱 <span class="text-pink-600">*</span></label>
+                        <input type="text" id="formName" placeholder="請輸入項目名稱" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">細項名稱</label>
-                        <input type="text" id="formSubitem" placeholder="請輸入細項名稱" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">細項名稱</label>
+                        <input type="text" id="formSubitem" placeholder="請輸入細項名稱" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">支用說明或編列基準</label>
-                    <textarea id="formDescription" rows="2" placeholder="詳細說明預算編列基準、支用用途與計算方式..." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                    <label class="block text-xs font-bold text-purple-900 mb-1">支用說明或編列基準</label>
+                    <textarea id="formDescription" rows="2" placeholder="詳細說明預算編列基準、支用用途與計算方式..." class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">補助款 ($)</label>
-                        <input type="number" id="formSubsidy" min="0" placeholder="0" oninput="calculateFormTotal()" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">補助款 ($)</label>
+                        <input type="number" id="formSubsidy" min="0" placeholder="0" oninput="calculateFormTotal()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">配合款 ($)</label>
-                        <input type="number" id="formMatching" min="0" placeholder="0" oninput="calculateFormTotal()" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">配合款 ($)</label>
+                        <input type="number" id="formMatching" min="0" placeholder="0" oninput="calculateFormTotal()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">總金額 ($) <span class="text-rose-500">*</span></label>
-                        <input type="number" id="formTotalAmount" min="0" placeholder="0" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-indigo-50/50 font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">總金額 ($) <span class="text-pink-600">*</span></label>
+                        <input type="number" id="formTotalAmount" min="0" placeholder="0" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl bg-purple-50/50 font-bold text-purple-900 focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">已核銷金額 ($)</label>
-                        <input type="number" id="formSpent" min="0" placeholder="0" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">已核銷金額 ($)</label>
+                        <input type="number" id="formSpent" min="0" placeholder="0" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     </div>
                 </div>
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-2">
-                <button onclick="closeModal('addEditModal')" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-50">取消</button>
-                <button onclick="saveItem()" class="px-4 py-2 rounded-lg text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 shadow">儲存資料</button>
+            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end space-x-2">
+                <button onclick="closeModal('addEditModal')" class="px-4 py-2.5 border border-purple-200 rounded-xl text-xs font-bold text-purple-800 bg-white hover:bg-purple-100">取消</button>
+                <button onclick="saveItem()" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 shadow">儲存資料</button>
             </div>
         </div>
     </div>
 
     <!-- Budget Adjustment / Change Modal (變更經費) -->
-    <div id="changeModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-amber-600 text-white px-6 py-4 flex justify-between items-center">
+    <div id="changeModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
+            <div class="bg-gradient-to-r from-amber-600 to-pink-600 text-white px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-base flex items-center">
                     <i class="fa-solid fa-right-left mr-2"></i> 變更經費與流用調整
                 </h3>
@@ -417,12 +426,12 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 bg-purple-50/20">
                 <input type="hidden" id="changeItemId">
                 
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900 space-y-1">
-                    <p><span class="font-semibold">項目名稱：</span><span id="changeItemName" class="font-bold">-</span></p>
-                    <div class="flex justify-between mt-1 pt-1 border-t border-amber-200/60">
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 space-y-1 shadow-sm">
+                    <p><span class="font-bold">項目名稱：</span><span id="changeItemName" class="font-bold text-purple-900">-</span></p>
+                    <div class="flex justify-between mt-1 pt-1 border-t border-amber-200/60 font-medium">
                         <span>原核定總金額：<strong id="changeOrigBudget">$0</strong></span>
                         <span>目前實支：<strong id="changeCurrentSpent">$0</strong></span>
                     </div>
@@ -430,8 +439,8 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">變更類型</label>
-                        <select id="changeType" onchange="calculateNewBudget()" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">變更類型</label>
+                        <select id="changeType" onchange="calculateNewBudget()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
                             <option value="ADD">追加預算 (+)</option>
                             <option value="SUB">追減預算 (-)</option>
                             <option value="TRANSFER_OUT">經費流出 / 流轉出 (-)</option>
@@ -439,55 +448,55 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">變更金額 ($)</label>
-                        <input type="number" id="changeAmount" min="0" value="0" oninput="calculateNewBudget()" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-purple-900 mb-1">變更金額 ($)</label>
+                        <input type="number" id="changeAmount" min="0" value="0" oninput="calculateNewBudget()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                 </div>
 
                 <!-- Synchronized Transfer Selector Container -->
                 <div id="transferTargetContainer" class="hidden transition-all duration-200">
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">
-                        <i class="fa-solid fa-link text-amber-600 mr-1"></i> <span id="transferTargetTitle">對應同步對象項目</span> <span class="text-rose-500">*</span>
+                    <label class="block text-xs font-bold text-purple-900 mb-1">
+                        <i class="fa-solid fa-link text-amber-600 mr-1"></i> <span id="transferTargetTitle">對應同步對象項目</span> <span class="text-pink-600">*</span>
                     </label>
-                    <select id="transferTargetItem" class="w-full text-xs p-2.5 border border-amber-300 bg-amber-50/30 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <select id="transferTargetItem" class="w-full text-xs p-2.5 border border-amber-300 bg-amber-50/50 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
                         <option value="">-- 請選擇同步連動之對應經費項目 --</option>
                     </select>
-                    <p class="text-[11px] text-amber-700 mt-1 flex items-center">
+                    <p class="text-[11px] text-amber-800 mt-1 flex items-center font-medium">
                         <i class="fa-solid fa-circle-info mr-1"></i> 系統將自動同步在該對應項目產生相對應之【<span id="transferPairText">流入/流出</span>】動態履歷紀錄與細項標註。
                     </p>
                 </div>
 
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs flex justify-between items-center">
-                    <span class="text-slate-600">調整後淨額金額：</span>
-                    <span id="changeCalculatedBudget" class="text-base font-bold text-indigo-700">$0</span>
+                <div class="p-3.5 bg-purple-100/60 border border-purple-200 rounded-xl text-xs flex justify-between items-center font-bold">
+                    <span class="text-purple-900">調整後淨額金額：</span>
+                    <span id="changeCalculatedBudget" class="text-base font-black text-purple-800">$0</span>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">變更原因與核準文號 <span class="text-rose-500">*</span></label>
-                    <textarea id="changeReason" rows="2" placeholder="例：簽呈1130089號核準經費流用，因設備需求增購..." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                    <label class="block text-xs font-bold text-purple-900 mb-1">變更原因與核準文號 <span class="text-pink-600">*</span></label>
+                    <textarea id="changeReason" rows="2" placeholder="例：簽呈1130089號核準經費流用，因設備需求增購..." class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
                 </div>
 
                 <!-- History Log Section inside Modal -->
                 <div class="pt-2">
-                    <h4 class="text-xs font-bold text-slate-700 mb-2 flex items-center">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-slate-400"></i> 歷史變更紀錄
+                    <h4 class="text-xs font-bold text-purple-900 mb-2 flex items-center">
+                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-purple-600"></i> 歷史變更紀錄
                     </h4>
                     <div id="changeHistoryList" class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar text-xs">
-                        <p class="text-slate-400 text-center py-2">無歷史變更紀錄</p>
+                        <p class="text-purple-400 text-center py-2">無歷史變更紀錄</p>
                     </div>
                 </div>
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-2">
-                <button onclick="closeModal('changeModal')" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-50">取消</button>
-                <button onclick="saveBudgetChange()" class="px-4 py-2 rounded-lg text-xs font-medium text-white bg-amber-600 hover:bg-amber-500 shadow">確認經費變更</button>
+            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end space-x-2">
+                <button onclick="closeModal('changeModal')" class="px-4 py-2.5 border border-purple-200 rounded-xl text-xs font-bold text-purple-800 bg-white hover:bg-purple-100">取消</button>
+                <button onclick="saveBudgetChange()" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-700 hover:to-pink-700 shadow">確認經費變更</button>
             </div>
         </div>
     </div>
 
     <!-- Google Sheet Sync / Import Modal -->
-    <div id="gsheetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-xl w-full overflow-hidden">
-            <div class="bg-emerald-700 text-white px-6 py-4 flex justify-between items-center">
+    <div id="gsheetModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden border border-purple-200">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-base flex items-center">
                     <i class="fa-solid fa-file-csv mr-2"></i> Google 試算表雲端同步與回寫設定
                 </h3>
@@ -495,33 +504,32 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="p-6 space-y-4 text-xs">
-                <p class="text-slate-600 leading-relaxed">
+            <div class="p-6 space-y-4 text-xs bg-purple-50/20">
+                <p class="text-slate-700 leading-relaxed font-medium">
                     系統已設定為每次啟動時自動從下列 Google 試算表載入最新資料。您也可以隨時點擊按鈕手動同步。
                 </p>
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Google Sheet 試算表網址：</label>
-                    <input type="text" id="gsheetUrl" value="https://docs.google.com/spreadsheets/d/1aQHxyx-CruG9YjSrLQUOEdmuSSGU30qDshmeKhCTAd8/edit?gid=0#gid=0" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label class="block font-bold text-purple-900 mb-1">Google Sheet 試算表網址：</label>
+                    <input type="text" id="gsheetUrl" value="https://docs.google.com/spreadsheets/d/1aQHxyx-CruG9YjSrLQUOEdmuSSGU30qDshmeKhCTAd8/edit?gid=0#gid=0" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Apps Script 部署網址 (Web App URL - 已自動配置)：</label>
-                    <input type="text" id="scriptWebAppUrl" value="https://script.google.com/macros/s/AKfycby55N8V7HdC5WkjAW56rH7IbDfKHDkmYnw_D7mWedfXCYjrB9pzkaBhGWTVWo62Gxz6/exec" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-emerald-50 font-mono text-emerald-900">
+                    <label class="block font-bold text-purple-900 mb-1">Apps Script 部署網址 (Web App URL - 已自動配置)：</label>
+                    <input type="text" id="scriptWebAppUrl" value="https://script.google.com/macros/s/AKfycby55N8V7HdC5WkjAW56rH7IbDfKHDkmYnw_D7mWedfXCYjrB9pzkaBhGWTVWo62Gxz6/exec" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-emerald-50 font-mono text-emerald-900">
                 </div>
-                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-amber-900 space-y-1">
-                    <p class="font-medium text-amber-800"><i class="fa-solid fa-circle-info mr-1"></i> Apps Script 程式碼範例（已預設就緒）：</p>
-                    <textarea readonly rows="4" class="w-full bg-white font-mono text-[10px] p-2 border border-amber-200 rounded text-slate-700">function doPost(e) {
+                <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-amber-900 space-y-1 shadow-sm">
+                    <p class="font-bold text-amber-800"><i class="fa-solid fa-circle-info mr-1"></i> Apps Script 程式碼範例（已預設就緒含新欄位）：</p>
+                    <textarea readonly rows="3" class="w-full bg-white font-mono text-[10px] p-2.5 border border-amber-200 rounded-xl text-slate-700">function doPost(e) {
   var data = JSON.parse(e.postData.contents);
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  // 依據資料更新工作表內容
   return ContentService.createTextOutput(JSON.stringify({"status":"success"})).setMimeType(ContentService.MimeType.JSON);
 }</textarea>
                 </div>
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                <button onclick="openScriptGuideModal()" class="text-indigo-600 hover:underline font-medium">查看 Apps Script 教學</button>
+            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-between items-center">
+                <button onclick="openScriptGuideModal()" class="text-purple-700 hover:underline font-bold">查看 Apps Script 教學</button>
                 <div class="flex space-x-2">
-                    <button onclick="closeModal('gsheetModal')" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-50">取消</button>
-                    <button onclick="autoLoadFromCloud(true)" class="px-4 py-2 rounded-lg text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-500 shadow flex items-center">
+                    <button onclick="closeModal('gsheetModal')" class="px-4 py-2.5 border border-purple-200 rounded-xl text-xs font-bold text-purple-800 bg-white hover:bg-purple-100">取消</button>
+                    <button onclick="autoLoadFromCloud(true)" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow flex items-center">
                         <i class="fa-solid fa-cloud-arrow-down mr-1.5"></i> 立即載入試算表
                     </button>
                 </div>
@@ -530,58 +538,61 @@
     </div>
 
     <!-- Script Guide Modal -->
-    <div id="scriptGuideModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full overflow-hidden">
-            <div class="bg-indigo-900 text-white px-6 py-4 flex justify-between items-center">
+    <div id="scriptGuideModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-purple-200">
+            <div class="bg-gradient-to-r from-purple-800 to-pink-700 text-white px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-base flex items-center">
                     <i class="fa-solid fa-code mr-2"></i> Google Apps Script 回寫設定步驟說明
                 </h3>
-                <button onclick="closeModal('scriptGuideModal')" class="text-indigo-200 hover:text-white text-lg">
+                <button onclick="closeModal('scriptGuideModal')" class="text-purple-200 hover:text-white text-lg">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="p-6 space-y-3 text-xs text-slate-700 leading-relaxed max-h-[70vh] overflow-y-auto">
-                <ol class="list-decimal list-inside space-y-2">
-                    <li>開啟您的 Google 試算表：<a href="https://docs.google.com/spreadsheets/d/1aQHxyx-CruG9YjSrLQUOEdmuSSGU30qDshmeKhCTAd8/edit?gid=0#gid=0" target="_blank" class="text-indigo-600 underline">點此前往試算表</a></li>
+            <div class="p-6 space-y-3 text-xs text-slate-700 leading-relaxed max-h-[70vh] overflow-y-auto bg-purple-50/20">
+                <ol class="list-decimal list-inside space-y-2 font-medium">
+                    <li>開啟您的 Google 試算表：<a href="https://docs.google.com/spreadsheets/d/1aQHxyx-CruG9YjSrLQUOEdmuSSGU30qDshmeKhCTAd8/edit?gid=0#gid=0" target="_blank" class="text-purple-700 underline font-bold">點此前往試算表</a></li>
                     <li>點選上方選單的 <strong>「擴充功能」 > 「Apps Script」</strong>。</li>
                     <li>將下方完整程式碼複製並貼入編輯器中取代原程式碼：</li>
                 </ol>
                 <div class="relative">
-                    <button onclick="copyScriptCode()" class="absolute top-2 right-2 bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded text-[10px]">複製程式碼</button>
-                    <textarea id="appScriptCodeArea" readonly rows="10" class="w-full bg-slate-900 text-emerald-400 font-mono text-[11px] p-3 rounded-lg">function doPost(e) {
+                    <button onclick="copyScriptCode()" class="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold shadow">複製程式碼</button>
+                    <textarea id="appScriptCodeArea" readonly rows="12" class="w-full bg-slate-900 text-purple-300 font-mono text-[11px] p-3.5 rounded-2xl">function doPost(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getActiveSheet();
     var data = JSON.parse(e.postData.contents);
+    var rows = data.rows || [];
     
-    var rows = data.rows; // 帶有完整經費與變更歷程資料陣列
-    
-    for (var i = 0; i < rows.length; i++) {
-      var r = rows[i];
-      var rowNum = i + 2; // 從第2列開始
-      sheet.getRange(rowNum, 1).setValue(r.year);
-      sheet.getRange(rowNum, 2).setValue(r.domain);
-      sheet.getRange(rowNum, 3).setValue(r.subproject);
-      sheet.getRange(rowNum, 4).setValue(r.source);
-      sheet.getRange(rowNum, 5).setValue(r.gate);
-      sheet.getRange(rowNum, 6).setValue(r.name);
-      sheet.getRange(rowNum, 7).setValue(r.subitem);
-      sheet.getRange(rowNum, 8).setValue(r.description);
-      sheet.getRange(rowNum, 9).setValue(r.totalAmount);
-      sheet.getRange(rowNum, 10).setValue(r.subsidyAmount);
-      sheet.getRange(rowNum, 11).setValue(r.matchingAmount);
-      sheet.getRange(rowNum, 12).setValue(r.transferIn);
-      sheet.getRange(rowNum, 13).setValue(r.transferOut);
-      sheet.getRange(rowNum, 14).setValue(r.adjustedTotal);
-      sheet.getRange(rowNum, 15).setValue(r.spent);
-      sheet.getRange(rowNum, 16).setValue(r.remaining);
-      sheet.getRange(rowNum, 17).setValue(r.execRate + '%');
-      sheet.getRange(rowNum, 18).setValue(r.changeCount);
-      sheet.getRange(rowNum, 19).setValue(r.lastChangeTime);
-      sheet.getRange(rowNum, 20).setValue(r.completeDate);
+    if (rows.length === 0) {
+      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "無接收到有效資料"}))
+        .setMimeType(ContentService.MimeType.JSON);
     }
     
-    return ContentService.createTextOutput(JSON.stringify({"status": "success", "message": "已成功同步回寫 " + rows.length + " 筆資料"}))
+    sheet.clearContents();
+    var headers = [
+      "年度", "範疇", "子計畫", "經費來源", "門別", "項目名稱", "細項名稱", 
+      "支用說明或編列基準", "總金額", "補助款", "配合款", "變更流入", "變更流出", 
+      "調整後淨額", "已核銷金額", "剩餘金額", "執行率", "異動筆數", "異動時間", "完成變更日期"
+    ];
+    sheet.appendRow(headers);
+    
+    var rowsToAppend = [];
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      rowsToAppend.push([
+        r.year || '', r.domain || '', r.subproject || '', r.source || '', r.gate || '',
+        r.name || '', r.subitem || '', r.description || '', r.totalAmount || 0,
+        r.subsidyAmount || 0, r.matchingAmount || 0, r.transferIn || 0, r.transferOut || 0,
+        r.adjustedTotal || 0, r.spent || 0, r.remaining || 0, (r.execRate || 0) + '%',
+        r.changeCount || 0, r.lastChangeTime || '-', r.completeDate || '-'
+      ]);
+    }
+    
+    if (rowsToAppend.length > 0) {
+      sheet.getRange(2, 1, rowsToAppend.length, headers.length).setValues(rowsToAppend);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({"status": "success", "message": "已成功同步回寫 " + rows.length + " 筆"}))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()}))
@@ -590,16 +601,16 @@
 }</textarea>
                 </div>
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
-                <button onclick="closeModal('scriptGuideModal')" class="px-4 py-2 rounded-lg text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 shadow">我知道了</button>
+            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end">
+                <button onclick="closeModal('scriptGuideModal')" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 shadow">我知道了</button>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification Banner -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 text-xs">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
-        <span id="toastMsg">通知訊息</span>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-purple-950 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 text-xs border border-purple-800">
+        <i class="fa-solid fa-circle-check text-pink-400 text-base"></i>
+        <span id="toastMsg" class="font-medium">通知訊息</span>
     </div>
 
     <script>
@@ -679,7 +690,7 @@
         let gateChart = null;
         let showCharts = false;
 
-        const STORAGE_KEY = 'smart_budget_data_v3';
+        const STORAGE_KEY = 'smart_budget_data_v3_purple';
         const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby55N8V7HdC5WkjAW56rH7IbDfKHDkmYnw_D7mWedfXCYjrB9pzkaBhGWTVWo62Gxz6/exec';
 
         function getItemFullPath(item) {
@@ -843,7 +854,7 @@
             const badge = document.getElementById('filteredBadge');
             if (badge) {
                 badge.innerText = isFiltered ? '已套用篩選' : '顯示全部';
-                badge.className = isFiltered ? 'bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-medium' : 'bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-medium';
+                badge.className = isFiltered ? 'bg-pink-200 text-pink-900 text-xs px-2.5 py-0.5 rounded-full font-bold' : 'bg-purple-200 text-purple-900 text-xs px-2.5 py-0.5 rounded-full font-bold';
             }
 
             currentPage = 1;
@@ -947,7 +958,7 @@
                     datasets: [{
                         data: domainValues,
                         backgroundColor: [
-                            '#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#64748b'
+                            '#8b5cf6', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#6366f1'
                         ]
                     }]
                 },
@@ -955,7 +966,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } }
                     }
                 }
             });
@@ -983,7 +994,7 @@
                         {
                             label: '調整後淨額',
                             data: [regularBudget, capitalBudget],
-                            backgroundColor: '#6366f1'
+                            backgroundColor: '#8b5cf6'
                         },
                         {
                             label: '已核銷金額',
@@ -996,11 +1007,11 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
-                        x: { ticks: { font: { size: 11 } } }
+                        y: { beginAtZero: true, ticks: { font: { size: 10, weight: 'bold' } } },
+                        x: { ticks: { font: { size: 11, weight: 'bold' } } }
                     },
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } }
                     }
                 }
             });
@@ -1116,8 +1127,6 @@
             populateFilterOptions();
             applyFilters();
             closeModal('addEditModal');
-            
-            // 自動同步回寫至雲端
             syncBackToCloud();
         }
 
@@ -1143,8 +1152,8 @@
             if (total === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="21" class="text-center py-12 text-slate-400">
-                            <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300 block"></i>
+                        <td colspan="21" class="text-center py-12 text-purple-400 font-medium">
+                            <i class="fa-solid fa-folder-open text-3xl mb-2 text-purple-300 block"></i>
                             查無符合條件之經費資料，請重新調整篩選條件
                         </td>
                     </tr>
@@ -1176,8 +1185,8 @@
                 const m = getItemMetrics(item);
 
                 const gateBadge = item.gate === '經常門' 
-                    ? '<span class="px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-full">經常門</span>'
-                    : '<span class="px-2 py-0.5 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 rounded-full">資本門</span>';
+                    ? '<span class="px-2.5 py-0.5 text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 rounded-full">經常門</span>'
+                    : '<span class="px-2.5 py-0.5 text-xs font-bold bg-pink-100 text-pink-800 border border-pink-200 rounded-full">資本門</span>';
 
                 let displaySubitem = item.subitem || '';
                 if (item.history && item.history.length > 0) {
@@ -1200,44 +1209,44 @@
                 if (!displaySubitem) displaySubitem = '-';
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition border-b border-slate-100 text-xs";
+                tr.className = "hover:bg-purple-50/70 transition border-b border-purple-100 text-xs";
                 tr.innerHTML = `
-                    <td class="p-3 text-center font-bold text-slate-700">${item.year}</td>
-                    <td class="p-3 font-medium text-slate-700">${escapeHtml(item.domain)}</td>
+                    <td class="p-3 text-center font-bold text-purple-900">${item.year}</td>
+                    <td class="p-3 font-semibold text-slate-800">${escapeHtml(item.domain)}</td>
                     <td class="p-3 text-slate-600">${escapeHtml(item.subproject || '-')}</td>
-                    <td class="p-3 font-medium text-slate-700">${escapeHtml(item.source)}</td>
+                    <td class="p-3 font-semibold text-slate-700">${escapeHtml(item.source)}</td>
                     <td class="p-3 text-center">${gateBadge}</td>
                     <td class="p-3 font-bold text-slate-900">${escapeHtml(item.name)}</td>
-                    <td class="p-3 text-slate-700 font-medium text-indigo-900">${escapeHtml(displaySubitem)}</td>
-                    <td class="p-3 text-slate-600 max-w-xs truncate cursor-pointer hover:text-indigo-600" onclick="viewItemDetail('${item.id}')" title="點擊檢視完整內容：${escapeHtml(item.description || item.note || '')}">${escapeHtml(item.description || item.note || '-')}</td>
-                    <td class="p-3 text-right font-bold text-slate-900">$${m.total.toLocaleString()}</td>
-                    <td class="p-3 text-right text-slate-600">$${m.subsidy.toLocaleString()}</td>
-                    <td class="p-3 text-right text-slate-600">$${m.matching.toLocaleString()}</td>
-                    <td class="p-3 text-right font-medium text-emerald-600">+${m.transferIn.toLocaleString()}</td>
-                    <td class="p-3 text-right font-medium text-rose-600">-${m.transferOut.toLocaleString()}</td>
-                    <td class="p-3 text-right font-bold text-indigo-900 bg-indigo-50/30">$${m.adjustedTotal.toLocaleString()}</td>
-                    <td class="p-3 text-right font-medium text-slate-800">$${m.spent.toLocaleString()}</td>
-                    <td class="p-3 text-right font-bold ${m.remaining < 0 ? 'text-rose-600' : 'text-emerald-600'}">$${m.remaining.toLocaleString()}</td>
+                    <td class="p-3 text-purple-900 font-bold">${escapeHtml(displaySubitem)}</td>
+                    <td class="p-3 text-slate-600 max-w-xs truncate cursor-pointer hover:text-purple-700" onclick="viewItemDetail('${item.id}')" title="點擊檢視完整內容：${escapeHtml(item.description || item.note || '')}">${escapeHtml(item.description || item.note || '-')}</td>
+                    <td class="p-3 text-right font-black text-slate-900">$${m.total.toLocaleString()}</td>
+                    <td class="p-3 text-right font-bold text-emerald-700">$${m.subsidy.toLocaleString()}</td>
+                    <td class="p-3 text-right font-bold text-sky-700">$${m.matching.toLocaleString()}</td>
+                    <td class="p-3 text-right font-bold text-emerald-600">+${m.transferIn.toLocaleString()}</td>
+                    <td class="p-3 text-right font-bold text-rose-600">-${m.transferOut.toLocaleString()}</td>
+                    <td class="p-3 text-right font-black text-purple-950 bg-purple-100/60">$${m.adjustedTotal.toLocaleString()}</td>
+                    <td class="p-3 text-right font-semibold text-slate-800">$${m.spent.toLocaleString()}</td>
+                    <td class="p-3 text-right font-black ${m.remaining < 0 ? 'text-rose-600' : 'text-emerald-600'}">$${m.remaining.toLocaleString()}</td>
                     <td class="p-3 text-center">
-                        <span class="px-2 py-0.5 font-bold rounded-full ${m.execRate >= 90 ? 'bg-emerald-100 text-emerald-800' : m.execRate >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}">
+                        <span class="px-2.5 py-0.5 font-bold rounded-full ${m.execRate >= 90 ? 'bg-emerald-100 text-emerald-800' : m.execRate >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'}">
                             ${m.execRate}%
                         </span>
                     </td>
-                    <td class="p-3 text-center font-semibold text-slate-700">${m.changeCount} 筆</td>
-                    <td class="p-3 text-center text-slate-500">${m.lastChangeTime}</td>
-                    <td class="p-3 text-center text-slate-500">${m.completeDate}</td>
-                    <td class="p-3 text-center sticky right-0 bg-white shadow-l">
-                        <div class="flex items-center justify-center space-x-1">
-                            <button onclick="viewItemDetail('${item.id}')" title="完整檢視明細" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-xs transition">
+                    <td class="p-3 text-center font-black text-amber-800 bg-amber-50/50">${m.changeCount} 筆</td>
+                    <td class="p-3 text-center text-slate-500 font-medium">${m.lastChangeTime}</td>
+                    <td class="p-3 text-center text-slate-500 font-medium">${m.completeDate}</td>
+                    <td class="p-3 text-center sticky right-0 bg-white/95 shadow-l">
+                        <div class="flex items-center justify-center space-x-1.5">
+                            <button onclick="viewItemDetail('${item.id}')" title="完整檢視明細" class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 rounded-xl text-xs transition shadow-sm font-bold">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
-                            <button onclick="openChangeModal('${item.id}')" title="變更經費/流用" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded text-xs transition">
+                            <button onclick="openChangeModal('${item.id}')" title="變更經費/流用" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 rounded-xl text-xs transition shadow-sm font-bold">
                                 <i class="fa-solid fa-right-left"></i>
                             </button>
-                            <button onclick="openEditModal('${item.id}')" title="修改內容" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded text-xs transition">
+                            <button onclick="openEditModal('${item.id}')" title="修改內容" class="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs transition shadow-sm font-bold">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
-                            <button onclick="deleteItem('${item.id}')" title="刪除項目" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-xs transition">
+                            <button onclick="deleteItem('${item.id}')" title="刪除項目" class="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 rounded-xl text-xs transition shadow-sm font-bold">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -1259,15 +1268,15 @@
                 const rawKeys = Object.keys(item.rawRow).filter(k => k !== '_rawFields');
                 if (rawKeys.length > 0) {
                     rawFieldsHtml = `
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4">
-                            <h4 class="font-bold text-slate-800 text-xs mb-2 flex items-center">
-                                <i class="fa-solid fa-table-columns text-indigo-600 mr-2"></i> 試算表原始匯入完整欄位資料
+                        <div class="bg-white p-4 rounded-2xl border border-purple-200 mt-4 shadow-sm">
+                            <h4 class="font-bold text-purple-900 text-xs mb-2 flex items-center">
+                                <i class="fa-solid fa-table-columns text-purple-600 mr-2"></i> 試算表原始匯入完整欄位資料
                             </h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                                 ${rawKeys.map(k => `
-                                    <div class="bg-white p-2 rounded border border-slate-200">
-                                        <span class="text-slate-400 block text-[10px]">${escapeHtml(k)}</span>
-                                        <span class="font-semibold text-slate-800">${escapeHtml(String(item.rawRow[k] || '-'))}</span>
+                                    <div class="bg-purple-50/50 p-2.5 rounded-xl border border-purple-100">
+                                        <span class="text-purple-500 block text-[10px] font-bold">${escapeHtml(k)}</span>
+                                        <span class="font-bold text-slate-800">${escapeHtml(String(item.rawRow[k] || '-'))}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -1277,70 +1286,74 @@
             }
 
             container.innerHTML = `
-                <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-100">
+                <div class="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-2xl border border-purple-200 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <div>
-                            <span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase">項號 ${item.id}</span>
-                            <h3 class="text-base font-bold text-slate-900 mt-1">${escapeHtml(item.name)}</h3>
-                            <p class="text-xs text-indigo-700 font-medium">${getItemFullPath(item)}</p>
+                            <span class="bg-purple-700 text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase shadow">項號 ${item.id}</span>
+                            <h3 class="text-base font-black text-slate-900 mt-1">${escapeHtml(item.name)}</h3>
+                            <p class="text-xs text-purple-900 font-bold">${getItemFullPath(item)}</p>
                         </div>
                         <div class="text-right">
-                            <span class="text-xs text-slate-500">門別：</span>
-                            <span class="font-bold text-slate-800">${item.gate}</span>
+                            <span class="text-xs text-purple-700 font-bold">門別：</span>
+                            <span class="font-black text-purple-950">${item.gate}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-                        <span class="text-slate-500">原核定金額</span>
-                        <p class="text-base font-bold text-slate-900 mt-0.5">$${m.total.toLocaleString()}</p>
+                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
+                        <span class="text-purple-700 font-bold">原核定金額</span>
+                        <p class="text-base font-black text-slate-900 mt-0.5">$${m.total.toLocaleString()}</p>
                     </div>
-                    <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-                        <span class="text-emerald-600">變更流入/追加</span>
-                        <p class="text-base font-bold text-emerald-600 mt-0.5">+$${m.transferIn.toLocaleString()}</p>
+                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
+                        <span class="text-emerald-700 font-bold">補助款</span>
+                        <p class="text-base font-black text-emerald-700 mt-0.5">$${m.subsidy.toLocaleString()}</p>
                     </div>
-                    <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-                        <span class="text-rose-600">變更流出/追減</span>
-                        <p class="text-base font-bold text-rose-600 mt-0.5">-$${m.transferOut.toLocaleString()}</p>
+                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
+                        <span class="text-sky-700 font-bold">配合款</span>
+                        <p class="text-base font-black text-sky-700 mt-0.5">$${m.matching.toLocaleString()}</p>
                     </div>
-                    <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-lg shadow-sm">
-                        <span class="text-indigo-900 font-semibold">調整後淨額</span>
-                        <p class="text-base font-bold text-indigo-900 mt-0.5">$${m.adjustedTotal.toLocaleString()}</p>
+                    <div class="p-3.5 bg-purple-200/70 border border-purple-300 rounded-2xl shadow-sm">
+                        <span class="text-purple-950 font-bold">調整後淨額</span>
+                        <p class="text-base font-black text-purple-950 mt-0.5">$${m.adjustedTotal.toLocaleString()}</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <span class="text-slate-500">已核銷金額</span>
-                        <p class="text-sm font-bold text-slate-800 mt-0.5">$${m.spent.toLocaleString()}</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
+                        <span class="text-emerald-700 font-bold">變更流入/追加</span>
+                        <p class="text-sm font-black text-emerald-600 mt-0.5">+$${m.transferIn.toLocaleString()}</p>
                     </div>
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <span class="text-slate-500">目前剩餘金額</span>
-                        <p class="text-sm font-bold ${m.remaining < 0 ? 'text-rose-600' : 'text-emerald-600'} mt-0.5">$${m.remaining.toLocaleString()}</p>
+                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
+                        <span class="text-rose-700 font-bold">變更流出/追減</span>
+                        <p class="text-sm font-black text-rose-600 mt-0.5">-$${m.transferOut.toLocaleString()}</p>
                     </div>
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <span class="text-slate-500">預算執行率</span>
-                        <p class="text-sm font-bold text-indigo-700 mt-0.5">${m.execRate}%</p>
+                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
+                        <span class="text-purple-700 font-bold">已核銷金額</span>
+                        <p class="text-sm font-black text-slate-800 mt-0.5">$${m.spent.toLocaleString()}</p>
+                    </div>
+                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
+                        <span class="text-purple-700 font-bold">目前剩餘金額</span>
+                        <p class="text-sm font-black ${m.remaining < 0 ? 'text-rose-600' : 'text-emerald-600'} mt-0.5">$${m.remaining.toLocaleString()}</p>
                     </div>
                 </div>
 
                 <div class="space-y-3 text-xs">
-                    <div class="bg-white p-3.5 rounded-lg border border-slate-200">
-                        <span class="font-bold text-slate-700 block mb-1">細項名稱與流轉備註：</span>
-                        <p class="text-slate-800 whitespace-pre-wrap">${escapeHtml(item.subitem || '-')}</p>
+                    <div class="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm">
+                        <span class="font-bold text-purple-900 block mb-1">細項名稱與流轉備註：</span>
+                        <p class="text-slate-800 whitespace-pre-wrap font-medium">${escapeHtml(item.subitem || '-')}</p>
                     </div>
-                    <div class="bg-white p-3.5 rounded-lg border border-slate-200">
-                        <span class="font-bold text-slate-700 block mb-1">支用說明或編列基準 (完整內文)：</span>
-                        <p class="text-slate-800 whitespace-pre-wrap leading-relaxed">${escapeHtml(item.description || item.note || '-')}</p>
+                    <div class="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm">
+                        <span class="font-bold text-purple-900 block mb-1">支用說明或編列基準 (完整內文)：</span>
+                        <p class="text-slate-800 whitespace-pre-wrap leading-relaxed font-medium">${escapeHtml(item.description || item.note || '-')}</p>
                     </div>
                 </div>
 
                 ${rawFieldsHtml}
 
-                <div class="border-t border-slate-200 pt-3 text-xs">
-                    <span class="font-bold text-slate-700 flex items-center mb-2">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-600"></i> 異動與變更歷程 (${m.changeCount} 筆)
+                <div class="border-t border-purple-200 pt-3 text-xs">
+                    <span class="font-bold text-purple-900 flex items-center mb-2">
+                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-purple-700"></i> 異動與變更歷程 (${m.changeCount} 筆)
                     </span>
                     <div id="detailHistoryList" class="space-y-1.5"></div>
                 </div>
@@ -1353,7 +1366,7 @@
         function renderChangeHistoryInto(item, container) {
             if (!container) return;
             if (!item.history || item.history.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">無變更異動紀錄</p>`;
+                container.innerHTML = `<p class="text-purple-400 text-center py-2 text-xs font-medium">無變更異動紀錄</p>`;
                 return;
             }
             let html = '';
@@ -1363,18 +1376,18 @@
                 let sign = '+';
 
                 if (h.type === 'SUB') { label = '追減'; badgeColor = 'bg-rose-100 text-rose-800'; sign = '-'; }
-                if (h.type === 'TRANSFER_IN') { label = '流轉入'; badgeColor = 'bg-blue-100 text-blue-800'; sign = '+'; }
+                if (h.type === 'TRANSFER_IN') { label = '流轉入'; badgeColor = 'bg-purple-100 text-purple-800'; sign = '+'; }
                 if (h.type === 'TRANSFER_OUT') { label = '流轉出'; badgeColor = 'bg-amber-100 text-amber-800'; sign = '-'; }
 
                 html += `
-                    <div class="p-2 border border-slate-200 rounded bg-slate-50 flex justify-between items-start text-xs">
+                    <div class="p-2.5 border border-purple-200 rounded-xl bg-white shadow-sm flex justify-between items-start text-xs">
                         <div>
                             <div class="flex items-center space-x-1.5">
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${label}</span>
-                                <span class="font-bold text-slate-800">${sign}$${Number(h.amount).toLocaleString()}</span>
-                                <span class="text-slate-400 text-[10px]">${h.date || ''}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">${label}</span>
+                                <span class="font-bold text-slate-900">${sign}$${Number(h.amount).toLocaleString()}</span>
+                                <span class="text-purple-400 text-[10px] font-bold">${h.date || ''}</span>
                             </div>
-                            <p class="text-slate-600 text-[11px] mt-0.5">${escapeHtml(h.reason || '')}</p>
+                            <p class="text-slate-700 text-[11px] mt-1 font-medium">${escapeHtml(h.reason || '')}</p>
                         </div>
                     </div>
                 `;
@@ -1541,8 +1554,6 @@
             applyFilters();
             closeModal('changeModal');
             showToast("已成功完成經費變更與流用記錄");
-
-            // 同步回寫至 Google 試算表
             syncBackToCloud();
         }
 
@@ -1614,7 +1625,6 @@
             });
         }
 
-        // 自動從 Google 試算表載入最新資料的核心函式
         function autoLoadFromCloud(isManual = false) {
             const rawUrl = document.getElementById('gsheetUrl') ? document.getElementById('gsheetUrl').value.trim() : "https://docs.google.com/spreadsheets/d/1aQHxyx-CruG9YjSrLQUOEdmuSSGU30qDshmeKhCTAd8/edit?gid=0#gid=0";
             if (!rawUrl) return;
@@ -1685,7 +1695,7 @@
                                 const remainingVal = getCol(['剩餘金額', '餘額', 'Remaining']);
                                 const remaining = remainingVal ? numVal(remainingVal) : (adjustedTotal - spent);
 
-                                const changeCount = numVal(getCol(['異動筆數', '變更次數']));
+                                const changeCount = numVal(getCol(['異動筆數', '變更次數', '異動次數']));
                                 const lastChangeTime = getCol(['異動時間', '最後異動時間']) || "-";
                                 const completeDate = getCol(['完成變更日期', '完成日期']) || "-";
 
@@ -1737,7 +1747,6 @@
                     if (isManual) {
                         alert("載入 Google 試算表失敗，請確認網路連線與權限。錯誤：" + err.message);
                     } else {
-                        // 若自動載入失敗則退回使用本地端快取或範例資料
                         loadFromStorage();
                         populateFilterOptions();
                         applyFilters();
@@ -1823,7 +1832,6 @@
         }
 
         window.onload = function() {
-            // 先從本地快取載入以確保畫面第一時間有內容顯示
             loadFromStorage();
             populateFilterOptions();
             applyFilters();
@@ -1832,7 +1840,6 @@
             const urlInput = document.getElementById('scriptWebAppUrl');
             if (urlInput) urlInput.value = savedUrl;
 
-            // 【自動帶入】系統執行啟動時自動透過公開 CSV 連結載入 Google 試算表最新資料
             autoLoadFromCloud(false);
         };
     </script>
