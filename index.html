@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>深耕計畫經費管理系統 - 活潑紫漾版</title>
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse for CSV parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap');
@@ -43,7 +39,6 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Top Navigation Header -->
     <header class="bg-gradient-to-r from-purple-800 via-purple-700 to-indigo-800 text-white shadow-xl sticky top-0 z-30 border-b border-purple-600/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -63,6 +58,9 @@
                     <button id="importGSheetBtn" onclick="openGSheetModal()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm px-3.5 py-2 rounded-xl transition duration-200 flex items-center shadow-md transform hover:-translate-y-0.5">
                         <i class="fa-solid fa-file-csv mr-1.5"></i> 載入 Google 試算表
                     </button>
+                    <button onclick="openChangeLogModal()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs sm:text-sm px-3.5 py-2 rounded-xl transition duration-200 flex items-center shadow-md transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> 檢視經費異動
+                    </button>
                     <button onclick="openAddModal()" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-xs sm:text-sm px-4 py-2 rounded-xl font-medium transition duration-200 flex items-center shadow-lg transform hover:-translate-y-0.5">
                         <i class="fa-solid fa-plus mr-1.5"></i> 新增經費
                     </button>
@@ -71,7 +69,6 @@
         </div>
     </header>
 
-    <!-- Main Content Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
         <!-- Top Summary KPI Cards -->
@@ -141,7 +138,6 @@
             </div>
         </div>
 
-        <!-- Multi-Dimensional Filter Panel -->
         <div class="lively-card rounded-2xl p-5 sm:p-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 mb-4 border-b border-purple-100 gap-2">
                 <div class="flex items-center space-x-2">
@@ -198,7 +194,6 @@
             </div>
         </div>
 
-        <!-- Analytics & Chart Visualizations (Hidden by default) -->
         <div id="chartSection" class="grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-300 hidden">
             <!-- Chart 1: Domain Budget Breakdown -->
             <div class="lively-card rounded-2xl p-5">
@@ -227,7 +222,6 @@
             </div>
         </div>
 
-        <!-- Data Table Container -->
         <div class="lively-card rounded-2xl overflow-hidden flex flex-col shadow-xl">
             <!-- Table Header Toolbar -->
             <div class="p-4 sm:p-5 bg-purple-50/70 border-b border-purple-100 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -248,7 +242,7 @@
                 </div>
             </div>
 
-            <!-- Table Responsive Wrapper with explicit columns including subsidy, matching, adjustedTotal, changeCount -->
+            <!-- Table Responsive Wrapper -->
             <div class="overflow-x-auto custom-scrollbar">
                 <table class="w-full text-left text-xs border-collapse whitespace-nowrap">
                     <thead>
@@ -308,7 +302,116 @@
         </div>
 
     </main>
-    <!-- Budget Adjustment / Change Modal (變更經費) -->
+
+    <div id="changeLogModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
+            <div class="bg-gradient-to-r from-indigo-700 to-purple-800 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left mr-2"></i> 全校經費異動與流用履歷總覽
+                </h3>
+                <button onclick="closeModal('changeLogModal')" class="text-indigo-200 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 bg-purple-50/20">
+                <div class="flex justify-between items-center bg-indigo-50 border border-indigo-200 p-3.5 rounded-2xl text-xs text-indigo-900">
+                    <span class="font-medium"><i class="fa-solid fa-circle-info mr-1"></i> 此處彙整所有經費項目的追加、追減、流入與流出變更履歷。</span>
+                    <span id="totalChangeLogCount" class="font-bold bg-indigo-200 px-2.5 py-1 rounded-full text-indigo-950">共 0 筆異動</span>
+                </div>
+                <div id="globalChangeLogList" class="space-y-3">
+                    <!-- Dynamic change logs injected here -->
+                </div>
+            </div>
+            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end">
+                <button onclick="closeModal('changeLogModal')" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-800 hover:to-purple-800 shadow">關閉視窗</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addEditModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
+            <div class="bg-gradient-to-r from-purple-800 to-pink-700 text-white px-6 py-4 flex justify-between items-center">
+                <h3 id="modalTitle" class="font-bold text-base flex items-center">
+                    <i class="fa-solid fa-pen-to-square mr-2"></i> 新增經費項目
+                </h3>
+                <button onclick="closeModal('addEditModal')" class="text-purple-200 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 bg-purple-50/20">
+                <input type="hidden" id="editItemId">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">年度 <span class="text-pink-600">*</span></label>
+                        <input type="text" id="formYear" placeholder="例：113" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">門別 <span class="text-pink-600">*</span></label>
+                        <select id="formGate" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white">
+                            <option value="經常門">經常門</option>
+                            <option value="資本門">資本門</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">範疇 <span class="text-pink-600">*</span></label>
+                        <input type="text" id="formDomain" placeholder="例：教學創新" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">子計畫</label>
+                        <input type="text" id="formSubproject" placeholder="例：子計畫一：跨域數位人才培育" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">經費 (經費來源) <span class="text-pink-600">*</span></label>
+                        <input type="text" id="formSource" placeholder="例：高教深耕計畫" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">項目名稱 <span class="text-pink-600">*</span></label>
+                        <input type="text" id="formName" placeholder="請輸入項目名稱" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">細項名稱</label>
+                        <input type="text" id="formSubitem" placeholder="請輸入細項名稱" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-purple-900 mb-1">支用說明或編列基準</label>
+                    <textarea id="formDescription" rows="2" placeholder="詳細說明預算編列基準、支用用途與計算方式..." class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">補助款 ($)</label>
+                        <input type="number" id="formSubsidy" min="0" placeholder="0" oninput="calculateFormTotal()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">配合款 ($)</label>
+                        <input type="number" id="formMatching" min="0" placeholder="0" oninput="calculateFormTotal()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">總金額 ($) <span class="text-pink-600">*</span></label>
+                        <input type="number" id="formTotalAmount" min="0" placeholder="0" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl bg-purple-50/50 font-bold text-purple-900 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">已核銷金額 ($)</label>
+                        <input type="number" id="formSpent" min="0" placeholder="0" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end space-x-2">
+                <button onclick="closeModal('addEditModal')" class="px-4 py-2.5 border border-purple-200 rounded-xl text-xs font-bold text-purple-800 bg-white hover:bg-purple-100">取消</button>
+                <button onclick="saveItem()" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 shadow">儲存資料</button>
+            </div>
+        </div>
+    </div>
+
     <div id="changeModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
             <div class="bg-gradient-to-r from-amber-600 to-pink-600 text-white px-6 py-4 flex justify-between items-center">
@@ -355,7 +458,7 @@
                         <option value="">-- 請選擇同步連動之對應經費項目 --</option>
                     </select>
                     <p class="text-[11px] text-amber-800 mt-1 flex items-center font-medium">
-                        <i class="fa-solid fa-circle-info mr-1"></i> 系統將自動同步在該對應項目產生相對應之【<span id="transferPairText">流入/流出</span>】動態履歷紀錄與細項標註。
+                        <i class="fa-solid fa-circle-info mr-1"></i> 系統將自動同步在該對應項目產生相對應之【<span id="transferPairText">流入/流出</span>】動態履歷紀錄。
                     </p>
                 </div>
 
@@ -372,7 +475,7 @@
                 <!-- History Log Section inside Modal -->
                 <div class="pt-2">
                     <h4 class="text-xs font-bold text-purple-900 mb-2 flex items-center">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-purple-600"></i> 歷史變更紀錄
+                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-purple-600"></i> 本項目歷史變更紀錄
                     </h4>
                     <div id="changeHistoryList" class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar text-xs">
                         <p class="text-purple-400 text-center py-2">無歷史變更紀錄</p>
@@ -386,7 +489,6 @@
         </div>
     </div>
 
-    <!-- Google Sheet Sync / Import Modal -->
     <div id="gsheetModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden border border-purple-200">
             <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white px-6 py-4 flex justify-between items-center">
@@ -409,14 +511,6 @@
                     <label class="block font-bold text-purple-900 mb-1">Apps Script 部署網址 (Web App URL - 已自動配置)：</label>
                     <input type="text" id="scriptWebAppUrl" value="https://script.google.com/macros/s/AKfycby55N8V7HdC5WkjAW56rH7IbDfKHDkmYnw_D7mWedfXCYjrB9pzkaBhGWTVWo62Gxz6/exec" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-emerald-50 font-mono text-emerald-900">
                 </div>
-                <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-amber-900 space-y-1 shadow-sm">
-                    <p class="font-bold text-amber-800"><i class="fa-solid fa-circle-info mr-1"></i> Apps Script 程式碼範例（已預設就緒含新欄位）：</p>
-                    <textarea readonly rows="3" class="w-full bg-white font-mono text-[10px] p-2.5 border border-amber-200 rounded-xl text-slate-700">function doPost(e) {
-  var data = JSON.parse(e.postData.contents);
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  return ContentService.createTextOutput(JSON.stringify({"status":"success"})).setMimeType(ContentService.MimeType.JSON);
-}</textarea>
-                </div>
             </div>
             <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-between items-center">
                 <button onclick="openScriptGuideModal()" class="text-purple-700 hover:underline font-bold">查看 Apps Script 教學</button>
@@ -430,7 +524,6 @@
         </div>
     </div>
 
-    <!-- Script Guide Modal -->
     <div id="scriptGuideModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-purple-200">
             <div class="bg-gradient-to-r from-purple-800 to-pink-700 text-white px-6 py-4 flex justify-between items-center">
@@ -500,7 +593,6 @@
         </div>
     </div>
 
-    <!-- Toast Notification Banner -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-purple-950 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 text-xs border border-purple-800">
         <i class="fa-solid fa-circle-check text-pink-400 text-base"></i>
         <span id="toastMsg" class="font-medium">通知訊息</span>
@@ -583,7 +675,7 @@
         let gateChart = null;
         let showCharts = false;
 
-        const STORAGE_KEY = 'smart_budget_data_v3_purple';
+        const STORAGE_KEY = 'smart_budget_data_v4_purple';
         const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby55N8V7HdC5WkjAW56rH7IbDfKHDkmYnw_D7mWedfXCYjrB9pzkaBhGWTVWo62Gxz6/exec';
 
         function getItemFullPath(item) {
@@ -657,6 +749,66 @@
 
         function openGSheetModal() {
             openModal('gsheetModal');
+        }
+
+        function openChangeLogModal() {
+            const container = document.getElementById('globalChangeLogList');
+            const totalCountBadge = document.getElementById('totalChangeLogCount');
+            if (!container) return;
+
+            let allLogs = [];
+            budgetData.forEach(item => {
+                if (item.history && Array.isArray(item.history)) {
+                    item.history.forEach(h => {
+                        allLogs.push({
+                            itemName: item.name,
+                            itemId: item.id,
+                            fullPath: getItemFullPath(item),
+                            ...h
+                        });
+                    });
+                }
+            });
+
+            totalCountBadge.innerText = `共 ${allLogs.length} 筆異動`;
+
+            if (allLogs.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-purple-400 font-medium">
+                        <i class="fa-solid fa-clock-rotate-left text-3xl mb-2 text-purple-300 block"></i>
+                        目前尚無任何經費異動與流用紀錄
+                    </div>
+                `;
+            } else {
+                let html = '';
+                allLogs.forEach(log => {
+                    let label = '追加';
+                    let badgeColor = 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+                    let sign = '+';
+
+                    if (log.type === 'SUB') { label = '追減'; badgeColor = 'bg-rose-100 text-rose-800 border border-rose-200'; sign = '-'; }
+                    if (log.type === 'TRANSFER_IN') { label = '流轉入'; badgeColor = 'bg-purple-100 text-purple-800 border border-purple-200'; sign = '+'; }
+                    if (log.type === 'TRANSFER_OUT') { label = '流轉出'; badgeColor = 'bg-amber-100 text-amber-800 border border-amber-200'; sign = '-'; }
+
+                    html += `
+                        <div class="p-4 border border-purple-200 rounded-2xl bg-white shadow-sm space-y-1.5 text-xs">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeColor}">${label}</span>
+                                    <span class="font-black text-slate-900">${escapeHtml(log.itemName)}</span>
+                                    <span class="text-purple-600 font-bold">(${sign}$${Number(log.amount || 0).toLocaleString()})</span>
+                                </div>
+                                <span class="text-purple-500 font-bold text-[11px]"><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(log.date || '-')}</span>
+                            </div>
+                            <p class="text-purple-900 font-medium text-[11px]">項目路徑：${escapeHtml(log.fullPath)}</p>
+                            <p class="text-slate-700 font-medium bg-purple-50/60 p-2.5 rounded-xl border border-purple-100 mt-1">變更原因與核準說明：${escapeHtml(log.reason || '-')}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+
+            openModal('changeLogModal');
         }
 
         function saveToStorage() {
@@ -1081,25 +1233,7 @@
                     ? '<span class="px-2.5 py-0.5 text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 rounded-full">經常門</span>'
                     : '<span class="px-2.5 py-0.5 text-xs font-bold bg-pink-100 text-pink-800 border border-pink-200 rounded-full">資本門</span>';
 
-                let displaySubitem = item.subitem || '';
-                if (item.history && item.history.length > 0) {
-                    const transferNotes = [];
-                    item.history.forEach(h => {
-                        if (h.type === 'TRANSFER_OUT') {
-                            const targetInfo = h.targetPath || h.targetName || (h.reason && h.reason.match(/【流出至 ([^】]+)〗/) ? h.reason.match(/【流出至 ([^】]+)〗/)[1] : '');
-                            if (targetInfo) transferNotes.push(`流出至：[${targetInfo}]`);
-                        } else if (h.type === 'TRANSFER_IN') {
-                            const sourceInfo = h.sourcePath || h.sourceName || (h.reason && h.reason.match(/【從 ([^】]+) 流入】/) ? h.reason.match(/【從 ([^】]+) 流入】/)[1] : '');
-                            if (sourceInfo) transferNotes.push(`從 [${sourceInfo}] 流入`);
-                        }
-                    });
-                    if (transferNotes.length > 0) {
-                        const transferStr = transferNotes.join('; ');
-                        if (!displaySubitem) displaySubitem = transferStr;
-                        else if (!displaySubitem.includes(transferStr)) displaySubitem += ` (${transferStr})`;
-                    }
-                }
-                if (!displaySubitem) displaySubitem = '-';
+                const displaySubitem = item.subitem || '-';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-purple-50/70 transition border-b border-purple-100 text-xs";
@@ -1111,7 +1245,7 @@
                     <td class="p-3 text-center">${gateBadge}</td>
                     <td class="p-3 font-bold text-slate-900">${escapeHtml(item.name)}</td>
                     <td class="p-3 text-purple-900 font-bold">${escapeHtml(displaySubitem)}</td>
-                    <td class="p-3 text-slate-600 max-w-xs truncate cursor-pointer hover:text-purple-700" onclick="viewItemDetail('${item.id}')" title="點擊檢視完整內容：${escapeHtml(item.description || item.note || '')}">${escapeHtml(item.description || item.note || '-')}</td>
+                    <td class="p-3 text-slate-600 max-w-xs truncate" title="${escapeHtml(item.description || item.note || '')}">${escapeHtml(item.description || item.note || '-')}</td>
                     <td class="p-3 text-right font-black text-slate-900">$${m.total.toLocaleString()}</td>
                     <td class="p-3 text-right font-bold text-emerald-700">$${m.subsidy.toLocaleString()}</td>
                     <td class="p-3 text-right font-bold text-sky-700">$${m.matching.toLocaleString()}</td>
@@ -1144,113 +1278,6 @@
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function viewItemDetail(id) {
-            const item = budgetData.find(d => d.id === id);
-            if (!item) return;
-
-            const m = getItemMetrics(item);
-            const container = document.getElementById('detailModalContent');
-
-            let rawFieldsHtml = '';
-            if (item.rawRow && typeof item.rawRow === 'object') {
-                const rawKeys = Object.keys(item.rawRow).filter(k => k !== '_rawFields');
-                if (rawKeys.length > 0) {
-                    rawFieldsHtml = `
-                        <div class="bg-white p-4 rounded-2xl border border-purple-200 mt-4 shadow-sm">
-                            <h4 class="font-bold text-purple-900 text-xs mb-2 flex items-center">
-                                <i class="fa-solid fa-table-columns text-purple-600 mr-2"></i> 試算表原始匯入完整欄位資料
-                            </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                                ${rawKeys.map(k => `
-                                    <div class="bg-purple-50/50 p-2.5 rounded-xl border border-purple-100">
-                                        <span class="text-purple-500 block text-[10px] font-bold">${escapeHtml(k)}</span>
-                                        <span class="font-bold text-slate-800">${escapeHtml(String(item.rawRow[k] || '-'))}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            container.innerHTML = `
-                <div class="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-2xl border border-purple-200 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                        <div>
-                            <span class="bg-purple-700 text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase shadow">項號 ${item.id}</span>
-                            <h3 class="text-base font-black text-slate-900 mt-1">${escapeHtml(item.name)}</h3>
-                            <p class="text-xs text-purple-900 font-bold">${getItemFullPath(item)}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs text-purple-700 font-bold">門別：</span>
-                            <span class="font-black text-purple-950">${item.gate}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
-                        <span class="text-purple-700 font-bold">原核定金額</span>
-                        <p class="text-base font-black text-slate-900 mt-0.5">$${m.total.toLocaleString()}</p>
-                    </div>
-                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
-                        <span class="text-emerald-700 font-bold">補助款</span>
-                        <p class="text-base font-black text-emerald-700 mt-0.5">$${m.subsidy.toLocaleString()}</p>
-                    </div>
-                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
-                        <span class="text-sky-700 font-bold">配合款</span>
-                        <p class="text-base font-black text-sky-700 mt-0.5">$${m.matching.toLocaleString()}</p>
-                    </div>
-                    <div class="p-3.5 bg-purple-200/70 border border-purple-300 rounded-2xl shadow-sm">
-                        <span class="text-purple-950 font-bold">調整後淨額</span>
-                        <p class="text-base font-black text-purple-950 mt-0.5">$${m.adjustedTotal.toLocaleString()}</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
-                        <span class="text-emerald-700 font-bold">變更流入/追加</span>
-                        <p class="text-sm font-black text-emerald-600 mt-0.5">+$${m.transferIn.toLocaleString()}</p>
-                    </div>
-                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
-                        <span class="text-rose-700 font-bold">變更流出/追減</span>
-                        <p class="text-sm font-black text-rose-600 mt-0.5">-$${m.transferOut.toLocaleString()}</p>
-                    </div>
-                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
-                        <span class="text-purple-700 font-bold">已核銷金額</span>
-                        <p class="text-sm font-black text-slate-800 mt-0.5">$${m.spent.toLocaleString()}</p>
-                    </div>
-                    <div class="p-3.5 bg-white border border-purple-200 rounded-2xl shadow-sm">
-                        <span class="text-purple-700 font-bold">目前剩餘金額</span>
-                        <p class="text-sm font-black ${m.remaining < 0 ? 'text-rose-600' : 'text-emerald-600'} mt-0.5">$${m.remaining.toLocaleString()}</p>
-                    </div>
-                </div>
-
-                <div class="space-y-3 text-xs">
-                    <div class="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm">
-                        <span class="font-bold text-purple-900 block mb-1">細項名稱與流轉備註：</span>
-                        <p class="text-slate-800 whitespace-pre-wrap font-medium">${escapeHtml(item.subitem || '-')}</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm">
-                        <span class="font-bold text-purple-900 block mb-1">支用說明或編列基準 (完整內文)：</span>
-                        <p class="text-slate-800 whitespace-pre-wrap leading-relaxed font-medium">${escapeHtml(item.description || item.note || '-')}</p>
-                    </div>
-                </div>
-
-                ${rawFieldsHtml}
-
-                <div class="border-t border-purple-200 pt-3 text-xs">
-                    <span class="font-bold text-purple-900 flex items-center mb-2">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-purple-700"></i> 異動與變更歷程 (${m.changeCount} 筆)
-                    </span>
-                    <div id="detailHistoryList" class="space-y-1.5"></div>
-                </div>
-            `;
-
-            renderChangeHistoryInto(item, document.getElementById('detailHistoryList'));
-            openModal('detailModal');
         }
 
         function renderChangeHistoryInto(item, container) {
@@ -1467,13 +1494,6 @@
 
             const rowsPayload = budgetData.map(item => {
                 const m = getItemMetrics(item);
-                let subitemDisplay = item.subitem || '';
-                if (item.history && item.history.length > 0) {
-                    const latestH = item.history[0];
-                    if (latestH && latestH.reason) {
-                        subitemDisplay += ` (${latestH.reason})`;
-                    }
-                }
                 return {
                     year: item.year,
                     domain: item.domain,
@@ -1481,7 +1501,7 @@
                     source: item.source,
                     gate: item.gate,
                     name: item.name,
-                    subitem: subitemDisplay,
+                    subitem: item.subitem || '',
                     description: item.description || item.note || '',
                     totalAmount: m.total,
                     subsidyAmount: m.subsidy,
@@ -1653,7 +1673,7 @@
 
             const csvRows = [];
             csvRows.push([
-                '年度', '範疇', '子計畫', '經費', '門別', '項目名稱', '細項名稱', 
+                '年度', '範疇', '子計畫', '經費來源', '門別', '項目名稱', '細項名稱', 
                 '支用說明或編列基準', '總金額', '補助款', '配合款', '變更流入', '變更流出', 
                 '調整後淨額', '已核銷金額', '剩餘金額', '執行率%', '異動筆數', '異動時間', '完成變更日期'
             ].join(','));
@@ -1668,7 +1688,7 @@
                     `"${item.gate}"`,
                     `"${item.name.replace(/"/g, '""')}"`,
                     `"${(item.subitem || '').replace(/"/g, '""')}"`,
-                    `"${(item.description || item.note || '').replace(/"/g, '""')}"`,
+                    `"${(item.description || '').replace(/"/g, '""')}"`,
                     m.total,
                     m.subsidy,
                     m.matching,
@@ -1677,36 +1697,31 @@
                     m.adjustedTotal,
                     m.spent,
                     m.remaining,
-                    m.execRate,
+                    `"${m.execRate}%"`,
                     m.changeCount,
                     `"${m.lastChangeTime}"`,
                     `"${m.completeDate}"`
                 ].join(','));
             });
 
-            const csvString = "\uFEFF" + csvRows.join('\n');
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(["\uFEFF" + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', `經費明細清單_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("已完成 CSV 報表匯出");
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `深耕計畫經費明細_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("已成功匯出 CSV 檔案");
         }
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMsg');
-            if (!toast || !toastMsg) return;
-
-            toastMsg.innerText = msg;
+            const msgEl = document.getElementById('toastMsg');
+            if (!toast || !msgEl) return;
+            msgEl.innerText = msg;
             toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-
             setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-20', 'opacity-0');
             }, 3000);
         }
@@ -1714,22 +1729,17 @@
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         window.onload = function() {
             loadFromStorage();
             populateFilterOptions();
             applyFilters();
-
-            const savedUrl = localStorage.getItem(STORAGE_KEY + '_script_url') || DEFAULT_SCRIPT_URL;
-            const urlInput = document.getElementById('scriptWebAppUrl');
-            if (urlInput) urlInput.value = savedUrl;
-
             autoLoadFromCloud(false);
         };
     </script>
