@@ -3,1745 +3,1330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>深耕計畫經費管理系統 - 活潑紫漾版</title>
+    <title>經費專案管理系統 💜✨</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- SheetJS (xlsx) Library for Excel Import -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap');
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #fbcfe8 100%);
+            /* 調整為極致亮麗的淺紫色為主漸層背景 */
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 35%, #e9d5ff 70%, #d8b4fe 100%);
+            background-attachment: fixed;
             min-height: 100vh;
         }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f3e8ff;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #d8b4fe;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #c084fc;
-        }
-        .lively-card {
+        
+        .glass-card {
             background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(216, 180, 254, 0.4);
-            box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.1), 0 8px 10px -6px rgba(147, 51, 234, 0.1);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(216, 180, 254, 0.6);
+            box-shadow: 0 10px 30px 0 rgba(147, 51, 234, 0.1);
+        }
+
+        .glass-card-purple {
+            background: linear-gradient(135deg, rgba(245, 243, 255, 0.95), rgba(237, 233, 254, 0.9));
+            border: 1px solid rgba(192, 132, 252, 0.5);
+        }
+
+        .emoji-bounce {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        .emoji-bounce:hover {
+            transform: scale(1.3) rotate(12deg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(243, 232, 255, 0.5);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a855f7;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9333ea;
         }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="p-3 md:p-6 text-gray-800">
 
-    <header class="bg-gradient-to-r from-purple-800 via-purple-700 to-indigo-800 text-white shadow-xl sticky top-0 z-30 border-b border-purple-600/30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-tr from-pink-500 to-purple-500 p-2.5 rounded-xl text-white shadow-lg transform hover:scale-105 transition duration-300">
-                        <i class="fa-solid fa-wallet text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-purple-100 to-pink-200 bg-clip-text text-transparent">深耕計畫經費管理系統</h1>
-                        <p class="text-xs text-purple-200 hidden sm:block">多維度經費管控、動態變更履歷與雲端同步平台</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <button id="syncCloudBtn" onclick="syncBackToCloud()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm px-3.5 py-2 rounded-xl transition duration-200 flex items-center shadow-md font-medium transform hover:-translate-y-0.5">
-                        <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> 回寫同步至雲端
-                    </button>
-                    <button id="importGSheetBtn" onclick="openGSheetModal()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm px-3.5 py-2 rounded-xl transition duration-200 flex items-center shadow-md transform hover:-translate-y-0.5">
-                        <i class="fa-solid fa-file-csv mr-1.5"></i> 載入 Google 試算表
-                    </button>
-                    <button onclick="openChangeLogModal()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs sm:text-sm px-3.5 py-2 rounded-xl transition duration-200 flex items-center shadow-md transform hover:-translate-y-0.5">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> 檢視經費異動
-                    </button>
-                    <button onclick="openAddModal()" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-xs sm:text-sm px-4 py-2 rounded-xl font-medium transition duration-200 flex items-center shadow-lg transform hover:-translate-y-0.5">
-                        <i class="fa-solid fa-plus mr-1.5"></i> 新增經費
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+    <div class="max-w-7xl mx-auto space-y-6">
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <!-- Top Summary KPI Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Card 1: Total Budget -->
-            <div class="lively-card rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:border-purple-300">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-purple-700">總核定金額</p>
-                        <h3 id="statTotalBudget" class="text-2xl font-black text-slate-900 mt-1">$0</h3>
-                    </div>
-                    <div class="p-3 bg-purple-100 text-purple-700 rounded-2xl shadow-inner">
-                        <i class="fa-solid fa-coins text-lg"></i>
-                    </div>
+        <!-- 頁眉 Header -->
+        <header class="glass-card rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
+            <div class="flex items-center space-x-4">
+                <div class="w-14 h-14 bg-gradient-to-tr from-purple-600 to-indigo-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg transform hover:rotate-6 transition">
+                    💎
                 </div>
-                <div class="mt-3 flex items-center text-xs text-purple-800/80">
-                    <span id="statItemCount" class="font-bold text-purple-900 mr-1">0</span> 個經費項目
-                </div>
-            </div>
-
-            <!-- Card 2: Executed Amount -->
-            <div class="lively-card rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:border-purple-300">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-amber-700">累計已核銷金額</p>
-                        <h3 id="statTotalSpent" class="text-2xl font-black text-slate-900 mt-1">$0</h3>
-                    </div>
-                    <div class="p-3 bg-amber-100 text-amber-700 rounded-2xl shadow-inner">
-                        <i class="fa-solid fa-receipt text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3 flex items-center text-xs text-amber-800">
-                    預算執行率：<span id="statExecutionRate" class="font-black text-amber-600 ml-1">0%</span>
-                </div>
-            </div>
-
-            <!-- Card 3: Remaining Budget -->
-            <div class="lively-card rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:border-purple-300">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">目前可用餘額</p>
-                        <h3 id="statTotalRemaining" class="text-2xl font-black text-emerald-600 mt-1">$0</h3>
-                    </div>
-                    <div class="p-3 bg-emerald-100 text-emerald-700 rounded-2xl shadow-inner">
-                        <i class="fa-solid fa-piggy-bank text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3 flex items-center text-xs text-emerald-800">
-                    未動用比率：<span id="statRemainingRate" class="font-bold text-slate-700 ml-1">0%</span>
-                </div>
-            </div>
-
-            <!-- Card 4: Budget Changes/Adjustments -->
-            <div class="lively-card rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:border-purple-300">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-pink-700">變更與流用次數</p>
-                        <h3 id="statTotalAdjustments" class="text-2xl font-black text-pink-600 mt-1">0 次</h3>
-                    </div>
-                    <div class="p-3 bg-pink-100 text-pink-700 rounded-2xl shadow-inner">
-                        <i class="fa-solid fa-right-left text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3 flex items-center text-xs text-pink-900/80">
-                    累計變更淨額：<span id="statAdjustmentNet" class="font-bold text-slate-700 ml-1">$0</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="lively-card rounded-2xl p-5 sm:p-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 mb-4 border-b border-purple-100 gap-2">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow">
-                        <i class="fa-solid fa-filter text-sm"></i>
-                    </div>
-                    <h2 class="font-bold text-slate-800 text-base">多維度篩選與條件過濾</h2>
-                    <span id="filteredBadge" class="bg-purple-200 text-purple-800 text-xs px-2.5 py-0.5 rounded-full font-bold">顯示全部</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button onclick="resetFilters()" class="text-xs text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl transition flex items-center font-medium">
-                        <i class="fa-solid fa-rotate-left mr-1"></i> 重置篩選
-                    </button>
-                    <button onclick="toggleChartSection()" class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-1.5 rounded-xl transition flex items-center shadow font-medium">
-                        <i class="fa-solid fa-chart-pie mr-1"></i> <span id="toggleChartText">顯示圖表分析</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Filter Dropdowns Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-purple-900 mb-1">年度</label>
-                    <select id="filterYear" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
-                        <option value="ALL">全部年度</option>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-900 to-indigo-800">
+                        健康台灣深耕計畫 🚀
+                    </h1>
+                    <p class="text-xs md:text-sm text-purple-700 font-medium">經費專案管理與動態視覺化儀表板 📊✨</p>
+                </div>
+            </div>
+            
+            <!-- 資料更新時間與操作按鈕 -->
+            <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                <div class="text-right sm:text-right bg-purple-50/80 border border-purple-200 px-3 py-1.5 rounded-xl">
+                    <span class="text-[11px] font-bold text-purple-600 block">🕒 資料最後更新時間</span>
+                    <span id="last-update-time" class="text-xs font-black text-purple-900">尚未更新</span>
+                </div>
+                
+                <!-- 隱藏的 Excel 檔案輸入 -->
+                <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelImport(event)">
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="fetchDataFromGoogleSheet()" class="text-xs font-bold text-indigo-900 bg-indigo-100 hover:bg-indigo-200 px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm border border-indigo-200">
+                        <i id="sync-fetch-icon" class="fa-solid fa-arrows-rotate text-indigo-600"></i> <span id="sync-fetch-text">同步最新資料 🔄</span>
+                    </button>
+                    <button onclick="document.getElementById('excel-file-input').click()" class="text-xs font-bold text-purple-900 bg-purple-100 hover:bg-purple-200 px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm border border-purple-200">
+                        <i class="fa-solid fa-file-import text-purple-600"></i> 匯入 Excel 📂
+                    </button>
+                    <button id="sync-google-btn" onclick="syncToGoogleSheet()" class="text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md">
+                        <i id="sync-google-icon" class="fa-solid fa-cloud-arrow-up"></i> <span id="sync-google-text">匯入 Google 試算表 📤</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 頂部多條件動態查詢工具列 (移至 KPI 儀表板上方) -->
+        <div class="glass-card rounded-2xl p-4 shadow-md space-y-2">
+            <div class="flex justify-between items-center border-b border-purple-100 pb-2">
+                <h2 class="text-sm font-bold text-purple-900 flex items-center gap-1.5">
+                    <span>🔍 快捷動態查詢篩選器</span>
+                    <span class="text-[10px] bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">即時連動全站數據 ⚡</span>
+                </h2>
+                <button onclick="resetFilters()" class="text-[11px] font-bold text-purple-700 bg-purple-100 hover:bg-purple-200 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-left"></i> 重置篩選 🔄
+                </button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 bg-purple-50/60 p-3 rounded-xl border border-purple-100">
+                <!-- 年度 -->
+                <div>
+                    <label class="block text-xs font-bold text-purple-800 mb-1">📅 年度</label>
+                    <select id="filter-year" onchange="applyFilters()" class="w-full text-xs font-medium bg-white border border-purple-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-400 outline-none">
+                        <option value="">全部年度 ✨</option>
                     </select>
                 </div>
+
+                <!-- 範疇 -->
                 <div>
-                    <label class="block text-xs font-bold text-purple-900 mb-1">範疇</label>
-                    <select id="filterDomain" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
-                        <option value="ALL">全部範疇</option>
+                    <label class="block text-xs font-bold text-purple-800 mb-1">🏷️ 範疇</label>
+                    <select id="filter-category" onchange="applyFilters()" class="w-full text-xs font-medium bg-white border border-purple-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-400 outline-none">
+                        <option value="">全部範疇 🌟</option>
                     </select>
                 </div>
+
+                <!-- 子計畫 -->
                 <div>
-                    <label class="block text-xs font-bold text-purple-900 mb-1">經費來源</label>
-                    <select id="filterSource" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
-                        <option value="ALL">全部經費來源</option>
+                    <label class="block text-xs font-bold text-purple-800 mb-1">📌 子計畫</label>
+                    <select id="filter-subproject" onchange="applyFilters()" class="w-full text-xs font-medium bg-white border border-purple-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-400 outline-none">
+                        <option value="">全部子計畫 🎯</option>
                     </select>
                 </div>
+
+                <!-- 經費別 (補助款/配合款) -->
                 <div>
-                    <label class="block text-xs font-bold text-purple-900 mb-1">門別</label>
-                    <select id="filterGate" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
-                        <option value="ALL">全部門別</option>
-                        <option value="經常門">經常門</option>
-                        <option value="資本門">資本門</option>
+                    <label class="block text-xs font-bold text-purple-800 mb-1">💵 經費類別</label>
+                    <select id="filter-fundtype" onchange="applyFilters()" class="w-full text-xs font-medium bg-white border border-purple-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-400 outline-none">
+                        <option value="">全部類別 💰</option>
                     </select>
                 </div>
+
+                <!-- 門別 -->
                 <div>
-                    <label class="block text-xs font-bold text-purple-900 mb-1">項目名稱</label>
-                    <select id="filterName" onchange="applyFilters()" class="w-full text-xs p-2.5 border border-purple-200 bg-white/80 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none font-medium">
-                        <option value="ALL">全部項目名稱</option>
+                    <label class="block text-xs font-bold text-purple-800 mb-1">🚪 門別</label>
+                    <select id="filter-door" onchange="applyFilters()" class="w-full text-xs font-medium bg-white border border-purple-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-400 outline-none">
+                        <option value="">全部門別 🔮</option>
+                    </select>
+                </div>
+
+                <!-- 項目名稱 -->
+                <div>
+                    <label class="block text-xs font-bold text-purple-800 mb-1">📑 項目名稱</label>
+                    <select id="filter-item" onchange="applyFilters()" class="w-full text-xs font-medium bg-white border border-purple-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-400 outline-none">
+                        <option value="">全部項目 📄</option>
                     </select>
                 </div>
             </div>
         </div>
 
-        <div id="chartSection" class="grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-300 hidden">
-            <!-- Chart 1: Domain Budget Breakdown -->
-            <div class="lively-card rounded-2xl p-5">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-chart-pie text-purple-600 mr-2"></i> 各範疇預算分布
-                    </h3>
-                    <span class="text-xs text-purple-600 font-bold bg-purple-100 px-2 py-0.5 rounded-full">比例分析</span>
+        <!-- KPI 總覽卡片列 Dashboard Overview KPIs -->
+        <div class="space-y-4">
+            <!-- 第一排：預算劃分 (總計畫經費、補助款總額、配合款總額) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 總計畫經費 -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between border-l-4 border-purple-500 hover:scale-102 transition shadow-md">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600">Total Budget</span>
+                            <h3 class="text-gray-600 font-semibold text-xs">總計畫經費 💰</h3>
+                        </div>
+                        <span class="text-xl emoji-bounce">🏦</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-lg sm:text-xl md:text-2xl font-black text-purple-900 truncate" id="kpi-total-budget">$0</div>
+                        <div class="mt-1 text-[11px] flex justify-between items-center text-gray-600 font-medium">
+                            <span>預算總計</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="h-56 relative">
-                    <canvas id="domainChart"></canvas>
+
+                <!-- 補助款 -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between border-l-4 border-blue-500 hover:scale-102 transition shadow-md">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Subsidy Budget</span>
+                            <h3 class="text-gray-600 font-semibold text-xs">補助款總額 🎁</h3>
+                        </div>
+                        <span class="text-xl emoji-bounce">📜</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-lg sm:text-xl md:text-2xl font-black text-blue-900 truncate" id="kpi-sub-budget">$0</div>
+                        <div class="mt-1 text-[11px] flex justify-between items-center text-gray-600 font-medium">
+                            <span>已核銷: <b id="kpi-sub-spent" class="text-blue-700">$0</b></span>
+                            <span id="kpi-sub-rate-badge" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 配合款 -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between border-l-4 border-pink-500 hover:scale-102 transition shadow-md">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-pink-600">Matching Budget</span>
+                            <h3 class="text-gray-600 font-semibold text-xs">配合款總額 🤝</h3>
+                        </div>
+                        <span class="text-xl emoji-bounce">⚖️</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-lg sm:text-xl md:text-2xl font-black text-pink-900 truncate" id="kpi-match-budget">$0</div>
+                        <div class="mt-1 text-[11px] flex justify-between items-center text-gray-600 font-medium">
+                            <span>已核銷: <b id="kpi-match-spent" class="text-pink-700">$0</b></span>
+                            <span id="kpi-match-rate-badge" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-pink-100 text-pink-800">0%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Chart 2: Operating vs Capital Comparison -->
-            <div class="lively-card rounded-2xl p-5">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-chart-column text-emerald-600 mr-2"></i> 門別執行與餘額比較 (經常門 / 資本門)
-                    </h3>
-                    <span class="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">金額對比</span>
+            <!-- 第二排：執行與剩餘 (已核銷總額、剩餘金額總額、整體執行率) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 已核銷總額 -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between border-l-4 border-indigo-500 hover:scale-102 transition shadow-md">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Total Spent</span>
+                            <h3 class="text-gray-600 font-semibold text-xs">已核銷總額 💸</h3>
+                        </div>
+                        <span class="text-xl emoji-bounce">🧾</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-lg sm:text-xl md:text-2xl font-black text-indigo-900 truncate" id="kpi-total-spent">$0</div>
+                        <div class="mt-1 text-[11px] flex justify-between items-center text-gray-600 font-medium">
+                            <span>已使用金額</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="h-56 relative">
-                    <canvas id="gateChart"></canvas>
+
+                <!-- 剩餘金額總額 -->
+                <div class="glass-card rounded-2xl p-4 flex flex-col justify-between border-l-4 border-emerald-500 hover:scale-102 transition shadow-md">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Remaining</span>
+                            <h3 class="text-gray-600 font-semibold text-xs">剩餘金額總額 💵</h3>
+                        </div>
+                        <span class="text-xl emoji-bounce">👛</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-lg sm:text-xl md:text-2xl font-black text-emerald-900 truncate" id="kpi-total-remaining">$0</div>
+                        <div class="mt-1 text-[11px] flex justify-between items-center text-gray-600 font-medium">
+                            <span>尚可支用</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 全計畫整體執行率總覽 -->
+                <div class="glass-card-purple rounded-2xl p-4 flex flex-col justify-between shadow-md relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-700">Execution Status</span>
+                            <h3 class="text-purple-900 font-bold text-xs">整體執行率 🔥</h3>
+                        </div>
+                        <span class="text-xl emoji-bounce">🎯</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between">
+                        <div>
+                            <span class="text-2xl md:text-3xl font-black text-purple-900" id="kpi-overall-rate">0%</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-purple-100 rounded-full h-2 mt-2 overflow-hidden">
+                        <div id="kpi-total-bar" class="bg-gradient-to-r from-purple-500 to-indigo-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="lively-card rounded-2xl overflow-hidden flex flex-col shadow-xl">
-            <!-- Table Header Toolbar -->
-            <div class="p-4 sm:p-5 bg-purple-50/70 border-b border-purple-100 flex flex-col sm:flex-row justify-between items-center gap-3">
-                <div class="flex items-center space-x-2">
-                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">經費明細清單</h3>
-                    <span id="recordCount" class="text-xs bg-purple-200 text-purple-900 px-2.5 py-0.5 rounded-full font-bold">共 0 筆</span>
+        <!-- 圖表區域 Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 各範疇經費與執行率分析 -->
+            <div class="glass-card rounded-2xl p-5 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-purple-900 flex items-center gap-2">
+                        <span>🌈 各範疇經費總額與執行率</span>
+                    </h2>
+                    <span class="text-xs bg-purple-100 text-purple-700 font-bold px-2.5 py-1 rounded-full">範疇統計 📊</span>
                 </div>
-                <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
-                    <button onclick="autoLoadFromCloud(true)" class="text-xs bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 px-3 py-2 rounded-xl transition flex items-center shadow-sm font-medium">
-                        <i class="fa-solid fa-arrows-rotate mr-1 text-emerald-600"></i> 即時同步雲端資料
-                    </button>
-                    <button onclick="exportCSV()" class="text-xs bg-white hover:bg-purple-50 text-purple-700 border border-purple-300 px-3 py-2 rounded-xl transition flex items-center shadow-sm font-medium">
-                        <i class="fa-solid fa-file-export mr-1 text-purple-600"></i> 匯出 CSV
-                    </button>
-                    <button onclick="restoreSampleData()" class="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl transition flex items-center shadow-sm font-medium">
-                        <i class="fa-solid fa-arrow-rotate-left mr-1 text-slate-500"></i> 恢復範例資料
-                    </button>
+                <div class="relative h-64 md:h-72">
+                    <canvas id="categoryChart"></canvas>
                 </div>
             </div>
 
-            <!-- Table Responsive Wrapper -->
-            <div class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left text-xs border-collapse whitespace-nowrap">
-                    <thead>
-                        <tr class="bg-purple-900 text-white font-semibold border-b border-purple-950 sticky top-0">
-                            <th class="p-3 text-center">年度</th>
-                            <th class="p-3">範疇</th>
-                            <th class="p-3">子計畫</th>
-                            <th class="p-3">經費</th>
-                            <th class="p-3 text-center">門別</th>
-                            <th class="p-3">項目名稱</th>
-                            <th class="p-3">細項名稱</th>
-                            <th class="p-3 min-w-[200px]">支用說明或編列基準</th>
-                            <th class="p-3 text-right">總金額</th>
-                            <th class="p-3 text-right font-bold text-emerald-200">補助款</th>
-                            <th class="p-3 text-right font-bold text-sky-200">配合款</th>
-                            <th class="p-3 text-right">變更流入</th>
-                            <th class="p-3 text-right">變更流出</th>
-                            <th class="p-3 text-right font-black text-pink-200 underline decoration-pink-400">調整後淨額</th>
-                            <th class="p-3 text-right">已核銷金額</th>
-                            <th class="p-3 text-right">剩餘金額</th>
-                            <th class="p-3 text-center">執行率</th>
-                            <th class="p-3 text-center font-bold text-amber-200">異動筆數</th>
-                            <th class="p-3 text-center">異動時間</th>
-                            <th class="p-3 text-center">完成變更日期</th>
-                            <th class="p-3 text-center sticky right-0 bg-purple-900 shadow-l">操作功能</th>
+            <!-- 各費用類別經費與執行狀況分析 (含獨立查詢) -->
+            <div class="glass-card rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <h2 class="text-lg font-bold text-purple-900 flex items-center gap-2">
+                        <span>💡 各費用類別執行分析</span>
+                    </h2>
+                    <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-full self-start sm:self-auto">四大費用統計 📊</span>
+                </div>
+                <div class="relative h-64 md:h-72">
+                    <canvas id="subprojectChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 合併：四大費用類別與子計畫執行綜合追蹤器 (Sub-projects & Expense Tracker) -->
+        <div class="glass-card rounded-2xl p-5 shadow-lg space-y-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-purple-100 pb-3">
+                <div>
+                    <h2 class="text-lg font-bold text-purple-900 flex items-center gap-2">
+                        <span>🧩 子計畫與費用類別綜合進度追蹤 (Expense & Sub-projects Tracker)</span>
+                    </h2>
+                    <p class="text-xs text-gray-500 mt-0.5">選擇特定範疇或子計畫，即時檢視人事費、業務費、設備費、管理費之執行率與金額明細</p>
+                </div>
+                
+                <!-- 專屬快捷查詢選單 -->
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <div class="flex items-center gap-1 bg-purple-50/80 px-2.5 py-1 rounded-xl border border-purple-200 text-xs">
+                        <span class="font-bold text-purple-800">🏷️ 範疇:</span>
+                        <select id="tracker-category" onchange="syncCategoryToMain(this.value)" class="bg-white text-xs font-bold text-purple-900 rounded p-1 outline-none border border-purple-200">
+                            <option value="">全部範疇 🌟</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1 bg-purple-50/80 px-2.5 py-1 rounded-xl border border-purple-200 text-xs">
+                        <span class="font-bold text-purple-800">📌 子計畫:</span>
+                        <select id="tracker-subproject" onchange="syncSubprojectToMain(this.value)" class="bg-white text-xs font-bold text-purple-900 rounded p-1 outline-none border border-purple-200 max-w-[160px] truncate">
+                            <option value="">全部子計畫 🎯</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 四大費用類別數據呈現卡片 -->
+            <div id="expense-category-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- 動態注入人事費、業務費、設備費、管理費的現況卡片 -->
+            </div>
+        </div>
+
+        <!-- 經費明細表與動態查詢 Section -->
+        <div class="glass-card rounded-2xl p-5 shadow-xl space-y-4">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-purple-100 pb-4">
+                <div>
+                    <h2 class="text-xl font-black text-purple-900 flex items-center gap-2">
+                        <span>🔍 經費明細查詢表</span>
+                        <span class="text-xs bg-purple-100 text-purple-700 font-bold px-2.5 py-1 rounded-full">明細管理 📝</span>
+                    </h2>
+                    <p class="text-xs text-gray-500 mt-0.5">提供多維度條件交叉查詢與動態數據管理</p>
+                </div>
+                <div class="flex items-center gap-2 self-end md:self-auto">
+                    <button onclick="openModal()" class="text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md">
+                        <i class="fa-solid fa-plus"></i> 新增經費 ➕
+                    </button>
+                    <button onclick="resetFilters()" class="text-xs font-bold text-purple-700 bg-purple-100 hover:bg-purple-200 px-3 py-2 rounded-xl transition flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> 重置篩選 🔄
+                    </button>
+                    <span class="text-xs text-purple-800 font-bold bg-white px-3 py-2 rounded-xl shadow-sm border border-purple-200">
+                        符合筆數：<span id="filtered-count" class="text-purple-600 font-black">0</span> 筆
+                    </span>
+                </div>
+            </div>
+
+            <!-- 資料表格 Table -->
+            <div class="overflow-x-auto rounded-xl border border-purple-100 shadow-inner max-h-[500px]">
+                <table class="w-full text-xs text-left text-gray-700 bg-white">
+                    <thead class="text-xs text-purple-900 bg-purple-100/90 uppercase font-bold sticky top-0 z-10 backdrop-blur-md">
+                        <tr>
+                            <th class="px-3 py-3">年度</th>
+                            <th class="px-3 py-3">範疇</th>
+                            <th class="px-3 py-3">子計畫</th>
+                            <th class="px-3 py-3">經費類別</th>
+                            <th class="px-3 py-3">門別</th>
+                            <th class="px-3 py-3">項目名稱</th>
+                            <th class="px-3 py-3">細項名稱</th>
+                            <th class="px-3 py-3">支用說明或編列基準</th>
+                            <th class="px-3 py-3 text-right">金額 (元)</th>
+                            <th class="px-3 py-3 text-right">已核銷 (元)</th>
+                            <th class="px-3 py-3 text-right">剩餘 (元)</th>
+                            <th class="px-3 py-3 text-center">執行率</th>
+                            <th class="px-3 py-3 text-center">操作管理</th>
                         </tr>
                     </thead>
-                    <tbody id="budgetTableBody" class="divide-y divide-purple-100 bg-white/50">
-                        <!-- Dynamic content injected here -->
+                    <tbody id="table-body" class="divide-y divide-purple-50 font-medium">
+                        <!-- 動態帶入資料 -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- Table Footer Pagination & Information -->
-            <div class="p-4 bg-purple-50/70 border-t border-purple-100 flex flex-col sm:flex-row justify-between items-center text-xs text-purple-900 gap-2">
-                <div class="flex items-center space-x-3">
-                    <div>
-                        顯示第 <span id="pageStart" class="font-bold">1</span> 至 <span id="pageEnd" class="font-bold">0</span> 筆，共 <span id="pageTotal" class="font-bold">0</span> 筆資料
-                    </div>
-                    <div class="flex items-center space-x-1">
-                        <label for="pageSizeSelect" class="text-purple-800 font-bold">每頁顯示：</label>
-                        <select id="pageSizeSelect" onchange="changePageSize()" class="bg-white border border-purple-200 text-purple-900 font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="10">10 筆</option>
-                            <option value="25">25 筆</option>
-                            <option value="50">50 筆</option>
-                            <option value="100">100 筆</option>
-                            <option value="ALL">全部筆數 (完整顯示)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-1">
-                    <button id="prevPageBtn" onclick="changePage(-1)" class="px-3 py-1.5 bg-white border border-purple-200 font-bold rounded-xl hover:bg-purple-100 disabled:opacity-40">上一頁</button>
-                    <span id="pageInfo" class="px-2 font-bold text-purple-900">1 / 1</span>
-                    <button id="nextPageBtn" onclick="changePage(1)" class="px-3 py-1.5 bg-white border border-purple-200 font-bold rounded-xl hover:bg-purple-100 disabled:opacity-40">下一頁</button>
-                </div>
-            </div>
         </div>
 
-    </main>
-
-    <div id="changeLogModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
-            <div class="bg-gradient-to-r from-indigo-700 to-purple-800 text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center">
-                    <i class="fa-solid fa-clock-rotate-left mr-2"></i> 全校經費異動與流用履歷總覽
-                </h3>
-                <button onclick="closeModal('changeLogModal')" class="text-indigo-200 hover:text-white text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 bg-purple-50/20">
-                <div class="flex justify-between items-center bg-indigo-50 border border-indigo-200 p-3.5 rounded-2xl text-xs text-indigo-900">
-                    <span class="font-medium"><i class="fa-solid fa-circle-info mr-1"></i> 此處彙整所有經費項目的追加、追減、流入與流出變更履歷。</span>
-                    <span id="totalChangeLogCount" class="font-bold bg-indigo-200 px-2.5 py-1 rounded-full text-indigo-950">共 0 筆異動</span>
-                </div>
-                <div id="globalChangeLogList" class="space-y-3">
-                    <!-- Dynamic change logs injected here -->
-                </div>
-            </div>
-            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end">
-                <button onclick="closeModal('changeLogModal')" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-800 hover:to-purple-800 shadow">關閉視窗</button>
-            </div>
-        </div>
     </div>
 
-    <div id="addEditModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
-            <div class="bg-gradient-to-r from-purple-800 to-pink-700 text-white px-6 py-4 flex justify-between items-center">
-                <h3 id="modalTitle" class="font-bold text-base flex items-center">
-                    <i class="fa-solid fa-pen-to-square mr-2"></i> 新增經費項目
+    <!-- 新增 / 編輯經費明細 Modal 視窗 -->
+    <div id="addModal" class="fixed inset-0 bg-purple-950/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all">
+        <div class="glass-card bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-purple-200 transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-purple-100 pb-3 mb-4">
+                <h3 class="text-lg font-extrabold text-purple-900 flex items-center gap-2">
+                    <span id="modal-title">✨ 新增經費明細資料</span>
                 </h3>
-                <button onclick="closeModal('addEditModal')" class="text-purple-200 hover:text-white text-lg">
+                <button onclick="closeModal()" class="text-gray-400 hover:text-purple-700 text-xl font-bold">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 bg-purple-50/20">
-                <input type="hidden" id="editItemId">
-                
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+            <form id="add-form" onsubmit="handleSaveData(event)" class="space-y-3">
+                <!-- 隱藏 ID 與 ROW INDEX 欄位用來判斷是編輯還是新增 -->
+                <input type="hidden" id="edit-id" value="">
+                <input type="hidden" id="edit-row-index" value="">
+
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">年度 <span class="text-pink-600">*</span></label>
-                        <input type="text" id="formYear" placeholder="例：113" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">門別 <span class="text-pink-600">*</span></label>
-                        <select id="formGate" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white">
-                            <option value="經常門">經常門</option>
-                            <option value="資本門">資本門</option>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">年度 📅</label>
+                        <select id="add-year" required class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold text-purple-900">
+                            <option value="116年">116年</option>
+                            <option value="117年">117年</option>
+                            <option value="118年">118年</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">範疇 <span class="text-pink-600">*</span></label>
-                        <input type="text" id="formDomain" placeholder="例：教學創新" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">子計畫</label>
-                        <input type="text" id="formSubproject" placeholder="例：子計畫一：跨域數位人才培育" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">經費 (經費來源) <span class="text-pink-600">*</span></label>
-                        <input type="text" id="formSource" placeholder="例：高教深耕計畫" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">項目名稱 <span class="text-pink-600">*</span></label>
-                        <input type="text" id="formName" placeholder="請輸入項目名稱" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">細項名稱</label>
-                        <input type="text" id="formSubitem" placeholder="請輸入細項名稱" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">範疇 🏷️</label>
+                        <select id="add-category" required class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold text-purple-900">
+                            <option value="範疇一">範疇一</option>
+                            <option value="範疇二">範疇二</option>
+                            <option value="範疇三">範疇三</option>
+                            <option value="範疇四">範疇四</option>
+                        </select>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-purple-900 mb-1">支用說明或編列基準</label>
-                    <textarea id="formDescription" rows="2" placeholder="詳細說明預算編列基準、支用用途與計算方式..." class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">補助款 ($)</label>
-                        <input type="number" id="formSubsidy" min="0" placeholder="0" oninput="calculateFormTotal()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">配合款 ($)</label>
-                        <input type="number" id="formMatching" min="0" placeholder="0" oninput="calculateFormTotal()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">總金額 ($) <span class="text-pink-600">*</span></label>
-                        <input type="number" id="formTotalAmount" min="0" placeholder="0" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl bg-purple-50/50 font-bold text-purple-900 focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">已核銷金額 ($)</label>
-                        <input type="number" id="formSpent" min="0" placeholder="0" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                    </div>
-                </div>
-            </div>
-            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end space-x-2">
-                <button onclick="closeModal('addEditModal')" class="px-4 py-2.5 border border-purple-200 rounded-xl text-xs font-bold text-purple-800 bg-white hover:bg-purple-100">取消</button>
-                <button onclick="saveItem()" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 shadow">儲存資料</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="changeModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-purple-200">
-            <div class="bg-gradient-to-r from-amber-600 to-pink-600 text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center">
-                    <i class="fa-solid fa-right-left mr-2"></i> 變更經費與流用調整
-                </h3>
-                <button onclick="closeModal('changeModal')" class="text-amber-100 hover:text-white text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 bg-purple-50/20">
-                <input type="hidden" id="changeItemId">
-                
-                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 space-y-1 shadow-sm">
-                    <p><span class="font-bold">項目名稱：</span><span id="changeItemName" class="font-bold text-purple-900">-</span></p>
-                    <div class="flex justify-between mt-1 pt-1 border-t border-amber-200/60 font-medium">
-                        <span>原核定總金額：<strong id="changeOrigBudget">$0</strong></span>
-                        <span>目前實支：<strong id="changeCurrentSpent">$0</strong></span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">變更類型</label>
-                        <select id="changeType" onchange="calculateNewBudget()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
-                            <option value="ADD">追加預算 (+)</option>
-                            <option value="SUB">追減預算 (-)</option>
-                            <option value="TRANSFER_OUT">經費流出 / 流轉出 (-)</option>
-                            <option value="TRANSFER_IN">經費流入 / 流轉入 (+)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-900 mb-1">變更金額 ($)</label>
-                        <input type="number" id="changeAmount" min="0" value="0" oninput="calculateNewBudget()" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <!-- Synchronized Transfer Selector Container -->
-                <div id="transferTargetContainer" class="hidden transition-all duration-200">
-                    <label class="block text-xs font-bold text-purple-900 mb-1">
-                        <i class="fa-solid fa-link text-amber-600 mr-1"></i> <span id="transferTargetTitle">對應同步對象項目</span> <span class="text-pink-600">*</span>
-                    </label>
-                    <select id="transferTargetItem" class="w-full text-xs p-2.5 border border-amber-300 bg-amber-50/50 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                        <option value="">-- 請選擇同步連動之對應經費項目 --</option>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">子計畫 📌</label>
+                    <select id="add-subproject" required class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold text-purple-900">
+                        <!-- 動態透過 JavaScript 帶入 options -->
                     </select>
-                    <p class="text-[11px] text-amber-800 mt-1 flex items-center font-medium">
-                        <i class="fa-solid fa-circle-info mr-1"></i> 系統將自動同步在該對應項目產生相對應之【<span id="transferPairText">流入/流出</span>】動態履歷紀錄。
-                    </p>
                 </div>
 
-                <div class="p-3.5 bg-purple-100/60 border border-purple-200 rounded-xl text-xs flex justify-between items-center font-bold">
-                    <span class="text-purple-900">調整後淨額金額：</span>
-                    <span id="changeCalculatedBudget" class="text-base font-black text-purple-800">$0</span>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-purple-900 mb-1">變更原因與核準文號 <span class="text-pink-600">*</span></label>
-                    <textarea id="changeReason" rows="2" placeholder="例：簽呈1130089號核準經費流用，因設備需求增購..." class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
-                </div>
-
-                <!-- History Log Section inside Modal -->
-                <div class="pt-2">
-                    <h4 class="text-xs font-bold text-purple-900 mb-2 flex items-center">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-purple-600"></i> 本項目歷史變更紀錄
-                    </h4>
-                    <div id="changeHistoryList" class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar text-xs">
-                        <p class="text-purple-400 text-center py-2">無歷史變更紀錄</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">經費類別 💵</label>
+                        <select id="add-fundtype" required class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold text-purple-900">
+                            <option value="A補助經費">A補助經費</option>
+                            <option value="F機構配合款">F機構配合款</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">門別 🚪</label>
+                        <select id="add-door" required class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold text-purple-900">
+                            <option value="B經常門">B經常門</option>
+                            <option value="E資本門">E資本門</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end space-x-2">
-                <button onclick="closeModal('changeModal')" class="px-4 py-2.5 border border-purple-200 rounded-xl text-xs font-bold text-purple-800 bg-white hover:bg-purple-100">取消</button>
-                <button onclick="saveBudgetChange()" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-700 hover:to-pink-700 shadow">確認經費變更</button>
-            </div>
-        </div>
-    </div>
 
-    <div id="gsheetModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden border border-purple-200">
-            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center">
-                    <i class="fa-solid fa-file-csv mr-2"></i> Google 試算表雲端同步與回寫設定
-                </h3>
-                <button onclick="closeModal('gsheetModal')" class="text-emerald-100 hover:text-white text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-4 text-xs bg-purple-50/20">
-                <p class="text-slate-700 leading-relaxed font-medium">
-                    系統已設定為每次啟動時自動從下列 Google 試算表載入最新資料。您也可以隨時點擊按鈕手動同步。
-                </p>
-                <div>
-                    <label class="block font-bold text-purple-900 mb-1">Google Sheet 試算表網址：</label>
-                    <input type="text" id="gsheetUrl" value="https://docs.google.com/spreadsheets/d/1aQHxyx-CruG9YjSrLQUOEdmuSSGU30qDshmeKhCTAd8/edit?gid=0#gid=0" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">項目名稱 📑</label>
+                        <select id="add-item" required class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold text-purple-900">
+                            <option value="C人事費">C人事費</option>
+                            <option value="D業務費">D業務費</option>
+                            <option value="E設備費">E設備費</option>
+                            <option value="F管理費">F管理費</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">細項名稱 📝</label>
+                        <input type="text" id="add-detail" required placeholder="請手動輸入細項名稱" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold text-purple-900">
+                    </div>
                 </div>
-                <div>
-                    <label class="block font-bold text-purple-900 mb-1">Apps Script 部署網址 (Web App URL - 已自動配置)：</label>
-                    <input type="text" id="scriptWebAppUrl" value="https://script.google.com/macros/s/AKfycby55N8V7HdC5WkjAW56rH7IbDfKHDkmYnw_D7mWedfXCYjrB9pzkaBhGWTVWo62Gxz6/exec" class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-emerald-50 font-mono text-emerald-900">
+
+                <!-- 新增：單價、單位、數量 -->
+                <div class="grid grid-cols-3 gap-3 bg-purple-50/70 p-3 rounded-xl border border-purple-100">
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">單價 (元) 🏷️</label>
+                        <input type="number" id="add-unitprice" min="0" placeholder="0" oninput="calculateTotalAmount()" class="w-full text-xs p-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">單位 📏</label>
+                        <input type="text" id="add-unit" placeholder="例: 人/月, 式" class="w-full text-xs p-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-purple-900 mb-1">數量 🔢</label>
+                        <input type="number" id="add-quantity" min="0" placeholder="1" value="1" oninput="calculateTotalAmount()" class="w-full text-xs p-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none font-bold">
+                    </div>
                 </div>
-            </div>
-            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-between items-center">
-                <button onclick="openScriptGuideModal()" class="text-purple-700 hover:underline font-bold">查看 Apps Script 教學</button>
-                <div class="flex space-x-2">
-                    <button onclick="closeModal('gsheetModal')" class="px-4 py-2.5 border border-purple-200 rounded-xl text-xs font-bold text-purple-800 bg-white hover:bg-purple-100">取消</button>
-                    <button onclick="autoLoadFromCloud(true)" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow flex items-center">
-                        <i class="fa-solid fa-cloud-arrow-down mr-1.5"></i> 立即載入試算表
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">總金額 (元) 💰</label>
+                        <input type="number" id="add-amount" min="0" placeholder="0" required class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">已核銷金額 (元) 💸</label>
+                        <input type="number" id="add-spent" min="0" placeholder="0" value="0" required class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">支用說明或編列基準 📖</label>
+                    <textarea id="add-description" rows="2" placeholder="請輸入支用說明或編列基準..." class="w-full text-xs p-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none font-medium text-gray-800"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-purple-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                        取消 ❌
+                    </button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl shadow-md transition">
+                        儲存資料 💾
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    <div id="scriptGuideModal" class="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-purple-200">
-            <div class="bg-gradient-to-r from-purple-800 to-pink-700 text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center">
-                    <i class="fa-solid fa-code mr-2"></i> Google Apps Script 回寫設定步驟說明
-                </h3>
-                <button onclick="closeModal('scriptGuideModal')" class="text-purple-200 hover:text-white text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-3 text-xs text-slate-700 leading-relaxed max-h-[70vh] overflow-y-auto bg-purple-50/20">
-                <ol class="list-decimal list-inside space-y-2 font-medium">
-                    <li>開啟您的 Google 試算表：<a href="https://docs.google.com/spreadsheets/d/1aQHxyx-CruG9YjSrLQUOEdmuSSGU30qDshmeKhCTAd8/edit?gid=0#gid=0" target="_blank" class="text-purple-700 underline font-bold">點此前往試算表</a></li>
-                    <li>點選上方選單的 <strong>「擴充功能」 > 「Apps Script」</strong>。</li>
-                    <li>將下方完整程式碼複製並貼入編輯器中取代原程式碼：</li>
-                </ol>
-                <div class="relative">
-                    <button onclick="copyScriptCode()" class="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold shadow">複製程式碼</button>
-                    <textarea id="appScriptCodeArea" readonly rows="12" class="w-full bg-slate-900 text-purple-300 font-mono text-[11px] p-3.5 rounded-2xl">function doPost(e) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getActiveSheet();
-    var data = JSON.parse(e.postData.contents);
-    var rows = data.rows || [];
-    
-    if (rows.length === 0) {
-      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "無接收到有效資料"}))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    sheet.clearContents();
-    var headers = [
-      "年度", "範疇", "子計畫", "經費來源", "門別", "項目名稱", "細項名稱", 
-      "支用說明或編列基準", "總金額", "補助款", "配合款", "變更流入", "變更流出", 
-      "調整後淨額", "已核銷金額", "剩餘金額", "執行率", "異動筆數", "異動時間", "完成變更日期"
-    ];
-    sheet.appendRow(headers);
-    
-    var rowsToAppend = [];
-    for (var i = 0; i < rows.length; i++) {
-      var r = rows[i];
-      rowsToAppend.push([
-        r.year || '', r.domain || '', r.subproject || '', r.source || '', r.gate || '',
-        r.name || '', r.subitem || '', r.description || '', r.totalAmount || 0,
-        r.subsidyAmount || 0, r.matchingAmount || 0, r.transferIn || 0, r.transferOut || 0,
-        r.adjustedTotal || 0, r.spent || 0, r.remaining || 0, (r.execRate || 0) + '%',
-        r.changeCount || 0, r.lastChangeTime || '-', r.completeDate || '-'
-      ]);
-    }
-    
-    if (rowsToAppend.length > 0) {
-      sheet.getRange(2, 1, rowsToAppend.length, headers.length).setValues(rowsToAppend);
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({"status": "success", "message": "已成功同步回寫 " + rows.length + " 筆"}))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}</textarea>
-                </div>
-            </div>
-            <div class="p-4 bg-purple-50 border-t border-purple-100 flex justify-end">
-                <button onclick="closeModal('scriptGuideModal')" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 shadow">我知道了</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-purple-950 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 text-xs border border-purple-800">
-        <i class="fa-solid fa-circle-check text-pink-400 text-base"></i>
-        <span id="toastMsg" class="font-medium">通知訊息</span>
-    </div>
-
+    <!-- JavaScript 應用邏輯 -->
     <script>
-        // Initial Sample Data Definition
-        const initialSampleData = [
-            {
-                id: "B113-001",
-                year: "113",
-                domain: "教學創新",
-                subproject: "子計畫一：跨域數位人才培育",
-                source: "高教深耕計畫",
-                gate: "經常門",
-                name: "AI輔助教學軟體授權費",
-                subitem: "全校授權",
-                description: "採購AI程式設計輔助軟體全校授權100套，供教學實作使用",
-                totalAmount: 300000,
-                subsidyAmount: 250000,
-                matchingAmount: 50000,
-                spent: 180000,
-                history: []
-            },
-            {
-                id: "B113-002",
-                year: "113",
-                domain: "教學創新",
-                subproject: "子計畫一：跨域數位人才培育",
-                source: "高教深耕計畫",
-                gate: "資本門",
-                name: "智慧創新播客錄音設備",
-                subitem: "錄音室介面",
-                description: "建置Podcast學生播客錄音室高階數位音訊介面與麥克風組",
-                totalAmount: 180000,
-                subsidyAmount: 150000,
-                matchingAmount: 30000,
-                spent: 180000,
-                history: []
-            },
-            {
-                id: "B113-003",
-                year: "113",
-                domain: "研究發展",
-                subproject: "子計畫二：前瞻永續研究鏈結",
-                source: "國科會專案",
-                gate: "資本門",
-                name: "高效能運算伺服器節點",
-                subitem: "GPU擴充模組",
-                description: "擴充AI大語言模型微調運算伺服器 GPU 顯卡模組",
-                totalAmount: 500000,
-                subsidyAmount: 400000,
-                matchingAmount: 100000,
-                spent: 320000,
-                history: []
-            },
-            {
-                id: "B113-004",
-                year: "113",
-                domain: "行政營運",
-                subproject: "子計畫三：智慧行政效能提升",
-                source: "校務基金",
-                gate: "經常門",
-                name: "電子公文系統雲端維護費",
-                subitem: "系統軟體升級",
-                description: "年度系統軟體升級、資料庫備份與資安稽核服務費",
-                totalAmount: 120000,
-                subsidyAmount: 0,
-                matchingAmount: 120000,
-                spent: 60000,
-                history: []
-            }
-        ];
+        // Google Apps Script 預設 URL (GAS 第7版部署網址)
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZ9nS8egx5J_nVJNZBAGw2tg2c-mjz-k88lxvedZHj8iNEUru22sxBWZFX-11WnxKPDg/exec";
 
+        // 全域狀態 Data Stores & Chart Instances
         let budgetData = [];
-        let filteredData = [];
-        let currentPage = 1;
-        let pageSize = 10;
-        let domainChart = null;
-        let gateChart = null;
-        let showCharts = false;
+        let categoryChartInstance = null;
+        let subprojectChartInstance = null;
 
-        const STORAGE_KEY = 'smart_budget_data_v4_purple';
-        const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby55N8V7HdC5WkjAW56rH7IbDfKHDkmYnw_D7mWedfXCYjrB9pzkaBhGWTVWo62Gxz6/exec';
-
-        function getItemFullPath(item) {
-            if (!item) return '-';
-            const year = item.year || '';
-            const domain = item.domain || '';
-            const subproject = item.subproject || '';
-            const name = item.name || '';
-            const subitem = item.subitem || '';
-            return [year, domain, subproject, name, subitem].filter(Boolean).join(' / ');
+        // 格式化千分位與金額
+        function formatCurrency(val) {
+            return '$' + Number(val).toLocaleString('zh-TW');
         }
 
-        function getItemMetrics(item) {
-            const total = Number(item.totalAmount || item.budget || 0);
-            let transferIn = Number(item.transferIn || 0);
-            let transferOut = Number(item.transferOut || 0);
-            let lastChangeTime = item.lastChangeTime || "-";
-            let completeDate = item.completeDate || "-";
+        // 更新系統時間顯示 (YYYY-MM-DD HH:mm:ss)
+        function updateTimestamp() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            
+            const formattedDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+            document.getElementById("last-update-time").textContent = formattedDate;
+        }
 
-            if (item.history && Array.isArray(item.history) && item.history.length > 0) {
-                let hIn = 0;
-                let hOut = 0;
-                item.history.forEach(h => {
-                    if (h.type === 'ADD' || h.type === 'TRANSFER_IN') hIn += Number(h.amount || 0);
-                    if (h.type === 'SUB' || h.type === 'TRANSFER_OUT') hOut += Number(h.amount || 0);
-                });
-                transferIn = hIn;
-                transferOut = hOut;
-                const latest = item.history[0];
-                lastChangeTime = latest.date || lastChangeTime;
-                completeDate = latest.completeDate || (latest.date ? latest.date.split(' ')[0] : completeDate);
+        // 頁面初始化
+        window.onload = function() {
+            updateTimestamp();
+            initFilterOptions();
+            renderDashboard();
+            fetchDataFromGoogleSheet(); // 自動從 Google 試算表(GAS v7)載入最新資料
+        };
+
+        // 從 Google Apps Script (GAS 第7版) 自動抓取試算表全量資料
+        async function fetchDataFromGoogleSheet() {
+            const fetchIcon = document.getElementById("sync-fetch-icon");
+            const fetchText = document.getElementById("sync-fetch-text");
+
+            if (fetchIcon && fetchText) {
+                fetchIcon.className = "fa-solid fa-spinner fa-spin text-indigo-600";
+                fetchText.textContent = "讀取試算表中... ⏳";
             }
 
-            const adjustedTotal = item.adjustedTotal !== undefined && item.adjustedTotal !== null && !isNaN(Number(item.adjustedTotal)) && !item.history?.length
-                ? Number(item.adjustedTotal)
-                : total + transferIn - transferOut;
-
-            const spent = Number(item.spent || 0);
-            const remaining = item.remaining !== undefined && item.remaining !== null && !isNaN(Number(item.remaining)) && !item.history?.length
-                ? Number(item.remaining)
-                : adjustedTotal - spent;
-
-            const execRate = adjustedTotal > 0 ? Math.min(100, Math.round((spent / adjustedTotal) * 100)) : 0;
-            const changeCount = (item.history && Array.isArray(item.history)) ? item.history.length : (item.changeCount || 0);
-
-            return {
-                total,
-                subsidy: Number(item.subsidyAmount || 0),
-                matching: Number(item.matchingAmount || 0),
-                transferIn,
-                transferOut,
-                adjustedTotal,
-                spent,
-                remaining,
-                execRate,
-                changeCount,
-                lastChangeTime,
-                completeDate
-            };
-        }
-
-        function openModal(modalId) {
-            const el = document.getElementById(modalId);
-            if (el) el.classList.remove('hidden');
-        }
-
-        function closeModal(modalId) {
-            const el = document.getElementById(modalId);
-            if (el) el.classList.add('hidden');
-        }
-
-        function openGSheetModal() {
-            openModal('gsheetModal');
-        }
-
-        function openChangeLogModal() {
-            const container = document.getElementById('globalChangeLogList');
-            const totalCountBadge = document.getElementById('totalChangeLogCount');
-            if (!container) return;
-
-            let allLogs = [];
-            budgetData.forEach(item => {
-                if (item.history && Array.isArray(item.history)) {
-                    item.history.forEach(h => {
-                        allLogs.push({
-                            itemName: item.name,
-                            itemId: item.id,
-                            fullPath: getItemFullPath(item),
-                            ...h
-                        });
-                    });
-                }
-            });
-
-            totalCountBadge.innerText = `共 ${allLogs.length} 筆異動`;
-
-            if (allLogs.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-purple-400 font-medium">
-                        <i class="fa-solid fa-clock-rotate-left text-3xl mb-2 text-purple-300 block"></i>
-                        目前尚無任何經費異動與流用紀錄
-                    </div>
-                `;
-            } else {
-                let html = '';
-                allLogs.forEach(log => {
-                    let label = '追加';
-                    let badgeColor = 'bg-emerald-100 text-emerald-800 border border-emerald-200';
-                    let sign = '+';
-
-                    if (log.type === 'SUB') { label = '追減'; badgeColor = 'bg-rose-100 text-rose-800 border border-rose-200'; sign = '-'; }
-                    if (log.type === 'TRANSFER_IN') { label = '流轉入'; badgeColor = 'bg-purple-100 text-purple-800 border border-purple-200'; sign = '+'; }
-                    if (log.type === 'TRANSFER_OUT') { label = '流轉出'; badgeColor = 'bg-amber-100 text-amber-800 border border-amber-200'; sign = '-'; }
-
-                    html += `
-                        <div class="p-4 border border-purple-200 rounded-2xl bg-white shadow-sm space-y-1.5 text-xs">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
-                                <div class="flex items-center space-x-2">
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeColor}">${label}</span>
-                                    <span class="font-black text-slate-900">${escapeHtml(log.itemName)}</span>
-                                    <span class="text-purple-600 font-bold">(${sign}$${Number(log.amount || 0).toLocaleString()})</span>
-                                </div>
-                                <span class="text-purple-500 font-bold text-[11px]"><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(log.date || '-')}</span>
-                            </div>
-                            <p class="text-purple-900 font-medium text-[11px]">項目路徑：${escapeHtml(log.fullPath)}</p>
-                            <p class="text-slate-700 font-medium bg-purple-50/60 p-2.5 rounded-xl border border-purple-100 mt-1">變更原因與核準說明：${escapeHtml(log.reason || '-')}</p>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            }
-
-            openModal('changeLogModal');
-        }
-
-        function saveToStorage() {
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(budgetData));
-            } catch (e) {
-                console.error('Storage save error:', e);
-            }
-        }
+                const response = await fetch(GOOGLE_SCRIPT_URL + "?t=" + Date.now());
+                const resData = await response.json();
 
-        function loadFromStorage() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    budgetData = JSON.parse(saved);
-                } else {
-                    budgetData = JSON.parse(JSON.stringify(initialSampleData));
+                if (resData.result === "success" && Array.isArray(resData.data)) {
+                    budgetData = resData.data;
+                    updateTimestamp();
+                    initFilterOptions();
+                    renderDashboard();
+
+                    if (fetchIcon && fetchText) {
+                        fetchIcon.className = "fa-solid fa-circle-check text-emerald-600";
+                        fetchText.textContent = "讀取完成 🎉";
+                        setTimeout(() => {
+                            fetchIcon.className = "fa-solid fa-arrows-rotate text-indigo-600";
+                            fetchText.textContent = "同步最新資料 🔄";
+                        }, 3000);
+                    }
                 }
-            } catch (e) {
-                budgetData = JSON.parse(JSON.stringify(initialSampleData));
+            } catch (err) {
+                console.error("無法自 Google 試算表取得資料:", err);
+                if (fetchIcon && fetchText) {
+                    fetchIcon.className = "fa-solid fa-arrows-rotate text-indigo-600";
+                    fetchText.textContent = "同步最新資料 🔄";
+                }
             }
         }
 
-        function restoreSampleData() {
-            if (confirm('確定要恢復預設範例資料嗎？現有未備份的變更將會被覆蓋。')) {
-                budgetData = JSON.parse(JSON.stringify(initialSampleData));
-                saveToStorage();
-                populateFilterOptions();
-                applyFilters();
-                showToast('已恢復預設範例資料');
-            }
-        }
+        // 發送動作與資料至 GAS (支援 create, update, delete)
+        function postToGoogleSheet(dataItem, action = "create") {
+            return new Promise((resolve) => {
+                if (!GOOGLE_SCRIPT_URL) {
+                    resolve(false);
+                    return;
+                }
 
-        function populateFilterOptions() {
-            const years = new Set();
-            const domains = new Set();
-            const sources = new Set();
-            const names = new Set();
+                const payload = {
+                    ...dataItem,
+                    action: action
+                };
 
-            budgetData.forEach(item => {
-                if (item.year) years.add(String(item.year));
-                if (item.domain) domains.add(item.domain);
-                if (item.source) sources.add(item.source);
-                if (item.name) names.add(item.name);
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(() => resolve(true))
+                .catch(err => {
+                    console.error("寫入 Google 試算表失敗:", err);
+                    resolve(false);
+                });
             });
-
-            populateSelect('filterYear', Array.from(years).sort(), '全部年度');
-            populateSelect('filterDomain', Array.from(domains).sort(), '全部範疇');
-            populateSelect('filterSource', Array.from(sources).sort(), '全部經費來源');
-            populateSelect('filterName', Array.from(names).sort(), '全部項目名稱');
         }
 
-        function populateSelect(selectId, options, defaultLabel) {
-            const select = document.getElementById(selectId);
-            if (!select) return;
-            const currentVal = select.value;
-            select.innerHTML = `<option value="ALL">${defaultLabel}</option>`;
-            options.forEach(opt => {
-                const optionEl = document.createElement('option');
-                optionEl.value = opt;
-                optionEl.textContent = opt;
-                select.appendChild(optionEl);
-            });
-            if (options.includes(currentVal)) {
-                select.value = currentVal;
-            } else {
-                select.value = 'ALL';
-            }
-        }
-
-        function applyFilters() {
-            const fYear = document.getElementById('filterYear')?.value || 'ALL';
-            const fDomain = document.getElementById('filterDomain')?.value || 'ALL';
-            const fSource = document.getElementById('filterSource')?.value || 'ALL';
-            const fGate = document.getElementById('filterGate')?.value || 'ALL';
-            const fName = document.getElementById('filterName')?.value || 'ALL';
-
-            filteredData = budgetData.filter(item => {
-                if (fYear !== 'ALL' && String(item.year) !== fYear) return false;
-                if (fDomain !== 'ALL' && item.domain !== fDomain) return false;
-                if (fSource !== 'ALL' && item.source !== fSource) return false;
-                if (fGate !== 'ALL' && item.gate !== fGate) return false;
-                if (fName !== 'ALL' && item.name !== fName) return false;
-                return true;
-            });
-
-            const isFiltered = (fYear !== 'ALL' || fDomain !== 'ALL' || fSource !== 'ALL' || fGate !== 'ALL' || fName !== 'ALL');
-            const badge = document.getElementById('filteredBadge');
-            if (badge) {
-                badge.innerText = isFiltered ? '已套用篩選' : '顯示全部';
-                badge.className = isFiltered ? 'bg-pink-200 text-pink-900 text-xs px-2.5 py-0.5 rounded-full font-bold' : 'bg-purple-200 text-purple-900 text-xs px-2.5 py-0.5 rounded-full font-bold';
-            }
-
-            currentPage = 1;
-            updateSummaryKPIs();
-            renderTable();
-            if (showCharts) {
-                renderCharts();
-            }
-        }
-
-        function resetFilters() {
-            document.getElementById('filterYear').value = 'ALL';
-            document.getElementById('filterDomain').value = 'ALL';
-            document.getElementById('filterSource').value = 'ALL';
-            document.getElementById('filterGate').value = 'ALL';
-            document.getElementById('filterName').value = 'ALL';
+        // 追蹤器專用查詢同步回主篩選條件
+        function syncCategoryToMain(val) {
+            document.getElementById("filter-category").value = val;
             applyFilters();
         }
 
-        function updateSummaryKPIs() {
-            let totalBudget = 0;
-            let totalSpent = 0;
-            let totalRemaining = 0;
-            let totalAdjustments = 0;
-            let netAdjustments = 0;
-
-            filteredData.forEach(item => {
-                const m = getItemMetrics(item);
-                totalBudget += m.total;
-                totalSpent += m.spent;
-                totalRemaining += m.remaining;
-                totalAdjustments += m.changeCount;
-                netAdjustments += (m.transferIn - m.transferOut);
-            });
-
-            const execRate = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
-            const remainingRate = totalBudget > 0 ? Math.round((totalRemaining / totalBudget) * 100) : 0;
-
-            document.getElementById('statTotalBudget').innerText = '$' + totalBudget.toLocaleString();
-            document.getElementById('statItemCount').innerText = filteredData.length;
-            document.getElementById('statTotalSpent').innerText = '$' + totalSpent.toLocaleString();
-            document.getElementById('statExecutionRate').innerText = execRate + '%';
-            document.getElementById('statTotalRemaining').innerText = '$' + totalRemaining.toLocaleString();
-            document.getElementById('statRemainingRate').innerText = remainingRate + '%';
-            document.getElementById('statTotalAdjustments').innerText = totalAdjustments + ' 次';
-            document.getElementById('statAdjustmentNet').innerText = (netAdjustments >= 0 ? '+' : '') + '$' + netAdjustments.toLocaleString();
+        function syncSubprojectToMain(val) {
+            document.getElementById("filter-subproject").value = val;
+            applyFilters();
         }
 
-        function toggleChartSection() {
-            const sec = document.getElementById('chartSection');
-            const txt = document.getElementById('toggleChartText');
-            if (!sec) return;
+        // 取得目前篩選條件後的資料
+        function getFilteredData() {
+            const yr = document.getElementById("filter-year").value;
+            const cat = document.getElementById("filter-category").value;
+            const sub = document.getElementById("filter-subproject").value;
+            const fund = document.getElementById("filter-fundtype").value;
+            const door = document.getElementById("filter-door").value;
+            const item = document.getElementById("filter-item").value;
 
-            showCharts = !showCharts;
-            if (showCharts) {
-                sec.classList.remove('hidden');
-                if (txt) txt.innerText = '隱藏圖表分析';
-                renderCharts();
-            } else {
-                sec.classList.add('hidden');
-                if (txt) txt.innerText = '顯示圖表分析';
+            if (document.getElementById("tracker-category")) {
+                document.getElementById("tracker-category").value = cat;
             }
-        }
-
-        function changePageSize() {
-            const val = document.getElementById('pageSizeSelect').value;
-            if (val === 'ALL') {
-                pageSize = filteredData.length > 0 ? filteredData.length : 999999;
-            } else {
-                pageSize = parseInt(val, 10) || 10;
+            if (document.getElementById("tracker-subproject")) {
+                document.getElementById("tracker-subproject").value = sub;
             }
-            currentPage = 1;
-            renderTable();
+
+            return budgetData.filter(d => {
+                return (!yr || d.year === yr) &&
+                       (!cat || d.category === cat) &&
+                       (!sub || d.subproject === sub) &&
+                       (!fund || d.fundType === fund) &&
+                       (!door || d.door === door) &&
+                       (!item || d.item === item);
+            });
         }
 
-        function changePage(delta) {
-            currentPage += delta;
-            renderTable();
+        // 重置所有篩選
+        function resetFilters() {
+            document.getElementById("filter-year").value = "";
+            document.getElementById("filter-category").value = "";
+            document.getElementById("filter-subproject").value = "";
+            document.getElementById("filter-fundtype").value = "";
+            document.getElementById("filter-door").value = "";
+            document.getElementById("filter-item").value = "";
+            if (document.getElementById("tracker-category")) document.getElementById("tracker-category").value = "";
+            if (document.getElementById("tracker-subproject")) document.getElementById("tracker-subproject").value = "";
+            applyFilters();
         }
 
-        function renderCharts() {
-            const domainCtx = document.getElementById('domainChart');
-            const gateCtx = document.getElementById('gateChart');
-            if (!domainCtx || !gateCtx) return;
+        // 當篩選條件改變時觸發
+        function applyFilters() {
+            renderDashboard();
+        }
 
-            const domainTotals = {};
-            filteredData.forEach(item => {
-                const m = getItemMetrics(item);
-                const dom = item.domain || '其他';
-                domainTotals[dom] = (domainTotals[dom] || 0) + m.adjustedTotal;
-            });
+        // 主渲染邏輯
+        function renderDashboard() {
+            const data = getFilteredData();
+            
+            // 1. 更新 KPI 頂部摘要卡片
+            updateKPIs(data);
 
-            const domainLabels = Object.keys(domainTotals);
-            const domainValues = Object.values(domainTotals);
+            // 2. 更新圖表
+            renderCategoryChart(data);
+            renderExpenseItemChart(data);
 
-            if (domainChart) domainChart.destroy();
-            domainChart = new Chart(domainCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: domainLabels,
-                    datasets: [{
-                        data: domainValues,
-                        backgroundColor: [
-                            '#8b5cf6', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#6366f1'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } }
-                    }
-                }
-            });
+            // 3. 更新四大費用類別與子計畫綜合卡片面板
+            renderExpenseCategoryCards(data);
 
-            let regularBudget = 0, regularSpent = 0;
-            let capitalBudget = 0, capitalSpent = 0;
+            // 4. 更新經費明細表格
+            renderTable(data);
+        }
 
-            filteredData.forEach(item => {
-                const m = getItemMetrics(item);
-                if (item.gate === '經常門') {
-                    regularBudget += m.adjustedTotal;
-                    regularSpent += m.spent;
+        // 1. KPI 數據更新
+        function updateKPIs(data) {
+            let totalBudget = 0, totalSpent = 0;
+            let subBudget = 0, subSpent = 0;
+            let matchBudget = 0, matchSpent = 0;
+
+            data.forEach(item => {
+                const amt = Number(item.amount) || 0;
+                const sp = Number(item.spent) || 0;
+                
+                totalBudget += amt;
+                totalSpent += sp;
+
+                if (item.fundType && item.fundType.includes("補助")) {
+                    subBudget += amt;
+                    subSpent += sp;
                 } else {
-                    capitalBudget += m.adjustedTotal;
-                    capitalSpent += m.spent;
+                    matchBudget += amt;
+                    matchSpent += sp;
                 }
             });
 
-            if (gateChart) gateChart.destroy();
-            gateChart = new Chart(gateCtx, {
+            const totalRemaining = totalBudget - totalSpent;
+            const totalRate = totalBudget > 0 ? ((totalSpent / totalBudget) * 100).toFixed(1) : "0.0";
+            const subRate = subBudget > 0 ? ((subSpent / subBudget) * 100).toFixed(1) : "0.0";
+            const matchRate = matchBudget > 0 ? ((matchSpent / matchBudget) * 100).toFixed(1) : "0.0";
+
+            // 總經費、已核銷總額與剩餘總額
+            document.getElementById("kpi-total-budget").textContent = formatCurrency(totalBudget);
+            document.getElementById("kpi-total-spent").textContent = formatCurrency(totalSpent);
+            
+            const remainingElem = document.getElementById("kpi-total-remaining");
+            if (remainingElem) {
+                remainingElem.textContent = formatCurrency(totalRemaining);
+                if (totalRemaining < 0) {
+                    remainingElem.className = "text-lg sm:text-xl md:text-2xl font-black text-red-600 truncate";
+                } else {
+                    remainingElem.className = "text-lg sm:text-xl md:text-2xl font-black text-emerald-900 truncate";
+                }
+            }
+
+            document.getElementById("kpi-total-bar").style.width = `${Math.min(totalRate, 100)}%`;
+
+            // 補助款
+            document.getElementById("kpi-sub-budget").textContent = formatCurrency(subBudget);
+            document.getElementById("kpi-sub-spent").textContent = formatCurrency(subSpent);
+            document.getElementById("kpi-sub-rate-badge").textContent = `${subRate}%`;
+
+            // 配合款
+            document.getElementById("kpi-match-budget").textContent = formatCurrency(matchBudget);
+            document.getElementById("kpi-match-spent").textContent = formatCurrency(matchSpent);
+            document.getElementById("kpi-match-rate-badge").textContent = `${matchRate}%`;
+
+            // 整體執行率
+            document.getElementById("kpi-overall-rate").textContent = `${totalRate}%`;
+        }
+
+        // 2. 範疇圖表
+        function renderCategoryChart(data) {
+            const categories = [...new Set(budgetData.map(d => d.category))].sort();
+            
+            const categoryStats = categories.map(cat => {
+                const catItems = data.filter(d => d.category === cat);
+                const budget = catItems.reduce((acc, cur) => acc + Number(cur.amount), 0);
+                const spent = catItems.reduce((acc, cur) => acc + Number(cur.spent), 0);
+                const rate = budget > 0 ? ((spent / budget) * 100).toFixed(1) : 0;
+                return { cat, budget, spent, rate };
+            });
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            if (categoryChartInstance) categoryChartInstance.destroy();
+
+            categoryChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['經常門', '資本門'],
+                    labels: categoryStats.map(s => s.cat),
                     datasets: [
                         {
-                            label: '調整後淨額',
-                            data: [regularBudget, capitalBudget],
-                            backgroundColor: '#8b5cf6'
+                            label: '總預算 (元)',
+                            data: categoryStats.map(s => s.budget),
+                            backgroundColor: 'rgba(147, 51, 234, 0.6)',
+                            borderColor: 'rgba(147, 51, 234, 1)',
+                            borderWidth: 1.5,
+                            borderRadius: 8,
+                            yAxisID: 'y'
                         },
                         {
-                            label: '已核銷金額',
-                            data: [regularSpent, capitalSpent],
-                            backgroundColor: '#10b981'
+                            label: '已核銷 (元)',
+                            data: categoryStats.map(s => s.spent),
+                            backgroundColor: 'rgba(236, 72, 153, 0.7)',
+                            borderColor: 'rgba(236, 72, 153, 1)',
+                            borderWidth: 1.5,
+                            borderRadius: 8,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '執行率 (%)',
+                            data: categoryStats.map(s => s.rate),
+                            type: 'line',
+                            borderColor: '#3b82f6',
+                            backgroundColor: '#3b82f6',
+                            borderWidth: 3,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            yAxisID: 'y1'
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { font: { size: 10, weight: 'bold' } } },
-                        x: { ticks: { font: { size: 11, weight: 'bold' } } }
-                    },
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } }
+                        legend: { position: 'top', labels: { font: { family: 'Noto Sans TC', weight: 'bold' } } }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: '金額 (元)' },
+                            grid: { color: 'rgba(200, 200, 200, 0.15)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            min: 0,
+                            max: 100,
+                            title: { display: true, text: '執行率 (%)' },
+                            grid: { drawOnChartArea: false }
+                        }
                     }
                 }
             });
         }
 
-        function calculateFormTotal() {
-            const sub = Number(document.getElementById('formSubsidy').value || 0);
-            const mat = Number(document.getElementById('formMatching').value || 0);
-            document.getElementById('formTotalAmount').value = sub + mat;
-        }
+        // 3. 費用類別（人事費、業務費、設備費、管理費）圖表
+        function renderExpenseItemChart(data) {
+            const targetItems = ["人事費", "業務費", "設備費", "管理費"];
 
-        function openAddModal() {
-            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-plus-circle mr-2"></i> 新增經費項目`;
-            document.getElementById('editItemId').value = '';
-            document.getElementById('formYear').value = new Date().getFullYear() - 1911;
-            document.getElementById('formGate').value = '經常門';
-            document.getElementById('formDomain').value = '';
-            document.getElementById('formSubproject').value = '';
-            document.getElementById('formSource').value = '';
-            document.getElementById('formName').value = '';
-            document.getElementById('formSubitem').value = '';
-            document.getElementById('formDescription').value = '';
-            document.getElementById('formSubsidy').value = '';
-            document.getElementById('formMatching').value = '';
-            document.getElementById('formTotalAmount').value = '';
-            document.getElementById('formSpent').value = '0';
-            openModal('addEditModal');
-        }
+            const itemStats = targetItems.map(targetName => {
+                const items = data.filter(d => String(d.item || "").includes(targetName));
+                const budget = items.reduce((acc, cur) => acc + Number(cur.amount), 0);
+                const spent = items.reduce((acc, cur) => acc + Number(cur.spent), 0);
+                const rate = budget > 0 ? ((spent / budget) * 100).toFixed(1) : "0.0";
+                return { name: targetName, budget, spent, rate };
+            });
 
-        function openEditModal(id) {
-            const item = budgetData.find(d => d.id === id);
-            if (!item) return;
+            const ctx = document.getElementById('subprojectChart').getContext('2d');
 
-            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square mr-2"></i> 修改經費資料`;
-            document.getElementById('editItemId').value = item.id;
-            document.getElementById('formYear').value = item.year;
-            document.getElementById('formGate').value = item.gate;
-            document.getElementById('formDomain').value = item.domain;
-            document.getElementById('formSubproject').value = item.subproject || '';
-            document.getElementById('formSource').value = item.source;
-            document.getElementById('formName').value = item.name;
-            document.getElementById('formSubitem').value = item.subitem || '';
-            document.getElementById('formDescription').value = item.description || item.note || '';
-            document.getElementById('formSubsidy').value = item.subsidyAmount || 0;
-            document.getElementById('formMatching').value = item.matchingAmount || 0;
-            document.getElementById('formTotalAmount').value = item.totalAmount || item.budget || 0;
-            document.getElementById('formSpent').value = item.spent || 0;
-            openModal('addEditModal');
-        }
+            if (subprojectChartInstance) subprojectChartInstance.destroy();
 
-        function saveItem() {
-            const id = document.getElementById('editItemId').value;
-            const year = document.getElementById('formYear').value.trim();
-            const gate = document.getElementById('formGate').value;
-            const domain = document.getElementById('formDomain').value.trim();
-            const subproject = document.getElementById('formSubproject').value.trim();
-            const source = document.getElementById('formSource').value.trim();
-            const name = document.getElementById('formName').value.trim();
-            const subitem = document.getElementById('formSubitem').value.trim();
-            const description = document.getElementById('formDescription').value.trim();
-            const subsidy = Number(document.getElementById('formSubsidy').value || 0);
-            const matching = Number(document.getElementById('formMatching').value || 0);
-            const totalAmount = Number(document.getElementById('formTotalAmount').value || (subsidy + matching));
-            const spent = Number(document.getElementById('formSpent').value || 0);
-
-            if (!year || !domain || !source || !name) {
-                alert("請填寫必填欄位（年度、範疇、經費來源、項目名稱）！");
-                return;
-            }
-
-            if (id) {
-                const idx = budgetData.findIndex(item => item.id === id);
-                if (idx !== -1) {
-                    budgetData[idx] = {
-                        ...budgetData[idx],
-                        year,
-                        gate,
-                        domain,
-                        subproject,
-                        source,
-                        name,
-                        subitem,
-                        description,
-                        subsidyAmount: subsidy,
-                        matchingAmount: matching,
-                        totalAmount: totalAmount,
-                        spent: spent
-                    };
-                    showToast("已成功更新經費資料");
+            subprojectChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: itemStats.map(s => s.name),
+                    datasets: [
+                        {
+                            label: '預算額 (元)',
+                            data: itemStats.map(s => s.budget),
+                            backgroundColor: 'rgba(99, 102, 241, 0.75)',
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: '已核銷 (元)',
+                            data: itemStats.map(s => s.spent),
+                            backgroundColor: 'rgba(16, 185, 129, 0.75)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { family: 'Noto Sans TC', weight: 'bold' } } },
+                        tooltip: {
+                            callbacks: {
+                                footer: (tooltipItems) => {
+                                    const index = tooltipItems[0].dataIndex;
+                                    return `執行率: ${itemStats[index].rate}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { font: { family: 'Noto Sans TC', weight: 'bold' } } },
+                        y: { 
+                            grid: { color: 'rgba(200, 200, 200, 0.15)' },
+                            title: { display: true, text: '金額 (元)' }
+                        }
+                    }
                 }
-            } else {
-                const newItem = {
-                    id: "B" + year + "-" + String(budgetData.length + 1).padStart(3, '0'),
-                    year,
-                    gate,
-                    domain,
-                    subproject,
-                    source,
-                    name,
-                    subitem,
-                    description,
-                    totalAmount: totalAmount,
-                    subsidyAmount: subsidy,
-                    matchingAmount: matching,
-                    spent: spent,
-                    history: []
-                };
-                budgetData.unshift(newItem);
-                showToast("已成功新增經費項目");
-            }
-
-            saveToStorage();
-            populateFilterOptions();
-            applyFilters();
-            closeModal('addEditModal');
-            syncBackToCloud();
+            });
         }
 
-        function deleteItem(id) {
-            if (confirm("確定要刪除此經費項目嗎？此動作無法復原。")) {
-                budgetData = budgetData.filter(item => item.id !== id);
-                saveToStorage();
-                populateFilterOptions();
-                applyFilters();
-                showToast("已成功刪除該經費項目");
-                syncBackToCloud();
-            }
+        // 4. 四大費用類別 (人事費、業務費、設備費、管理費) 綜合卡片面板
+        function renderExpenseCategoryCards(data) {
+            const container = document.getElementById("expense-category-cards");
+            if (!container) return;
+            container.innerHTML = "";
+
+            const targetItems = [
+                { name: "人事費", emoji: "👥", color: "from-purple-500 to-indigo-600", bg: "bg-purple-50/70", border: "border-purple-200" },
+                { name: "業務費", emoji: "💼", color: "from-blue-500 to-cyan-500", bg: "bg-blue-50/70", border: "border-blue-200" },
+                { name: "設備費", emoji: "🖥️", color: "from-emerald-500 to-teal-600", bg: "bg-emerald-50/70", border: "border-emerald-200" },
+                { name: "管理費", emoji: "⚙️", color: "from-amber-500 to-orange-500", bg: "bg-amber-50/70", border: "border-amber-200" }
+            ];
+
+            targetItems.forEach(item => {
+                const matchedItems = data.filter(d => String(d.item || "").includes(item.name));
+                const budget = matchedItems.reduce((acc, cur) => acc + Number(cur.amount), 0);
+                const spent = matchedItems.reduce((acc, cur) => acc + Number(cur.spent), 0);
+                const remaining = budget - spent;
+                const rate = budget > 0 ? ((spent / budget) * 100).toFixed(1) : "0.0";
+
+                const cardHtml = `
+                    <div class="p-4 ${item.bg} rounded-2xl border ${item.border} hover:shadow-md transition flex flex-col justify-between space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">${item.emoji}</span>
+                                <h4 class="font-extrabold text-sm text-gray-900">${item.name}</h4>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-black ${rate >= 80 ? 'bg-emerald-100 text-emerald-800' : rate >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'}">
+                                ${rate}%
+                            </span>
+                        </div>
+
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex justify-between items-center text-gray-600">
+                                <span>經費總額:</span>
+                                <b class="text-gray-900 font-bold">${formatCurrency(budget)}</b>
+                            </div>
+                            <div class="flex justify-between items-center text-gray-600">
+                                <span>已核銷:</span>
+                                <b class="text-indigo-700 font-bold">${formatCurrency(spent)}</b>
+                            </div>
+                            <div class="flex justify-between items-center text-gray-600">
+                                <span>剩餘金額:</span>
+                                <b class="${remaining < 0 ? 'text-red-500 font-bold' : 'text-emerald-700 font-bold'}">${formatCurrency(remaining)}</b>
+                            </div>
+
+                            <div class="pt-1">
+                                <div class="w-full bg-gray-200/80 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-gradient-to-r ${item.color} h-2 rounded-full transition-all duration-300" style="width: ${Math.min(rate, 100)}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHtml;
+            });
         }
 
-        function renderTable() {
-            const tbody = document.getElementById('budgetTableBody');
-            tbody.innerHTML = '';
+        // 5. 明細表格渲染與維護功能
+        function renderTable(data) {
+            const tbody = document.getElementById("table-body");
+            document.getElementById("filtered-count").textContent = data.length;
+            tbody.innerHTML = "";
 
-            const total = filteredData.length;
-            document.getElementById('recordCount').innerText = `共 ${total} 筆`;
-            document.getElementById('pageTotal').innerText = total;
-
-            if (total === 0) {
+            if (data.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="21" class="text-center py-12 text-purple-400 font-medium">
-                            <i class="fa-solid fa-folder-open text-3xl mb-2 text-purple-300 block"></i>
-                            查無符合條件之經費資料，請重新調整篩選條件
+                        <td colspan="13" class="text-center py-8 text-gray-400 font-medium">
+                            <i class="fa-solid fa-inbox text-2xl mb-2 block"></i>
+                            查無符合條件的經費明細資料
                         </td>
                     </tr>
                 `;
-                document.getElementById('pageStart').innerText = '0';
-                document.getElementById('pageEnd').innerText = '0';
-                document.getElementById('pageInfo').innerText = '0 / 0';
-                document.getElementById('prevPageBtn').disabled = true;
-                document.getElementById('nextPageBtn').disabled = true;
                 return;
             }
 
-            const effectivePageSize = pageSize > 0 ? pageSize : total;
-            const totalPages = Math.max(1, Math.ceil(total / effectivePageSize));
-            if (currentPage > totalPages) currentPage = totalPages;
+            data.forEach((row) => {
+                const amount = Number(row.amount) || 0;
+                const spent = Number(row.spent) || 0;
+                const remaining = amount - spent;
+                const rate = amount > 0 ? ((spent / amount) * 100).toFixed(1) : "0.0";
 
-            const startIndex = (currentPage - 1) * effectivePageSize;
-            const endIndex = Math.min(startIndex + effectivePageSize, total);
-            const pageData = filteredData.slice(startIndex, endIndex);
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-purple-50/50 transition border-b border-purple-50";
 
-            document.getElementById('pageStart').innerText = total > 0 ? startIndex + 1 : 0;
-            document.getElementById('pageEnd').innerText = endIndex;
-            document.getElementById('pageInfo').innerText = `${currentPage} / ${totalPages}`;
-
-            document.getElementById('prevPageBtn').disabled = (currentPage === 1);
-            document.getElementById('nextPageBtn').disabled = (currentPage === totalPages);
-
-            pageData.forEach(item => {
-                const m = getItemMetrics(item);
-
-                const gateBadge = item.gate === '經常門' 
-                    ? '<span class="px-2.5 py-0.5 text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 rounded-full">經常門</span>'
-                    : '<span class="px-2.5 py-0.5 text-xs font-bold bg-pink-100 text-pink-800 border border-pink-200 rounded-full">資本門</span>';
-
-                const displaySubitem = item.subitem || '-';
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-purple-50/70 transition border-b border-purple-100 text-xs";
                 tr.innerHTML = `
-                    <td class="p-3 text-center font-bold text-purple-900">${item.year}</td>
-                    <td class="p-3 font-semibold text-slate-800">${escapeHtml(item.domain)}</td>
-                    <td class="p-3 text-slate-600">${escapeHtml(item.subproject || '-')}</td>
-                    <td class="p-3 font-semibold text-slate-700">${escapeHtml(item.source)}</td>
-                    <td class="p-3 text-center">${gateBadge}</td>
-                    <td class="p-3 font-bold text-slate-900">${escapeHtml(item.name)}</td>
-                    <td class="p-3 text-purple-900 font-bold">${escapeHtml(displaySubitem)}</td>
-                    <td class="p-3 text-slate-600 max-w-xs truncate" title="${escapeHtml(item.description || item.note || '')}">${escapeHtml(item.description || item.note || '-')}</td>
-                    <td class="p-3 text-right font-black text-slate-900">$${m.total.toLocaleString()}</td>
-                    <td class="p-3 text-right font-bold text-emerald-700">$${m.subsidy.toLocaleString()}</td>
-                    <td class="p-3 text-right font-bold text-sky-700">$${m.matching.toLocaleString()}</td>
-                    <td class="p-3 text-right font-bold text-emerald-600">+${m.transferIn.toLocaleString()}</td>
-                    <td class="p-3 text-right font-bold text-rose-600">-${m.transferOut.toLocaleString()}</td>
-                    <td class="p-3 text-right font-black text-purple-950 bg-purple-100/60">$${m.adjustedTotal.toLocaleString()}</td>
-                    <td class="p-3 text-right font-semibold text-slate-800">$${m.spent.toLocaleString()}</td>
-                    <td class="p-3 text-right font-black ${m.remaining < 0 ? 'text-rose-600' : 'text-emerald-600'}">$${m.remaining.toLocaleString()}</td>
-                    <td class="p-3 text-center">
-                        <span class="px-2.5 py-0.5 font-bold rounded-full ${m.execRate >= 90 ? 'bg-emerald-100 text-emerald-800' : m.execRate >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'}">
-                            ${m.execRate}%
+                    <td class="px-3 py-3 font-bold text-purple-900">${row.year || ''}</td>
+                    <td class="px-3 py-3"><span class="px-2 py-0.5 rounded-md text-xs font-bold bg-purple-100 text-purple-800">${row.category || ''}</span></td>
+                    <td class="px-3 py-3 font-medium">${row.subproject || ''}</td>
+                    <td class="px-3 py-3">${row.fundType || ''}</td>
+                    <td class="px-3 py-3">${row.door || ''}</td>
+                    <td class="px-3 py-3 font-bold text-gray-800">${row.item || ''}</td>
+                    <td class="px-3 py-3 text-gray-600">${row.detail || ''}</td>
+                    <td class="px-3 py-3 text-gray-500 max-w-xs truncate" title="${row.description || ''}">${row.description || '-'}</td>
+                    <td class="px-3 py-3 text-right font-bold">${formatCurrency(amount)}</td>
+                    <td class="px-3 py-3 text-right font-bold text-indigo-600">${formatCurrency(spent)}</td>
+                    <td class="px-3 py-3 text-right font-bold ${remaining < 0 ? 'text-red-500' : 'text-emerald-600'}">${formatCurrency(remaining)}</td>
+                    <td class="px-3 py-3 text-center">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-black ${rate >= 80 ? 'bg-emerald-100 text-emerald-800' : rate >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'}">
+                            ${rate}%
                         </span>
                     </td>
-                    <td class="p-3 text-center font-black text-amber-800 bg-amber-50/50">${m.changeCount} 筆</td>
-                    <td class="p-3 text-center text-slate-500 font-medium">${m.lastChangeTime}</td>
-                    <td class="p-3 text-center text-slate-500 font-medium">${m.completeDate}</td>
-                    <td class="p-3 text-center sticky right-0 bg-white/95 shadow-l">
-                        <div class="flex items-center justify-center space-x-1.5">
-                            <button onclick="openChangeModal('${item.id}')" title="變更經費/流用" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 rounded-xl text-xs transition shadow-sm font-bold">
-                                <i class="fa-solid fa-right-left"></i>
-                            </button>
-                            <button onclick="openEditModal('${item.id}')" title="修改內容" class="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs transition shadow-sm font-bold">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button onclick="deleteItem('${item.id}')" title="刪除項目" class="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 rounded-xl text-xs transition shadow-sm font-bold">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
+                    <td class="px-3 py-3 text-center space-x-1">
+                        <button onclick="editItem(${row.id})" class="text-xs font-bold text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-lg transition" title="修改">
+                            <i class="fa-solid fa-pen-to-square"></i> 修改
+                        </button>
+                        <button onclick="deleteItem(${row.id})" class="text-xs font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition" title="刪除">
+                            <i class="fa-solid fa-trash-can"></i> 刪除
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function renderChangeHistoryInto(item, container) {
-            if (!container) return;
-            if (!item.history || item.history.length === 0) {
-                container.innerHTML = `<p class="text-purple-400 text-center py-2 text-xs font-medium">無變更異動紀錄</p>`;
-                return;
+        // 預設常見子計畫對應範疇清單
+        const categorySubprojectMap = {
+            "範疇一": [
+                "AI 輔助數位病理分析模組子計畫",
+                "臨床心理中心子計畫",
+                "腸胃內科子計畫",
+                "手術室子計畫",
+                "解剖病理科子計畫",
+                "麻醉部子計畫",
+                "健康資料中心子計畫"
+            ],
+            "範疇二": [
+                "轉銜照護中心子計畫",
+                "社區整合照護子計畫",
+                "居家醫療服務子計畫"
+            ],
+            "範疇三": [
+                "智慧健康管理子計畫",
+                "預防醫學推廣子計畫"
+            ],
+            "範疇四": [
+                "全人照護品質提升子計畫",
+                "醫學教育與師培子計畫"
+            ]
+        };
+
+        // 依據選擇的範疇帶入子計畫下拉選項
+        function updateSubprojectOptions(selectedSubproject = null) {
+            const catSelect = document.getElementById("add-category");
+            const subSelect = document.getElementById("add-subproject");
+            if (!catSelect || !subSelect) return;
+
+            const selectedCat = catSelect.value || "範疇一";
+            const availableSubs = categorySubprojectMap[selectedCat] || [];
+
+            subSelect.innerHTML = "";
+            availableSubs.forEach(sub => {
+                const opt = document.createElement("option");
+                opt.value = sub;
+                opt.textContent = sub;
+                subSelect.appendChild(opt);
+            });
+
+            if (selectedSubproject && availableSubs.includes(selectedSubproject)) {
+                subSelect.value = selectedSubproject;
             }
-            let html = '';
-            item.history.forEach(h => {
-                let label = '追加';
-                let badgeColor = 'bg-emerald-100 text-emerald-800';
-                let sign = '+';
-
-                if (h.type === 'SUB') { label = '追減'; badgeColor = 'bg-rose-100 text-rose-800'; sign = '-'; }
-                if (h.type === 'TRANSFER_IN') { label = '流轉入'; badgeColor = 'bg-purple-100 text-purple-800'; sign = '+'; }
-                if (h.type === 'TRANSFER_OUT') { label = '流轉出'; badgeColor = 'bg-amber-100 text-amber-800'; sign = '-'; }
-
-                html += `
-                    <div class="p-2.5 border border-purple-200 rounded-xl bg-white shadow-sm flex justify-between items-start text-xs">
-                        <div>
-                            <div class="flex items-center space-x-1.5">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">${label}</span>
-                                <span class="font-bold text-slate-900">${sign}$${Number(h.amount).toLocaleString()}</span>
-                                <span class="text-purple-400 text-[10px] font-bold">${h.date || ''}</span>
-                            </div>
-                            <p class="text-slate-700 text-[11px] mt-1 font-medium">${escapeHtml(h.reason || '')}</p>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
         }
 
-        function openChangeModal(id) {
-            const item = budgetData.find(d => d.id === id);
-            if (!item) return;
+        // 綁定範疇下拉選單切換事件
+        document.getElementById("add-category").addEventListener("change", function() {
+            updateSubprojectOptions();
+        });
 
-            const m = getItemMetrics(item);
-            document.getElementById('changeItemId').value = item.id;
-            document.getElementById('changeItemName').innerText = getItemFullPath(item);
-            document.getElementById('changeOrigBudget').innerText = '$' + m.total.toLocaleString();
-            document.getElementById('changeCurrentSpent').innerText = '$' + m.spent.toLocaleString();
-
-            document.getElementById('changeType').value = 'ADD';
-            document.getElementById('changeAmount').value = 0;
-            document.getElementById('changeReason').value = '';
-
-            const targetSelect = document.getElementById('transferTargetItem');
-            targetSelect.innerHTML = '<option value="">-- 請選擇同步連動之對應經費項目 --</option>';
-
-            budgetData.forEach(target => {
-                if (target.id !== item.id) {
-                    const tm = getItemMetrics(target);
-                    const opt = document.createElement('option');
-                    opt.value = target.id;
-                    opt.textContent = `${getItemFullPath(target)} (餘額: $${tm.remaining.toLocaleString()})`;
-                    targetSelect.appendChild(opt);
-                }
-            });
-
-            calculateNewBudget();
-            renderChangeHistoryInto(item, document.getElementById('changeHistoryList'));
-            openModal('changeModal');
+        // 自動計算總金額 (單價 * 數量)
+        function calculateTotalAmount() {
+            const unitPrice = Number(document.getElementById("add-unitprice").value) || 0;
+            const quantity = Number(document.getElementById("add-quantity").value) || 0;
+            if (unitPrice > 0 && quantity > 0) {
+                document.getElementById("add-amount").value = unitPrice * quantity;
+            }
         }
 
-        function calculateNewBudget() {
-            const id = document.getElementById('changeItemId').value;
-            const item = budgetData.find(d => d.id === id);
-            if (!item) return;
+        // 開啟 Modal (新增/編輯)
+        function openModal(itemData = null) {
+            const modal = document.getElementById("addModal");
+            const form = document.getElementById("add-form");
+            const title = document.getElementById("modal-title");
 
-            const m = getItemMetrics(item);
-            const type = document.getElementById('changeType').value;
-            const amount = Number(document.getElementById('changeAmount').value || 0);
+            form.reset();
 
-            const targetContainer = document.getElementById('transferTargetContainer');
-            const targetTitle = document.getElementById('transferTargetTitle');
-            const pairText = document.getElementById('transferPairText');
+            if (itemData) {
+                title.textContent = "✏️ 編輯經費明細資料";
+                // 確保正確帶入內部 id 以及 Google 試算表實際列號 rowIndex
+                document.getElementById("edit-id").value = itemData.id || "";
+                document.getElementById("edit-row-index").value = itemData.rowIndex || itemData.id || "";
+                
+                document.getElementById("add-year").value = itemData.year || "116年";
+                document.getElementById("add-category").value = itemData.category || "範疇一";
+                
+                updateSubprojectOptions(itemData.subproject);
 
-            if (type === 'TRANSFER_OUT') {
-                targetContainer.classList.remove('hidden');
-                targetTitle.innerText = '對應同步流入之目標項目';
-                pairText.innerText = '流入';
-            } else if (type === 'TRANSFER_IN') {
-                targetContainer.classList.remove('hidden');
-                targetTitle.innerText = '對應同步流出之來源項目';
-                pairText.innerText = '流出';
+                document.getElementById("add-fundtype").value = itemData.fundType || "A補助經費";
+                document.getElementById("add-door").value = itemData.door || "B經常門";
+                document.getElementById("add-item").value = itemData.item || "C人事費";
+                document.getElementById("add-detail").value = itemData.detail || "";
+                
+                document.getElementById("add-unitprice").value = itemData.unitPrice !== undefined ? itemData.unitPrice : "";
+                document.getElementById("add-unit").value = itemData.unit || "";
+                document.getElementById("add-quantity").value = itemData.quantity !== undefined ? itemData.quantity : 1;
+                
+                document.getElementById("add-description").value = itemData.description || "";
+                document.getElementById("add-amount").value = itemData.amount || 0;
+                document.getElementById("add-spent").value = itemData.spent || 0;
             } else {
-                targetContainer.classList.add('hidden');
+                title.textContent = "✨ 新增經費明細資料";
+                document.getElementById("edit-id").value = "";
+                document.getElementById("edit-row-index").value = "";
+                document.getElementById("add-quantity").value = 1;
+                updateSubprojectOptions();
             }
 
-            let newTotal = m.adjustedTotal;
-            if (type === 'ADD' || type === 'TRANSFER_IN') {
-                newTotal = m.adjustedTotal + amount;
-            } else if (type === 'SUB' || type === 'TRANSFER_OUT') {
-                newTotal = m.adjustedTotal - amount;
-            }
-
-            document.getElementById('changeCalculatedBudget').innerText = '$' + newTotal.toLocaleString();
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
         }
 
-        function saveBudgetChange() {
-            const id = document.getElementById('changeItemId').value;
-            const item = budgetData.find(d => d.id === id);
-            if (!item) return;
-
-            const type = document.getElementById('changeType').value;
-            const amount = Number(document.getElementById('changeAmount').value || 0);
-            const reason = document.getElementById('changeReason').value.trim();
-
-            if (amount <= 0) {
-                alert("請輸入有效的變更金額！");
-                return;
-            }
-
-            if (!reason) {
-                alert("請輸入變更原因或核準文號！");
-                return;
-            }
-
-            const now = new Date();
-            const dateStr = `${now.getFullYear() - 1911}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            const completeDateStr = `${now.getFullYear() - 1911}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
-
-            if (!item.history) item.history = [];
-
-            if (type === 'TRANSFER_OUT' || type === 'TRANSFER_IN') {
-                const targetId = document.getElementById('transferTargetItem').value;
-                if (!targetId) {
-                    alert("進行經費流轉時，必須選擇連動對應之項目！");
-                    return;
-                }
-                const targetItem = budgetData.find(d => d.id === targetId);
-                if (!targetItem) {
-                    alert("找不到對應的經費項目！");
-                    return;
-                }
-                if (!targetItem.history) targetItem.history = [];
-
-                const itemPath = getItemFullPath(item);
-                const targetPath = getItemFullPath(targetItem);
-
-                if (type === 'TRANSFER_OUT') {
-                    item.history.unshift({
-                        type: 'TRANSFER_OUT',
-                        amount: amount,
-                        reason: `【流出至 ${targetPath}】${reason}`,
-                        targetPath: targetPath,
-                        date: dateStr,
-                        completeDate: completeDateStr
-                    });
-
-                    targetItem.history.unshift({
-                        type: 'TRANSFER_IN',
-                        amount: amount,
-                        reason: `【從 ${itemPath} 流入】${reason}`,
-                        sourcePath: itemPath,
-                        date: dateStr,
-                        completeDate: completeDateStr
-                    });
-                } else {
-                    item.history.unshift({
-                        type: 'TRANSFER_IN',
-                        amount: amount,
-                        reason: `【從 ${targetPath} 流入】${reason}`,
-                        sourcePath: targetPath,
-                        date: dateStr,
-                        completeDate: completeDateStr
-                    });
-
-                    targetItem.history.unshift({
-                        type: 'TRANSFER_OUT',
-                        amount: amount,
-                        reason: `【流出至 ${itemPath}】${reason}`,
-                        targetPath: itemPath,
-                        date: dateStr,
-                        completeDate: completeDateStr
-                    });
-                }
-            } else {
-                item.history.unshift({
-                    type: type,
-                    amount: amount,
-                    reason: reason,
-                    date: dateStr,
-                    completeDate: completeDateStr
-                });
-            }
-
-            saveToStorage();
-            applyFilters();
-            closeModal('changeModal');
-            showToast("已成功完成經費變更與流用記錄");
-            syncBackToCloud();
+        // 關閉 Modal
+        function closeModal() {
+            const modal = document.getElementById("addModal");
+            modal.classList.remove("flex");
+            modal.classList.add("hidden");
         }
 
-        function openScriptGuideModal() {
-            openModal('scriptGuideModal');
-        }
+        // 儲存經費明細資料 (修復：精確判斷 update 動作並發送 rowIndex)
+        async function handleSaveData(e) {
+            e.preventDefault();
 
-        function copyScriptCode() {
-            const codeArea = document.getElementById('appScriptCodeArea');
-            codeArea.select();
-            document.execCommand('copy');
-            showToast("已成功複製 Apps Script 程式碼至剪貼簿！");
-        }
+            const editId = document.getElementById("edit-id").value;
+            const editRowIndex = document.getElementById("edit-row-index").value;
+            
+            // 只要 editRowIndex 或 editId 存在，就代表是在執行「修改」
+            const isEdit = Boolean(editRowIndex || editId);
+            const actionType = isEdit ? "update" : "create";
+            const targetRowIndex = isEdit ? Number(editRowIndex || editId) : null;
 
-        function syncBackToCloud() {
-            const urlInput = document.getElementById('scriptWebAppUrl');
-            const url = (urlInput ? urlInput.value.trim() : '') || DEFAULT_SCRIPT_URL;
+            const itemData = {
+                id: editId ? Number(editId) : Date.now(),
+                rowIndex: targetRowIndex,
+                year: document.getElementById("add-year").value,
+                category: document.getElementById("add-category").value,
+                subproject: document.getElementById("add-subproject").value,
+                fundType: document.getElementById("add-fundtype").value,
+                door: document.getElementById("add-door").value,
+                item: document.getElementById("add-item").value,
+                detail: document.getElementById("add-detail").value,
+                unitPrice: Number(document.getElementById("add-unitprice").value) || 0,
+                unit: document.getElementById("add-unit").value,
+                quantity: Number(document.getElementById("add-quantity").value) || 1,
+                description: document.getElementById("add-description").value,
+                amount: Number(document.getElementById("add-amount").value) || 0,
+                spent: Number(document.getElementById("add-spent").value) || 0
+            };
 
-            localStorage.setItem(STORAGE_KEY + '_script_url', url);
-            showToast("正在將異動資料回寫至 Google 試算表...");
+            closeModal();
 
-            const rowsPayload = budgetData.map(item => {
-                const m = getItemMetrics(item);
-                return {
-                    year: item.year,
-                    domain: item.domain,
-                    subproject: item.subproject || '',
-                    source: item.source,
-                    gate: item.gate,
-                    name: item.name,
-                    subitem: item.subitem || '',
-                    description: item.description || item.note || '',
-                    totalAmount: m.total,
-                    subsidyAmount: m.subsidy,
-                    matchingAmount: m.matching,
-                    transferIn: m.transferIn,
-                    transferOut: m.transferOut,
-                    adjustedTotal: m.adjustedTotal,
-                    spent: m.spent,
-                    remaining: m.remaining,
-                    execRate: m.execRate,
-                    changeCount: m.changeCount,
-                    lastChangeTime: m.lastChangeTime,
-                    completeDate: m.completeDate
-                };
-            });
-
-            fetch(url, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ rows: rowsPayload })
-            })
-            .then(() => {
-                showToast("已成功發送回寫請求至 Google 試算表！");
-            })
-            .catch(err => {
-                console.error('Cloud sync error:', err);
-                showToast("回寫請求已發送（受跨域限制請至試算表確認更新結果）");
-            });
-        }
-
-        function autoLoadFromCloud(isManual = false) {
-            const rawUrl = document.getElementById('gsheetUrl') ? document.getElementById('gsheetUrl').value.trim() : "https://docs.google.com/spreadsheets/d/1aQHxyx-CruG9YjSrLQUOEdmuSSGU30qDshmeKhCTAd8/edit?gid=0#gid=0";
-            if (!rawUrl) return;
-
-            let csvUrl = rawUrl;
-            if (rawUrl.includes('docs.google.com/spreadsheets')) {
-                const matches = rawUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                if (matches && matches[1]) {
-                    const sheetId = matches[1];
-                    let gid = "0";
-                    const gidMatches = rawUrl.match(/gid=([0-9]+)/);
-                    if (gidMatches && gidMatches[1]) {
-                        gid = gidMatches[1];
-                    }
-                    csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-                }
-            }
-
-            if (isManual) {
-                showToast("正在從 Google 試算表同步最新資料...");
-            }
-
-            Papa.parse(csvUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if (results.data && results.data.length > 0) {
-                        try {
-                            const parsedItems = results.data.map((row, index) => {
-                                const getCol = (possibleNames) => {
-                                    for (let key of Object.keys(row)) {
-                                        const cleanKey = key.trim().toLowerCase();
-                                        for (let p of possibleNames) {
-                                            if (cleanKey === p.toLowerCase() || cleanKey.includes(p.toLowerCase())) {
-                                                return row[key];
-                                            }
-                                        }
-                                    }
-                                    return '';
-                                };
-
-                                const year = getCol(['年度', 'Year', '學年度']) || "113";
-                                const domain = getCol(['範疇', '領域', '分類', '主計畫', 'Domain']) || "一般範疇";
-                                const subproject = getCol(['子計畫', '子項目', 'Subproject']) || "";
-                                const source = getCol(['經費', '經費來源', '計畫來源', 'Source']) || "一般經費";
-                                const gateVal = getCol(['門別', '門別(經常/資本)', 'Gate']);
-                                const gate = String(gateVal).includes('資本') ? '資本門' : '經常門';
-                                const name = getCol(['項目名稱', '項目', '名稱', '預算項目', 'Name']) || `預算項目 #${index + 1}`;
-                                const subitem = getCol(['細項名稱', '細項', 'Subitem']) || "";
-                                const description = getCol(['支用說明或編列基準', '支用說明', '編列基準', '說明', '備註', 'Description', 'Note']) || "";
-                                
-                                const numVal = (v) => {
-                                    if (v === null || v === undefined) return 0;
-                                    const parsed = Number(String(v).replace(/[^0-9.-]+/g,""));
-                                    return isNaN(parsed) ? 0 : parsed;
-                                };
-
-                                const totalAmount = numVal(getCol(['總金額', '預算總額', '核定預算', '預算金額', '總預算', 'TotalAmount']));
-                                const subsidyAmount = numVal(getCol(['補助款', '教育部補助', 'Subsidy']));
-                                const matchingAmount = numVal(getCol(['配合款', '自籌款', 'Matching']));
-                                const transferIn = numVal(getCol(['變更流入', '流入', '追加', 'TransferIn']));
-                                const transferOut = numVal(getCol(['變更流出', '流出', '追減', 'TransferOut']));
-                                const adjustedTotalVal = getCol(['調整後淨額', '調整金額', '淨額']);
-                                const adjustedTotal = adjustedTotalVal ? numVal(adjustedTotalVal) : (totalAmount + transferIn - transferOut);
-
-                                const spent = numVal(getCol(['已核銷金額', '累計實支', '實支金額', '已支用', 'Spent']));
-                                const remainingVal = getCol(['剩餘金額', '餘額', 'Remaining']);
-                                const remaining = remainingVal ? numVal(remainingVal) : (adjustedTotal - spent);
-
-                                const changeCount = numVal(getCol(['異動筆數', '變更次數', '異動次數']));
-                                const lastChangeTime = getCol(['異動時間', '最後異動時間']) || "-";
-                                const completeDate = getCol(['完成變更日期', '完成日期']) || "-";
-
-                                return {
-                                    id: "GS-" + (index + 1),
-                                    year: String(year).trim(),
-                                    domain: String(domain).trim(),
-                                    subproject: String(subproject).trim(),
-                                    source: String(source).trim(),
-                                    gate: gate,
-                                    name: String(name).trim(),
-                                    subitem: String(subitem).trim(),
-                                    description: String(description).trim(),
-                                    totalAmount: totalAmount,
-                                    subsidyAmount: subsidyAmount,
-                                    matchingAmount: matchingAmount,
-                                    transferIn: transferIn,
-                                    transferOut: transferOut,
-                                    adjustedTotal: adjustedTotal,
-                                    spent: spent,
-                                    remaining: remaining,
-                                    changeCount: changeCount,
-                                    lastChangeTime: String(lastChangeTime).trim(),
-                                    completeDate: String(completeDate).trim(),
-                                    rawRow: row,
-                                    history: []
-                                };
-                            }).filter(item => item.totalAmount > 0 || item.name !== "");
-
-                            if (parsedItems.length > 0) {
-                                budgetData = parsedItems;
-                                saveToStorage();
-                                populateFilterOptions();
-                                applyFilters();
-                                if (isManual) {
-                                    closeModal('gsheetModal');
-                                    showToast(`成功同步載入 ${parsedItems.length} 筆最新雲端資料！`);
-                                } else {
-                                    showToast(`已自動帶入 Google 試算表最新資料 (${parsedItems.length} 筆)`);
-                                }
-                            }
-                        } catch(err) {
-                            console.error("Cloud auto-load parse error:", err);
-                            if (isManual) alert("解析欄位時發生錯誤：" + err.message);
-                        }
-                    }
-                },
-                error: function(err) {
-                    if (isManual) {
-                        alert("載入 Google 試算表失敗，請確認網路連線與權限。錯誤：" + err.message);
-                    } else {
-                        loadFromStorage();
-                        populateFilterOptions();
-                        applyFilters();
-                    }
-                }
-            });
-        }
-
-        function exportCSV() {
-            if (filteredData.length === 0) {
-                alert("目前無資料可匯出！");
-                return;
-            }
-
-            const csvRows = [];
-            csvRows.push([
-                '年度', '範疇', '子計畫', '經費來源', '門別', '項目名稱', '細項名稱', 
-                '支用說明或編列基準', '總金額', '補助款', '配合款', '變更流入', '變更流出', 
-                '調整後淨額', '已核銷金額', '剩餘金額', '執行率%', '異動筆數', '異動時間', '完成變更日期'
-            ].join(','));
-
-            filteredData.forEach(item => {
-                const m = getItemMetrics(item);
-                csvRows.push([
-                    `"${item.year}"`,
-                    `"${item.domain}"`,
-                    `"${(item.subproject || '').replace(/"/g, '""')}"`,
-                    `"${item.source}"`,
-                    `"${item.gate}"`,
-                    `"${item.name.replace(/"/g, '""')}"`,
-                    `"${(item.subitem || '').replace(/"/g, '""')}"`,
-                    `"${(item.description || '').replace(/"/g, '""')}"`,
-                    m.total,
-                    m.subsidy,
-                    m.matching,
-                    m.transferIn,
-                    m.transferOut,
-                    m.adjustedTotal,
-                    m.spent,
-                    m.remaining,
-                    `"${m.execRate}%"`,
-                    m.changeCount,
-                    `"${m.lastChangeTime}"`,
-                    `"${m.completeDate}"`
-                ].join(','));
-            });
-
-            const blob = new Blob(["\uFEFF" + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `深耕計畫經費明細_${new Date().toISOString().slice(0, 10)}.csv`);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast("已成功匯出 CSV 檔案");
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toastMsg');
-            if (!toast || !msgEl) return;
-            msgEl.innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
+            // 發送指令至 Google Apps Script 執行寫入或覆蓋
+            await postToGoogleSheet(itemData, actionType);
+            
+            // 800ms 後自動重新整理頁面資料
             setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
+                fetchDataFromGoogleSheet();
+            }, 800);
+        }
+
+        // 編輯單筆資料
+        function editItem(id) {
+            const item = budgetData.find(d => Number(d.id) === Number(id));
+            if (item) {
+                openModal(item);
+            }
+        }
+
+        // 刪除單筆資料
+        async function deleteItem(id) {
+            const item = budgetData.find(d => Number(d.id) === Number(id));
+            if (!item) return;
+
+            if (confirm(`確定要刪除這筆經費明細資料嗎？\n[${item.subproject} - ${item.detail}]`)) {
+                await postToGoogleSheet({ 
+                    rowIndex: item.rowIndex || item.id 
+                }, "delete");
+                
+                setTimeout(() => {
+                    fetchDataFromGoogleSheet();
+                }, 800);
+            }
+        }
+
+        // 匯入 Excel 檔案 (自動發送至 GAS v7)
+        async function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonData && jsonData.length > 0) {
+                        const importedData = jsonData.map((row, index) => ({
+                            year: String(row['年度'] || row['year'] || '116年'),
+                            category: String(row['範疇'] || row['category'] || '範疇一'),
+                            subproject: String(row['子計畫'] || row['subproject'] || '未分類子計畫'),
+                            fundType: String(row['經費類別'] || row['經費'] || row['fundType'] || 'A補助經費'),
+                            door: String(row['門別'] || row['door'] || 'B經常門'),
+                            item: String(row['項目名稱'] || row['item'] || 'C人事費'),
+                            detail: String(row['細項名稱'] || row['detail'] || ''),
+                            unitPrice: Number(row['單價'] || row['單價(元)'] || row['unitPrice'] || 0),
+                            unit: String(row['單位'] || row['unit'] || ''),
+                            quantity: Number(row['數量'] || row['quantity'] || 1),
+                            description: String(row['支用說明或編列基準'] || row['支用說明'] || row['編列基準'] || row['description'] || ''),
+                            amount: Number(row['金額'] || row['總金額'] || row['amount'] || 0),
+                            spent: Number(row['已核銷'] || row['已核銷金額'] || row['spent'] || 0)
+                        }));
+
+                        const syncBtn = document.getElementById("sync-google-btn");
+                        const syncIcon = document.getElementById("sync-google-icon");
+                        const syncText = document.getElementById("sync-google-text");
+                        
+                        syncBtn.disabled = true;
+                        syncBtn.className = "text-xs font-bold text-white bg-gradient-to-r from-amber-600 to-orange-600 px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-wait";
+                        syncIcon.className = "fa-solid fa-spinner fa-spin";
+                        syncText.textContent = `匯入 Google 試算表中 (0/${importedData.length})... ⏳`;
+
+                        let successCount = 0;
+                        for (let i = 0; i < importedData.length; i++) {
+                            syncText.textContent = `匯入 Google 試算表中 (${i + 1}/${importedData.length})... ⏳`;
+                            const success = await postToGoogleSheet(importedData[i], "create");
+                            if (success) successCount++;
+                            await new Promise(r => setTimeout(r, 200));
+                        }
+
+                        syncBtn.className = "text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md";
+                        syncIcon.className = "fa-solid fa-circle-check";
+                        syncText.textContent = `已完成匯入 (${successCount}/${importedData.length}) 🎉`;
+
+                        setTimeout(() => {
+                            syncBtn.disabled = false;
+                            syncIcon.className = "fa-solid fa-cloud-arrow-up";
+                            syncText.textContent = "匯入 Google 試算表 📤";
+                            fetchDataFromGoogleSheet();
+                        }, 3000);
+
+                    } else {
+                        alert("匯入失敗：試算表中無有效數據。");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("解析 Excel 檔案發生錯誤，請確認檔案格式是否正確。");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        // 手動批次將目前網頁所有資料同步至 Google 試算表
+        async function syncToGoogleSheet() {
+            if (budgetData.length === 0) {
+                alert("目前無任何資料可供同步發送至 Google 試算表！");
+                return;
+            }
+
+            const syncBtn = document.getElementById("sync-google-btn");
+            const syncIcon = document.getElementById("sync-google-icon");
+            const syncText = document.getElementById("sync-google-text");
+
+            syncBtn.disabled = true;
+            syncBtn.className = "text-xs font-bold text-white bg-gradient-to-r from-amber-600 to-orange-600 px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-wait";
+            syncIcon.className = "fa-solid fa-spinner fa-spin";
+            syncText.textContent = `匯入 Google 試算表中 (0/${budgetData.length})... ⏳`;
+
+            let successCount = 0;
+            for (let i = 0; i < budgetData.length; i++) {
+                syncText.textContent = `匯入 Google 試算表中 (${i + 1}/${budgetData.length})... ⏳`;
+                const success = await postToGoogleSheet(budgetData[i], "create");
+                if (success) successCount++;
+                await new Promise(r => setTimeout(r, 200));
+            }
+
+            syncBtn.className = "text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md";
+            syncIcon.className = "fa-solid fa-circle-check";
+            syncText.textContent = `已完成匯入 (${successCount}/${budgetData.length}) 🎉`;
+
+            setTimeout(() => {
+                syncBtn.disabled = false;
+                syncIcon.className = "fa-solid fa-cloud-arrow-up";
+                syncText.textContent = "匯入 Google 試算表 📤";
+                fetchDataFromGoogleSheet();
             }, 3000);
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+        // 初始化所有動態篩選器的下拉選項
+        function initFilterOptions() {
+            populateSelect("filter-year", "year", "全部年度 ✨");
+            populateSelect("filter-category", "category", "全部範疇 🌟");
+            populateSelect("filter-subproject", "subproject", "全部子計畫 🎯");
+            populateSelect("filter-fundtype", "fundType", "全部類別 💰");
+            populateSelect("filter-door", "door", "全部門別 🔮");
+            populateSelect("filter-item", "item", "全部項目 📄");
+
+            populateSelect("tracker-category", "category", "全部範疇 🌟");
+            populateSelect("tracker-subproject", "subproject", "全部子計畫 🎯");
         }
 
-        window.onload = function() {
-            loadFromStorage();
-            populateFilterOptions();
-            applyFilters();
-            autoLoadFromCloud(false);
-        };
+        function populateSelect(selectId, key, defaultLabel) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+
+            const currentValue = select.value;
+            const values = [...new Set(budgetData.map(d => d[key]).filter(Boolean))].sort();
+
+            select.innerHTML = `<option value="">${defaultLabel}</option>`;
+            values.forEach(val => {
+                const opt = document.createElement("option");
+                opt.value = val;
+                opt.textContent = val;
+                select.appendChild(opt);
+            });
+
+            if (currentValue && values.includes(currentValue)) {
+                select.value = currentValue;
+            }
+        }
     </script>
 </body>
 </html>
