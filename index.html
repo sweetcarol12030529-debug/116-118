@@ -1193,6 +1193,40 @@
             const file = event.target.files[0];
             if (!file) return;
 
+            // 輔助函式：去除欄位名稱前後空白並支援多組別名比對
+            function pickField(row, candidates, fallback = '') {
+                const normalizedMap = {};
+                Object.keys(row || {}).forEach(k => {
+                    const cleanKey = String(k).trim();
+                    normalizedMap[cleanKey] = row[k];
+                    normalizedMap[cleanKey.toLowerCase()] = row[k];
+                });
+
+                for (const name of candidates) {
+                    const cleanName = String(name).trim();
+                    if (normalizedMap[cleanName] !== undefined && normalizedMap[cleanName] !== null && String(normalizedMap[cleanName]).trim() !== '') {
+                        return normalizedMap[cleanName];
+                    }
+                    const lowerName = cleanName.toLowerCase();
+                    if (normalizedMap[lowerName] !== undefined && normalizedMap[lowerName] !== null && String(normalizedMap[lowerName]).trim() !== '') {
+                        return normalizedMap[lowerName];
+                    }
+                }
+                return fallback;
+            }
+
+            // 輔助函式：清理金額/單價/數量字串中的逗號與幣別符號後轉數值
+            function parseNumberSafe(val, fallback = 0) {
+                if (typeof val === 'number') {
+                    return Number.isFinite(val) ? val : fallback;
+                }
+                if (val === undefined || val === null) return fallback;
+                const cleaned = String(val).replace(/[,，$\sNT元]/g, '').trim();
+                if (cleaned === '') return fallback;
+                const num = Number(cleaned);
+                return Number.isFinite(num) ? num : fallback;
+            }
+
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
@@ -1200,24 +1234,44 @@
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
                     if (jsonData && jsonData.length > 0) {
-                        const importedData = jsonData.map((row, index) => ({
-                            year: String(row['年度'] || row['year'] || '116年'),
-                            category: String(row['範疇'] || row['category'] || '範疇一'),
-                            subproject: String(row['子計畫'] || row['subproject'] || '未分類子計畫'),
-                            fundType: String(row['經費類別'] || row['經費'] || row['fundType'] || 'A補助經費'),
-                            door: String(row['門別'] || row['door'] || 'B經常門'),
-                            item: String(row['項目名稱'] || row['item'] || 'C人事費'),
-                            detail: String(row['細項名稱'] || row['detail'] || ''),
-                            unitPrice: Number(row['單價'] || row['單價(元)'] || row['unitPrice'] || 0),
-                            unit: String(row['單位'] || row['unit'] || ''),
-                            quantity: Number(row['數量'] || row['quantity'] || 1),
-                            description: String(row['支用說明或編列基準'] || row['支用說明'] || row['編列基準'] || row['description'] || ''),
-                            amount: Number(row['金額'] || row['總金額'] || row['amount'] || 0),
-                            spent: Number(row['已核銷'] || row['已核銷金額'] || row['spent'] || 0)
-                        }));
+                        const importedData = jsonData.map((row) => {
+                            const rawUnitPrice = pickField(row, [
+                                '單價', '單價(元)', '單價（元）', '單價/元', 'unitPrice', 'unit_price', 'price'
+                            ], 0);
+                            const rawUnit = pickField(row, [
+                                '單位', '計量單位', '單位名稱', 'unit', 'units'
+                            ], '');
+                            const rawQty = pickField(row, [
+                                '數量', 'qty', 'quantity'
+                            ], 1);
+
+                            const unitPrice = parseNumberSafe(rawUnitPrice, 0);
+                            const unit = String(rawUnit ?? '').trim();
+                            const quantity = parseNumberSafe(rawQty, 1);
+                            const rawAmount = pickField(row, ['金額', '總金額', '預算金額', 'amount'], null);
+                            const amount = rawAmount !== null && String(rawAmount).trim() !== ''
+                                ? parseNumberSafe(rawAmount, 0)
+                                : unitPrice * quantity;
+
+                            return {
+                                year: String(pickField(row, ['年度', 'year'], '116年')).trim(),
+                                category: String(pickField(row, ['範疇', 'category'], '範疇一')).trim(),
+                                subproject: String(pickField(row, ['子計畫', '子計畫名稱', 'subproject'], '未分類子計畫')).trim(),
+                                fundType: String(pickField(row, ['經費類別', '經費', '經費別', 'fundType'], 'A補助經費')).trim(),
+                                door: String(pickField(row, ['門別', 'door'], 'B經常門')).trim(),
+                                item: String(pickField(row, ['項目名稱', '項目', 'item'], 'C人事費')).trim(),
+                                detail: String(pickField(row, ['細項名稱', '細項', 'detail'], '')).trim(),
+                                unitPrice: unitPrice,
+                                unit: unit,
+                                quantity: quantity,
+                                description: String(pickField(row, ['支用說明或編列基準', '支用說明', '編列基準', '說明', 'description'], '')).trim(),
+                                amount: amount,
+                                spent: parseNumberSafe(pickField(row, ['已核銷', '已核銷金額', 'spent'], 0), 0)
+                            };
+                        });
 
                         const syncBtn = document.getElementById("sync-google-btn");
                         const syncIcon = document.getElementById("sync-google-icon");
