@@ -238,7 +238,7 @@
                     <div class="mt-3">
                         <div class="text-lg sm:text-xl md:text-2xl font-black text-indigo-900 truncate" id="kpi-total-spent">$0</div>
                         <div class="mt-1 text-[11px] flex justify-between items-center text-gray-600 font-medium">
-                            <span>已使用金額</span>
+                            <span>已支用核銷累計</span>
                         </div>
                     </div>
                 </div>
@@ -247,35 +247,60 @@
                 <div class="glass-card rounded-2xl p-4 flex flex-col justify-between border-l-4 border-emerald-500 hover:scale-102 transition shadow-md">
                     <div class="flex justify-between items-start">
                         <div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Remaining</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Remaining Budget</span>
                             <h3 class="text-gray-600 font-semibold text-xs">剩餘金額總額 💵</h3>
                         </div>
-                        <span class="text-xl emoji-bounce">👛</span>
+                        <span class="text-xl emoji-bounce">💰</span>
                     </div>
                     <div class="mt-3">
                         <div class="text-lg sm:text-xl md:text-2xl font-black text-emerald-900 truncate" id="kpi-total-remaining">$0</div>
                         <div class="mt-1 text-[11px] flex justify-between items-center text-gray-600 font-medium">
-                            <span>尚可支用</span>
+                            <span>尚可支用餘額</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 全計畫整體執行率總覽 -->
+                <!-- 全計畫整體執行率總覽 (含紅黃綠燈警示) -->
                 <div class="glass-card-purple rounded-2xl p-4 flex flex-col justify-between shadow-md relative overflow-hidden">
-                    <div class="flex justify-between items-start">
+                    <div class="flex justify-between items-start gap-2">
                         <div>
                             <span class="text-[10px] font-bold uppercase tracking-wider text-purple-700">Execution Status</span>
                             <h3 class="text-purple-900 font-bold text-xs">整體執行率 🔥</h3>
                         </div>
-                        <span class="text-xl emoji-bounce">🎯</span>
-                    </div>
-                    <div class="mt-2 flex items-center justify-between">
-                        <div>
-                            <span class="text-2xl md:text-3xl font-black text-purple-900" id="kpi-overall-rate">0%</span>
+                        <!-- 檢視月份選擇器 (每月+10%) -->
+                        <div class="flex items-center gap-1 bg-white/80 px-2 py-1 rounded-lg border border-purple-200 shadow-sm">
+                            <span class="text-[10px] font-bold text-purple-700">📅 檢視:</span>
+                            <select id="target-month-select" onchange="applyFilters()" class="text-[11px] font-black text-purple-900 bg-transparent outline-none cursor-pointer">
+                                <option value="1">1月 (目標10%)</option>
+                                <option value="2">2月 (目標20%)</option>
+                                <option value="3">3月 (目標30%)</option>
+                                <option value="4">4月 (目標40%)</option>
+                                <option value="5">5月 (目標50%)</option>
+                                <option value="6">6月 (目標60%)</option>
+                                <option value="7">7月 (目標70%)</option>
+                                <option value="8">8月 (目標80%)</option>
+                                <option value="9">9月 (目標90%)</option>
+                                <option value="10">10月 (目標100%)</option>
+                                <option value="11">11月 (目標100%)</option>
+                                <option value="12">12月 (目標100%)</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="w-full bg-purple-100 rounded-full h-2 mt-2 overflow-hidden">
+                    <div class="mt-2 flex items-center justify-between gap-2">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-2xl md:text-3xl font-black text-purple-900" id="kpi-overall-rate">0%</span>
+                            <span class="text-[11px] font-bold text-purple-700" id="kpi-target-rate-text">(應達 10%)</span>
+                        </div>
+                        <!-- 紅黃綠燈號顯示區 -->
+                        <div id="kpi-traffic-light-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold bg-gray-100 text-gray-700 border border-gray-200 shadow-sm">
+                            <span id="kpi-traffic-dot" class="w-3 h-3 rounded-full bg-gray-400 inline-block"></span>
+                            <span id="kpi-traffic-label">計算中</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-purple-100 rounded-full h-2 mt-2 overflow-hidden relative">
                         <div id="kpi-total-bar" class="bg-gradient-to-r from-purple-500 to-indigo-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        <!-- 目標基準線標記 -->
+                        <div id="kpi-target-marker" class="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 transition-all duration-500" style="left: 10%" title="當月應達目標線"></div>
                     </div>
                 </div>
             </div>
@@ -384,6 +409,7 @@
                             <th class="px-3 py-3 text-right">已核銷 (元)</th>
                             <th class="px-3 py-3 text-right">剩餘 (元)</th>
                             <th class="px-3 py-3 text-center">執行率</th>
+                            <th class="px-3 py-3 text-center">燈號警示</th>
                             <th class="px-3 py-3 text-center">操作管理</th>
                         </tr>
                     </thead>
@@ -549,11 +575,61 @@
 
         // 頁面初始化
         window.onload = function() {
+            // 自動設定檢視月份為系統當前月份 (1~12月)
+            const currentMonth = new Date().getMonth() + 1;
+            const monthSelect = document.getElementById("target-month-select");
+            if (monthSelect) {
+                monthSelect.value = String(currentMonth);
+            }
+
             updateTimestamp();
             initFilterOptions();
             renderDashboard();
             fetchDataFromGoogleSheet(); // 自動從 Google 試算表(GAS v7)載入最新資料
         };
+
+        // 取得當月應達累計目標執行率 (每月 10%，次月累加 10%，上限 100%)
+        function getTargetRateByMonth() {
+            const monthSelect = document.getElementById("target-month-select");
+            const month = monthSelect ? (Number(monthSelect.value) || (new Date().getMonth() + 1)) : (new Date().getMonth() + 1);
+            return Math.min(month * 10, 100);
+        }
+
+        // 依據實際執行率與當月目標計算紅黃綠燈狀態
+        function evaluateTrafficLight(actualRate, targetRate) {
+            const rate = Number(actualRate) || 0;
+            const target = Number(targetRate) || 10;
+            const diff = rate - target;
+
+            if (diff >= 0) {
+                return {
+                    status: "green",
+                    label: "綠燈｜達標",
+                    shortLabel: "🟢 達標",
+                    dotClass: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]",
+                    badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                    barClass: "bg-gradient-to-r from-emerald-400 to-teal-600"
+                };
+            } else if (diff >= -10) {
+                return {
+                    status: "yellow",
+                    label: "黃燈｜微落後",
+                    shortLabel: "🟡 警戒",
+                    dotClass: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.85)] animate-pulse",
+                    badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
+                    barClass: "bg-gradient-to-r from-amber-400 to-orange-500"
+                };
+            } else {
+                return {
+                    status: "red",
+                    label: "紅燈｜嚴重落後",
+                    shortLabel: "🔴 落後",
+                    dotClass: "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.85)] animate-ping",
+                    badgeClass: "bg-red-100 text-red-800 border-red-300",
+                    barClass: "bg-gradient-to-r from-red-500 to-rose-600"
+                };
+            }
+        }
 
         // 從 Google Apps Script (GAS 第7版) 自動抓取試算表全量資料
         async function fetchDataFromGoogleSheet() {
@@ -748,8 +824,32 @@
             document.getElementById("kpi-match-spent").textContent = formatCurrency(matchSpent);
             document.getElementById("kpi-match-rate-badge").textContent = `${matchRate}%`;
 
-            // 整體執行率
+            // 整體執行率與紅黃綠燈警示更新
+            const targetRate = getTargetRateByMonth();
+            const light = evaluateTrafficLight(totalRate, targetRate);
+
             document.getElementById("kpi-overall-rate").textContent = `${totalRate}%`;
+            const targetTextEl = document.getElementById("kpi-target-rate-text");
+            if (targetTextEl) targetTextEl.textContent = `(應達 ${targetRate}%)`;
+
+            const badgeEl = document.getElementById("kpi-traffic-light-badge");
+            const dotEl = document.getElementById("kpi-traffic-dot");
+            const labelEl = document.getElementById("kpi-traffic-label");
+            const barEl = document.getElementById("kpi-total-bar");
+            const markerEl = document.getElementById("kpi-target-marker");
+
+            if (badgeEl && dotEl && labelEl) {
+                badgeEl.className = `flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold border shadow-sm transition-all ${light.badgeClass}`;
+                dotEl.className = `w-2.5 h-2.5 rounded-full inline-block ${light.dotClass}`;
+                labelEl.textContent = light.label;
+            }
+            if (barEl) {
+                barEl.className = `${light.barClass} h-2 rounded-full transition-all duration-500`;
+            }
+            if (markerEl) {
+                markerEl.style.left = `${Math.min(targetRate, 100)}%`;
+                markerEl.title = `當月累計應達目標：${targetRate}%`;
+            }
         }
 
         // 2. 範疇圖表
@@ -909,12 +1009,15 @@
                 { name: "管理費", emoji: "⚙️", color: "from-amber-500 to-orange-500", bg: "bg-amber-50/70", border: "border-amber-200" }
             ];
 
+            const targetRate = getTargetRateByMonth();
+
             targetItems.forEach(item => {
                 const matchedItems = data.filter(d => String(d.item || "").includes(item.name));
                 const budget = matchedItems.reduce((acc, cur) => acc + Number(cur.amount), 0);
                 const spent = matchedItems.reduce((acc, cur) => acc + Number(cur.spent), 0);
                 const remaining = budget - spent;
                 const rate = budget > 0 ? ((spent / budget) * 100).toFixed(1) : "0.0";
+                const light = evaluateTrafficLight(rate, targetRate);
 
                 const cardHtml = `
                     <div class="p-4 ${item.bg} rounded-2xl border ${item.border} hover:shadow-md transition flex flex-col justify-between space-y-3">
@@ -923,29 +1026,13 @@
                                 <span class="text-xl">${item.emoji}</span>
                                 <h4 class="font-extrabold text-sm text-gray-900">${item.name}</h4>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full text-xs font-black ${rate >= 80 ? 'bg-emerald-100 text-emerald-800' : rate >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'}">
-                                ${rate}%
-                            </span>
-                        </div>
-
-                        <div class="space-y-1.5 text-xs">
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span>經費總額:</span>
-                                <b class="text-gray-900 font-bold">${formatCurrency(budget)}</b>
-                            </div>
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span>已核銷:</span>
-                                <b class="text-indigo-700 font-bold">${formatCurrency(spent)}</b>
-                            </div>
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span>剩餘金額:</span>
-                                <b class="${remaining < 0 ? 'text-red-500 font-bold' : 'text-emerald-700 font-bold'}">${formatCurrency(remaining)}</b>
-                            </div>
-
-                            <div class="pt-1">
-                                <div class="w-full bg-gray-200/80 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-gradient-to-r ${item.color} h-2 rounded-full transition-all duration-300" style="width: ${Math.min(rate, 100)}%"></div>
-                                </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold border ${light.badgeClass}" title="當月應達目標 ${targetRate}%">
+                                    ${light.shortLabel}
+                                </span>
+                                <span class="px-2 py-0.5 rounded-full text-xs font-black bg-white/90 text-purple-900 border border-purple-200">
+                                    ${rate}%
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -963,7 +1050,7 @@
             if (data.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="13" class="text-center py-8 text-gray-400 font-medium">
+                        <td colspan="14" class="text-center py-8 text-gray-400 font-medium">
                             <i class="fa-solid fa-inbox text-2xl mb-2 block"></i>
                             查無符合條件的經費明細資料
                         </td>
@@ -972,11 +1059,14 @@
                 return;
             }
 
+            const targetRate = getTargetRateByMonth();
+
             data.forEach((row) => {
                 const amount = Number(row.amount) || 0;
                 const spent = Number(row.spent) || 0;
                 const remaining = amount - spent;
                 const rate = amount > 0 ? ((spent / amount) * 100).toFixed(1) : "0.0";
+                const light = evaluateTrafficLight(rate, targetRate);
 
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-purple-50/50 transition border-b border-purple-50";
@@ -994,15 +1084,20 @@
                     <td class="px-3 py-3 text-right font-bold text-indigo-600">${formatCurrency(spent)}</td>
                     <td class="px-3 py-3 text-right font-bold ${remaining < 0 ? 'text-red-500' : 'text-emerald-600'}">${formatCurrency(remaining)}</td>
                     <td class="px-3 py-3 text-center">
-                        <span class="px-2 py-0.5 rounded-full text-xs font-black ${rate >= 80 ? 'bg-emerald-100 text-emerald-800' : rate >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'}">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-black bg-purple-100 text-purple-800">
                             ${rate}%
                         </span>
                     </td>
-                    <td class="px-3 py-3 text-center space-x-1">
-                        <button onclick="editItem(${row.id})" class="text-xs font-bold text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-lg transition" title="修改">
+                    <td class="px-3 py-3 text-center whitespace-nowrap">
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold border ${light.badgeClass}" title="應達目標: ${targetRate}%">
+                            ${light.shortLabel}
+                        </span>
+                    </td>
+                    <td class="px-3 py-3 text-center space-x-1 whitespace-nowrap">
+                        <button onclick="editItem(${row.id})" class="px-2 py-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition">
                             <i class="fa-solid fa-pen-to-square"></i> 修改
                         </button>
-                        <button onclick="deleteItem(${row.id})" class="text-xs font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition" title="刪除">
+                        <button onclick="deleteItem(${row.id})" class="px-2 py-1 text-[11px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 transition">
                             <i class="fa-solid fa-trash-can"></i> 刪除
                         </button>
                     </td>
